@@ -9,30 +9,38 @@
 , iproute2
 , procps
 , cacert
-, libxml2
 , libidn2
 , zlib
 , wireguard-tools
 , libnl
 , libcap_ng
 , sqlite
+, libxslt        # provides xsltproc (arm64 dep since 4.2.1+)
 }:
 
 let
   pname = "nordvpn";
   version = "4.4.0";
 
+  arch = if stdenv.hostPlatform.isAarch64 then "arm64"
+         else if stdenv.hostPlatform.isx86_64 then "amd64"
+         else throw "nordvpn: unsupported platform ${stdenv.hostPlatform.system}";
+
+  hashes = {
+    amd64 = "sha256-rePBEVe6o49If5dYvIUW361E7nFqngzd+XkiOeehY7w=";
+    arm64 = "sha256-yl2O6yeFFWvksb2xne6MP6WES5r7XSOKyVxzvD769e8=";
+  };
+
   nordVPNBase = stdenv.mkDerivation {
     inherit pname version;
 
     src = fetchurl {
       url =
-        "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_${version}_amd64.deb";
-      hash = "sha256-rePBEVe6o49If5dYvIUW361E7nFq
-ngzd+XkiOeehY7w=";
+        "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_${version}_${arch}.deb";
+      hash = hashes.${arch};
     };
 
-    buildInputs = [ libxml2 libidn2 sqlite stdenv.cc.cc.lib libcap_ng libnl ];
+    buildInputs = [ libidn2 sqlite stdenv.cc.cc.lib libcap_ng libnl ];
     nativeBuildInputs = [ dpkg autoPatchelfHook ];
 
     dontConfigure = true;
@@ -67,10 +75,10 @@ ngzd+XkiOeehY7w=";
         iproute2
         procps
         cacert
-        libxml2
         libidn2
         zlib
         wireguard-tools
+        libxslt     # xsltproc
       ];
   };
 
@@ -97,6 +105,6 @@ stdenv.mkDerivation {
     homepage = "https://www.nordvpn.com";
     license = licenses.unfree;
     maintainers = with maintainers; [ LuisChDev ];
-    platforms = [ "x86_64-linux" ];
+    platforms = [ "x86_64-linux" "aarch64-linux" ];
   };
 }

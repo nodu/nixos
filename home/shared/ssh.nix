@@ -26,37 +26,37 @@
       };
 
       "bau-slate-wifi" = {
-        user = "pi";
+        user = "matt";
         hostname = "192.168.8.8";
         identityFile = "~/.ssh/baremetal";
       };
 
       "bau-slate" = {
-        user = "pi";
+        user = "matt";
         hostname = "192.168.8.6";
         identityFile = "~/.ssh/baremetal";
       };
 
       "bau" = {
-        user = "pi";
+        user = "matt";
         hostname = "bau";
         identityFile = "~/.ssh/baremetal";
       };
 
       "bau-kai" = {
-        user = "pi";
+        user = "matt";
         hostname = "192.168.0.6";
         identityFile = "~/.ssh/baremetal";
       };
 
       "bau-att" = {
-        user = "pi";
+        user = "matt";
         hostname = "192.168.1.76";
         identityFile = "~/.ssh/baremetal";
       };
 
       "bau-mesh-ip" = {
-        user = "pi";
+        user = "matt";
         hostname = "100.105.37.182";
         identityFile = "~/.ssh/baremetal";
       };

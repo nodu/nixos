@@ -5,6 +5,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../modules/vpns.nix
   ];
 
   nix = {
@@ -65,7 +66,7 @@
     isNormalUser = true;
     home = "/home/matt";
     description = "Matt N";
-    extraGroups = [ "networkmanager" "wheel" "dialout" ]; #dialout for gaggimate
+    extraGroups = [ "nordvpn" "networkmanager" "wheel" "dialout" ]; #dialout for gaggimate
     openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDsX9th55Gnh54WPClEHrylw7Uw7Uu4MfF2lR2Ugi6Jfk2p0/nSdc0eGea8+hulccGgP7UxsZdOnA83ugZ7K+6SdDbc7qdTOst/amfGPYZoJVrAbDhRwfV9JBytjru+MADHPGCp2VBP+5/ko83SWreZZWIhRQypOMCbtvLCLByEk6HxVO19v5RrsQcals19tcwYn9tyCYHYcJxgbY3Y0sH3CrDXLMcy447Yeix7ljTpDDvAV+bW6cyBqUMC1upJ7jNPE4e/r5RudlEytr4JPAGQQPrxLPoBojvz1QE3qOtHdEy151Cz765WdZj23mKNnReWMV4eNm7XWGmQPsvEkWmAeCbYBw6PYNBvMrQSh45+TtJFPC3M+IXdHZhX4GxIPDKp1V0ohG56awp94WTqVvwOaiEO4S8fkVbv/zVzqWfawDKc7p1nFtc1A7Dn8LOxmMUEPn2FkoQjBNoWAxkb5Pch8jV2vRcGrkNP5A5++y/m0AcMR9eomeSn1JLKINGrDIM= matt@nixos" ];
     initialPassword = "changeme";
     shell = pkgs.zsh;
@@ -99,6 +100,15 @@
   '';
 
   networking.firewall.enable = true;
+  networking.firewall.checkReversePath = false; # required for NordVPN
+  networking.firewall.allowedTCPPorts = [ 443 ]; # NordVPN
+  networking.firewall.allowedUDPPorts = [ 1194 ]; # NordVPN
+
+  # Make hosts writable for nordvpn mesh
+  environment.etc.hosts.mode = "0644";
+
+  #----- NordVPN -----
+  services.nordvpn.enable = true;
 
   system.stateVersion = "25.11";
 }
