@@ -101,6 +101,33 @@
         hardwareModules = [
           nixos-hardware.nixosModules.raspberry-pi-3
         ];
+        extraModules = [
+          {
+            nixpkgs.config.packageOverrides = pkgs: {
+              nordvpn = (pkgs.callPackage
+                ./modules/vpn.nix
+                { });
+            };
+          }
+        ];
+      };
+
+      nixosConfigurations.bau = mkSystem {
+        system = "aarch64-linux";
+        config = ./hosts/bau/configuration.nix;
+        homeConfig = ./home/home-bau.nix;
+        hardwareModules = [
+          nixos-hardware.nixosModules.raspberry-pi-4
+        ];
+        extraModules = [
+          {
+            nixpkgs.config.packageOverrides = pkgs: {
+              nordvpn = (pkgs.callPackage
+                ./modules/vpn.nix
+                { });
+            };
+          }
+        ];
       };
     };
 }

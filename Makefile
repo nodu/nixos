@@ -22,6 +22,16 @@ help:
 	@echo "  make rpi3/build          - Build rpi3 config (cross-compile)"
 	@echo "  make rpi3/secrets        - Copy SSH keys to Pi"
 	@echo ""
+	@echo "Raspberry Pi 4 (bau):"
+	@echo "  make bau/deploy          - Build on Framework, push and activate on bau"
+	@echo "  make bau/copy            - Copy config to bau"
+	@echo "  make bau/switch          - Rebuild and switch (run on bau)"
+	@echo "  make bau/switch-remote   - Rebuild and switch via SSH"
+	@echo "  make bau/build           - Build bau config (cross-compile)"
+	@echo "  make bau/secrets         - Copy SSH keys to bau"
+	@echo "  make bau/sd-image        - Build SD card image (cross-compile)"
+	@echo "  make bau/partition       - Show post-dd partitioning instructions"
+	@echo ""
 	@echo "VM:"
 	@echo "  make vm/bootstrap0       - Bootstrap new VM from ISO"
 	@echo "  make vm/bootstrap        - Complete VM setup"
@@ -42,6 +52,9 @@ NIXUSER ?= matt
 
 # Raspberry Pi 3 connectivity
 RPIADDR ?= rpi3
+
+# Raspberry Pi 4 (bau) connectivity
+BAUADDR ?= bau
 
 # Get the path to this Makefile and directory
 MAKEFILE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
@@ -187,6 +200,8 @@ rpi3/switch-remote:
 rpi3/secrets:
 	rsync -av -e 'ssh -p22' \
 		--exclude='environment' \
+		--exclude='known_hosts*' \
+		--exclude='config' \
 		$(HOME)/.ssh/ $(NIXUSER)@$(RPIADDR):~/.ssh
 
 # Build SD card image for initial RPi3 install
@@ -208,6 +223,86 @@ rpi3/deploy:
 # Run directly on the Pi (from ~/repos/nixos) to rebuild and switch
 rpi3/switch:
 	sudo nixos-rebuild switch --flake "/home/matt/repos/nixos#rpi3"
+
+#---------------------------------------------------------------------
+# Raspberry Pi 4 (bau) targets
+#---------------------------------------------------------------------
+
+# Build bau configuration (cross-compile via binfmt on x86_64 host)
+bau/build:
+	nix build ".#nixosConfigurations.bau.config.system.build.toplevel"
+
+# Copy configuration to bau
+bau/copy:
+	rsync -av -e 'ssh -p22' \
+		--exclude='vendor/' \
+		--exclude='.git' \
+		$(MAKEFILE_DIR)/ $(NIXUSER)@$(BAUADDR):/home/matt/repos/nixos
+	ssh -p22 $(NIXUSER)@$(BAUADDR) "cd /home/matt/repos/nixos && git init -q && git add --force ."
+
+# Apply configuration on bau remotely (requires passwordless sudo)
+bau/switch-remote:
+	ssh -p22 $(NIXUSER)@$(BAUADDR) " \
+		sudo nixos-rebuild switch --flake \"/home/matt/repos/nixos#bau\" \
+	"
+
+# Copy secrets to bau
+bau/secrets:
+	rsync -av -e 'ssh -p22' \
+		--exclude='environment' \
+		--exclude='known_hosts*' \
+		--exclude='config' \
+		$(HOME)/.ssh/ $(NIXUSER)@$(BAUADDR):~/.ssh
+
+# Build bau on x86_64 host (via binfmt), push closure, and activate
+bau/deploy:
+	nix build ".#nixosConfigurations.bau.config.system.build.toplevel"
+	nix copy --to ssh://$(NIXUSER)@$(BAUADDR) ./result
+	ssh -t -p22 $(NIXUSER)@$(BAUADDR) " \
+		sudo nix-env -p /nix/var/nix/profiles/system --set $$(readlink -f ./result) && \
+		sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch \
+	"
+
+# Run directly on bau (from ~/repos/nixos) to rebuild and switch
+bau/switch:
+	sudo nixos-rebuild switch --flake "/home/matt/repos/nixos#bau"
+
+# Build SD card image for bau (cross-compile via binfmt)
+# After building, use bau/partition for next steps
+bau/sd-image:
+	nix build ".#nixosConfigurations.bau.config.system.build.sdImage"
+	@echo ""
+	@echo "Image built: $$(readlink -f ./result/sd-image/*.img*)"
+	@echo "Next: run 'make bau/partition' for dd and partitioning instructions"
+
+# Print post-dd partitioning instructions for the 1TB SD card
+# These are destructive commands -- printed, not executed
+bau/partition:
+	@echo "=== Bau SD Card Setup (1TB) ==="
+	@echo ""
+	@echo "1. Find your SD card device:"
+	@echo "   lsblk"
+	@echo ""
+	@echo "2. Write the image (replace /dev/sdX with your device):"
+	@echo "   zstdcat result/sd-image/*.img.zst | sudo dd of=/dev/sdX bs=4M status=progress conv=fsync"
+	@echo ""
+	@echo "3. Partition the card (the image creates p1=boot p2=root, both small):"
+	@echo "   sudo parted /dev/sdX resizepart 2 250GB"
+	@echo "   sudo resize2fs /dev/sdX2"
+	@echo "   sudo parted /dev/sdX mkpart primary ext4 250GB 100%"
+	@echo "   sudo mkfs.ext4 -L data /dev/sdX3"
+	@echo ""
+	@echo "4. Get UUIDs and update hosts/bau/hardware-configuration.nix:"
+	@echo "   sudo blkid /dev/sdX1 /dev/sdX2 /dev/sdX3"
+	@echo ""
+	@echo "5. After updating UUIDs, re-comment the sd-image import in"
+	@echo "   hosts/bau/hardware-configuration.nix, then boot the Pi."
+	@echo ""
+	@echo "6. Copy data from old Debian SD card:"
+	@echo "   sudo mkdir -p /mnt/old /mnt/new-data"
+	@echo "   sudo mount /dev/sdY1 /mnt/old          # old Debian root"
+	@echo "   sudo mount /dev/sdX3 /mnt/new-data      # new data partition"
+	@echo "   sudo rsync -av /mnt/old/path/to/data/ /mnt/new-data/"
 
 # Backup secrets so that we can transer them to new machines via
 # sneakernet or other means.
