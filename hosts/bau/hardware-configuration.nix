@@ -16,7 +16,7 @@
 
   boot.initrd.availableKernelModules = [ ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ ];
+  boot.kernelModules = [ "v3d" "vc4" "ip_tables" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {

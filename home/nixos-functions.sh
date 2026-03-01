@@ -49,6 +49,10 @@ nx-shell() {
 	fi
 }
 
+nx-update-nordvpn() {
+	"$HOME/repos/nixos/scripts/update-nordvpn.sh"
+}
+
 nx-shell-unfree() {
 	if [ -z "$1" ]; then
 		echo "Command:"

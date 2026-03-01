@@ -22,6 +22,8 @@
       experimental-features = [ "nix-command" "flakes" ];
       auto-optimise-store = true;
       trusted-users = [ "root" "matt" ];
+      max-jobs = 2; # limit parallel build jobs on 4-core ARM
+      cores = 2; # limit cores per build job
       # Pre-built binaries for nix-community packages (neovim-nightly, etc.)
       substituters = [
         "https://nix-community.cachix.org"
@@ -36,6 +38,19 @@
   zramSwap = {
     enable = true;
     memoryPercent = 50;
+  };
+
+  #----- Performance tuning -----
+  # schedutil governor doesn't ramp RPi4 cores above 700 MHz properly;
+  # lock at max freq (1.8 GHz). Fan + heatsink keep temps well under 50°C.
+  powerManagement.cpuFreqGovernor = "performance";
+
+  # Tune VM for SD card storage -- reduce random I/O pressure
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 10; # strongly prefer RAM over swap-to-SD
+    "vm.vfs_cache_pressure" = 50; # retain inode/dentry caches longer
+    "vm.dirty_ratio" = 10; # flush dirty pages sooner
+    "vm.dirty_background_ratio" = 5; # start background writeback earlier
   };
 
   environment.pathsToLink = [ "/share/zsh" ];
@@ -129,10 +144,48 @@
   # Disable WiFi (wired-only host)
   # boot.blacklistedKernelModules = [ "brcmfmac" "brcmutil" ];
 
-  # TODO: GPIO fan on pin 14 @ 60°C -- the original Debian config used
-  # dtoverlay=gpio-fan,gpiopin=14,temp=60000 in config.txt.
-  # After first boot, add the overlay via hardware.deviceTree.overlays or
-  # a config.txt snippet once the kernel dtbo path is confirmed.
+  #----- GPIO fan (pin 14, activates at 60°C) -----
+  hardware.deviceTree.overlays = [
+    {
+      name = "gpio-fan";
+      dtsText = ''
+        /dts-v1/;
+        /plugin/;
+        / {
+          compatible = "brcm,bcm2711";
+          fragment@0 {
+            target-path = "/";
+            __overlay__ {
+              fan: gpio-fan {
+                compatible = "gpio-fan";
+                gpios = <&gpio 14 0>;
+                gpio-fan,speed-map = <0 0 5000 1>;
+                #cooling-cells = <2>;
+              };
+            };
+          };
+          fragment@1 {
+            target = <&cpu_thermal>;
+            __overlay__ {
+              trips {
+                fan_on: fan-on {
+                  temperature = <60000>;
+                  hysteresis = <10000>;
+                  type = "active";
+                };
+              };
+              cooling-maps {
+                fan-map {
+                  trip = <&fan_on>;
+                  cooling-device = <&fan 1 1>;
+                };
+              };
+            };
+          };
+        };
+      '';
+    }
+  ];
 
   #----- Firewall -----
   networking.firewall = {

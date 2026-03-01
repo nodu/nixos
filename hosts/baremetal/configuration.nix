@@ -35,19 +35,26 @@
 
     #----- Power Management -----
     logind.settings.Login = {
-      HandlePowerKey = "suspend-then-hibernate";
-      HandleLidSwitch = "suspend-then-hibernate";
-      IdleAction = "suspend-then-hibernate";
+      # HandlePowerKey = "suspend-then-hibernate";
+      # HandleLidSwitch = "suspend-then-hibernate";
+      # IdleAction = "suspend-then-hibernate";
+      HandlePowerKey = "hibernate";
+      HandleLidSwitch = "hibernate";
+      IdleAction = "hibernate";
       IdleActionSec = "5min";
     };
     upower.criticalPowerAction = "Hibernate";
     upower.percentageAction = 3;
+
+    #----- Thermal / Fan -----
+    lact.enable = true;
   };
 
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=2h
-    SuspendEstimationSec=1m
-  '';
+  # TODO: re-enable suspend-then-hibernate once s2idle is fixed on kernel 6.19
+  # systemd.sleep.extraConfig = ''
+  #   HibernateDelaySec=2h
+  #   SuspendEstimationSec=1m
+  # '';
 
   virtualisation.docker.enable = true;
 
@@ -185,8 +192,14 @@
     gnome-tour
     geary
     gnome-calendar
+    gnome-console # use alacritty instead via nautilus-open-any-terminal
   ]) ++ (with pkgs.gnome; [
   ]);
+
+  programs.nautilus-open-any-terminal = {
+    enable = true;
+    terminal = "alacritty";
+  };
   console.useXkbConfig = true;
   services.xserver = {
     # Configure keymap in X11

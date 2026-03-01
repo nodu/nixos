@@ -102,6 +102,7 @@ in
     pkgs.blender
     # unstable.rpi-imager
     pkgs.arandr
+    pkgs.sunsama
     handy
 
     pkgs.zenity
@@ -254,12 +255,6 @@ in
         name = "Settings";
         exec = "env XDG_CURRENT_DESKTOP=Gnome gnome-control-center";
         categories = [ "Application" "Settings" ];
-      };
-      sunsama = {
-        type = "Application";
-        name = "Sunsama";
-        exec = "/home/matt/AppImages/sunsama-3.0.7-build-250130sppknclbo-x86_64.AppImage";
-        categories = [ "Application" ];
       };
       zwift = {
         type = "Application";

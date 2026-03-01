@@ -24,15 +24,15 @@
   };
 
   # Clone or update LazyVim config from private repo
-  home.activation.neovimConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    NVIM_DIR="$HOME/.config/nvim"
-    if [ ! -d "$NVIM_DIR/.git" ]; then
-      $DRY_RUN_CMD rm -rf "$NVIM_DIR"
-      $DRY_RUN_CMD ${pkgs.git}/bin/git clone git@github.com:nodu/lazystuff.git "$NVIM_DIR" || true
-    else
-      $DRY_RUN_CMD ${pkgs.git}/bin/git -C "$NVIM_DIR" pull --ff-only || true
-    fi
-  '';
+  # home.activation.neovimConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #   NVIM_DIR="$HOME/.config/nvim"
+  #   if [ ! -d "$NVIM_DIR/.git" ]; then
+  #     $DRY_RUN_CMD rm -rf "$NVIM_DIR"
+  #     $DRY_RUN_CMD ${pkgs.git}/bin/git clone git@github.com:nodu/lazystuff.git "$NVIM_DIR" || true
+  #   else
+  #     $DRY_RUN_CMD ${pkgs.git}/bin/git -C "$NVIM_DIR" pull --ff-only || true
+  #   fi
+  # '';
 
   home.packages = [
     # neovim

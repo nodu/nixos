@@ -1,7 +1,7 @@
 # Bau (RPi4) home-manager configuration
 
 { inputs, ... }:
-{ config, lib, pkgs, unstable, ... }:
+{ config, lib, pkgs, unstable, opencode-packages, ... }:
 
 {
   imports = [
@@ -12,6 +12,7 @@
     ./shared/cli.nix
     ./shared/gpg.nix
     ./shared/ssh.nix
+    ./shared/tmux.nix
   ];
 
   home.stateVersion = "25.11";
@@ -31,5 +32,7 @@
 
   home.packages = [
     # Add bau-specific packages here
+    opencode-packages.opencode
+
   ];
 }

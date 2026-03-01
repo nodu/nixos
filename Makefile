@@ -39,6 +39,9 @@ help:
 	@echo "  make vm/switch           - Apply config on VM"
 	@echo "  make vm/secrets          - Copy secrets to VM"
 	@echo ""
+	@echo "Updates:"
+	@echo "  make update-nordvpn      - Update pinned NordVPN version"
+	@echo ""
 	@echo "Secrets:"
 	@echo "  make secrets/backup      - Backup SSH keys and GPG keyring"
 	@echo "  make secrets/restore     - Restore from backup"
@@ -94,6 +97,9 @@ clean-boot-partition:
 
 set-current:
 	sudo nix-env -p /nix/var/nix/profiles/system --switch-generation $(gen)
+
+update-nordvpn:
+	$(MAKEFILE_DIR)/scripts/update-nordvpn.sh
 
 # bootstrap a brand new VM. The VM should have NixOS ISO on the CD drive
 # and just set the password of the root user to "root". This will install

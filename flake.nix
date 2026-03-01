@@ -86,9 +86,8 @@
           { nixpkgs.overlays = overlays; }
           {
             nixpkgs.config.packageOverrides = pkgs: {
-              nordvpn = (pkgs.callPackage
-                ./modules/vpn.nix
-                { });
+              nordvpn = (pkgs.callPackage ./modules/vpn.nix { });
+              sunsama = (pkgs.callPackage ./modules/sunsama.nix { });
             };
           }
         ];
@@ -119,6 +118,9 @@
         hardwareModules = [
           nixos-hardware.nixosModules.raspberry-pi-4
         ];
+        extraSpecialArgs = {
+          opencode-packages = inputs.opencode.packages."aarch64-linux";
+        };
         extraModules = [
           {
             nixpkgs.config.packageOverrides = pkgs: {
