@@ -29,7 +29,7 @@ let
         name = "freerdp3-launcher-GPC.sh";
         runtimeInputs = [ pkgs.zenity pkgs.freerdp ];
         text = ''
-          pw=$(gpg --decrypt "$HOME"/repos/nixos/gpc-rdp-secret.gpg)
+          pw=$(gpg --decrypt "$HOME"/.secrets/gpc-rdp-secret.gpg)
           # pw=$(zenity --entry --title="Domain Password" --text="Enter your _password:" --hide-text)
           xfreerdp /v:192.168.0.3 +clipboard /dynamic-resolution /sound:sys:alsa /u:GPC /d: /p:"$pw"
         '';
@@ -44,6 +44,7 @@ in
     ./shared/git.nix
     ./shared/cli.nix
     ./shared/gpg.nix
+    ./shared/tmux.nix
     ./shared/ssh.nix
     ./sway/sway.nix
     ./i3/i3.nix

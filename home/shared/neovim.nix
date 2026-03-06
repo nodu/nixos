@@ -16,10 +16,11 @@
     ];
 
     extraConfig = ''
-      source ~/.config/nvim/bootstrap.init.lua
+      lua require("config.lazy")
     '';
 
     extraPackages = [
+      pkgs.gcc
     ];
   };
 

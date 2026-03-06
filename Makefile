@@ -321,7 +321,8 @@ secrets/backup:
 		--exclude='.gnupg/*.conf' \
 		--exclude='.ssh/environment' \
 		.ssh/ \
-		.gnupg
+		.gnupg \
+		.secrets/
 
 .PHONY: secrets/restore
 secrets/restore:
@@ -330,8 +331,9 @@ secrets/restore:
 		exit 1; \
 	fi
 	echo "Restoring SSH keys and GPG keyring from backup..."
-	mkdir -p $(HOME)/.ssh $(HOME)/.gnupg
+	mkdir -p $(HOME)/.ssh $(HOME)/.gnupg $(HOME)/.secrets
 	tar -xzvf $(MAKEFILE_DIR)/backup.tar.gz -C $(HOME)
-	chmod 700 $(HOME)/.ssh $(HOME)/.gnupg
+	chmod 700 $(HOME)/.ssh $(HOME)/.gnupg $(HOME)/.secrets
 	chmod 600 $(HOME)/.ssh/* || true
 	chmod 700 $(HOME)/.gnupg/* || true
+	chmod 600 $(HOME)/.secrets/* || true

@@ -32,15 +32,16 @@
     };
 
     tailscale.enable = false;
+    tailscale.useRoutingFeatures = "client";
 
     #----- Power Management -----
     logind.settings.Login = {
       # HandlePowerKey = "suspend-then-hibernate";
       # HandleLidSwitch = "suspend-then-hibernate";
       # IdleAction = "suspend-then-hibernate";
-      HandlePowerKey = "hibernate";
-      HandleLidSwitch = "hibernate";
-      IdleAction = "hibernate";
+      HandlePowerKey = "suspend";
+      HandleLidSwitch = "suspend";
+      IdleAction = "suspend";
       IdleActionSec = "5min";
     };
     upower.criticalPowerAction = "Hibernate";
