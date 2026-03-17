@@ -20,15 +20,15 @@
 
 let
   pname = "nordvpn";
-  version = "4.4.0";
+  version = "4.5.0";
 
   arch = if stdenv.hostPlatform.isAarch64 then "arm64"
          else if stdenv.hostPlatform.isx86_64 then "amd64"
          else throw "nordvpn: unsupported platform ${stdenv.hostPlatform.system}";
 
   hashes = {
-    amd64 = "sha256-rePBEVe6o49If5dYvIUW361E7nFqngzd+XkiOeehY7w=";
-    arm64 = "sha256-yl2O6yeFFWvksb2xne6MP6WES5r7XSOKyVxzvD769e8=";
+    amd64 = "sha256-bekJOzhLGwFsYRuPagANwUduyCufaU4XoJPwWoBniR8=";
+    arm64 = "sha256-xJYpCRhQjVCcAh56VQgdeRcanDhGJR4xYKmAz2mtr9I=";
   };
 
   nordVPNBase = stdenv.mkDerivation {
