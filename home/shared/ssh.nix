@@ -12,16 +12,9 @@
         identityFile = "~/.ssh/baremetal";
       };
 
-      "github-personal.com" = {
-        hostname = "github.com";
-        identityFile = "~/.ssh/baremetal";
-        extraOptions.IdentitiesOnly = "yes";
-      };
-
       "github.com" = {
         hostname = "github.com";
-        user = "git";
-        identityFile = "~/.ssh/mnodu@github";
+        identityFile = "~/.ssh/baremetal";
         extraOptions.IdentitiesOnly = "yes";
       };
 

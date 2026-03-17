@@ -34,6 +34,108 @@ let
           xfreerdp /v:192.168.0.3 +clipboard /dynamic-resolution /sound:sys:alsa /u:GPC /d: /p:"$pw"
         '';
       };
+
+  vpnSwitch = pkgs.writeShellScriptBin "vpn-switch" ''
+    set -euo pipefail
+
+    DEFAULT_EXIT_NODE="tailscale-subnet-router"
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    NC='\033[0m' # No Color
+
+    usage() {
+      echo "Usage: vpn-switch <tailscale|nordvpn|off|status>"
+      echo ""
+      echo "Commands:"
+      echo "  tailscale  Disconnect NordVPN tunnel, start Tailscale exit node"
+      echo "  nordvpn    Stop Tailscale service (connect NordVPN manually)"
+      echo "  off        Disconnect NordVPN tunnel, stop Tailscale service"
+      echo "  status     Show status of both VPNs"
+      exit 1
+    }
+
+    nord_disconnect() {
+      echo -e "''${YELLOW}Disconnecting NordVPN tunnel...''${NC}"
+      nordvpn disconnect 2>/dev/null | grep -v "You are not connected" || true
+      # NordVPN often leaves DNS in a broken state after disconnect.
+      # Reload NetworkManager to restore DNS resolution.
+      sleep 1
+      echo -e "''${YELLOW}Restoring DNS...''${NC}"
+      sudo nmcli general reload dns-full
+    }
+
+    tailscale_start() {
+      echo -e "''${YELLOW}Starting tailscaled service...''${NC}"
+      sudo systemctl start tailscaled
+
+      # Wait for the daemon socket to be ready
+      local retries=0
+      while [ $retries -lt 10 ]; do
+        if tailscale status &>/dev/null; then
+          break
+        fi
+        sleep 0.5
+        retries=$((retries + 1))
+      done
+
+      echo -e "''${YELLOW}Connecting to Tailscale network...''${NC}"
+      sudo tailscale up --reset --accept-routes
+
+      echo -e "''${GREEN}Setting exit node: $DEFAULT_EXIT_NODE''${NC}"
+      sudo tailscale set --exit-node="$DEFAULT_EXIT_NODE" --exit-node-allow-lan-access
+    }
+
+    tailscale_stop() {
+      if systemctl is-active --quiet tailscaled; then
+        echo -e "''${YELLOW}Stopping tailscaled service...''${NC}"
+        sudo systemctl stop tailscaled
+      else
+        echo -e "''${BLUE}Tailscale service already stopped''${NC}"
+      fi
+    }
+
+    show_status() {
+      echo -e "''${BLUE}--- NordVPN ---''${NC}"
+      nordvpn status 2>/dev/null || echo "nordvpn daemon not running"
+      echo ""
+      echo -e "''${BLUE}--- Tailscale ---''${NC}"
+      if systemctl is-active --quiet tailscaled; then
+        tailscale status 2>/dev/null || echo "tailscaled running but not connected"
+      else
+        echo "tailscaled service stopped"
+      fi
+    }
+
+    if [ $# -lt 1 ]; then
+      usage
+    fi
+
+    case "$1" in
+      tailscale|ts)
+        nord_disconnect
+        tailscale_start
+        echo -e "''${GREEN}Switched to Tailscale exit node''${NC}"
+        ;;
+      nordvpn|nord)
+        tailscale_stop
+        echo -e "''${GREEN}Switched to NordVPN mode (Meshnet active)''${NC}"
+        echo "Connect manually: nordvpn connect <server>"
+        ;;
+      off)
+        nord_disconnect
+        tailscale_stop
+        echo -e "''${GREEN}All VPN tunnels disconnected (Meshnet still active)''${NC}"
+        ;;
+      status)
+        show_status
+        ;;
+      *)
+        usage
+        ;;
+    esac
+  '';
 in
 {
   imports = [
@@ -149,6 +251,7 @@ in
     pkgs.sshfs
     pkgs.nmap
     #pkgs.tshark
+    vpnSwitch
 
     # pkgs.postgresql_11
     pkgs.kubectl

@@ -303,6 +303,11 @@ function sleep-schedule() {
 
 alias mn-source-gcp='source functions_gcp'
 
-alias nord-la='nordvpn connect United_States Los_Angeles'
-alias nord-sf='nordvpn connect United_States San_Francisco'
-alias nord-d='nordvpn disconnect'
+alias vpn-la='nordvpn connect United_States Los_Angeles'
+alias vpn-sf='nordvpn connect United_States San_Francisco'
+
+# VPN switching (NordVPN <-> Tailscale)
+alias vpn-ts='vpn-switch tailscale'
+alias vpn-nord='vpn-switch nordvpn'
+alias vpn-off='vpn-switch off'
+alias vpn-status='vpn-switch status'

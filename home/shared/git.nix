@@ -28,11 +28,11 @@
       {
         contents = {
           user = {
-            email = "matt@work.com";
+            email = "matt@10four.ai";
             name = "Matt Nodurfth";
           };
         };
-        condition = "gitdir:~/repos/work/";
+        condition = "gitdir:~/repos/raiz/";
       }
     ];
     settings = {

@@ -31,9 +31,15 @@
       };
     };
 
-    tailscale.enable = false;
+    tailscale.enable = true;
     tailscale.useRoutingFeatures = "client";
+  };
 
+  # Keep tailscale installed but don't start at boot (conflicts with NordVPN Meshnet).
+  # Use `vpn-switch tailscale` to start on demand.
+  systemd.services.tailscaled.wantedBy = lib.mkForce [ ];
+
+  services = {
     #----- Power Management -----
     logind.settings.Login = {
       # HandlePowerKey = "suspend-then-hibernate";
@@ -162,9 +168,9 @@
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
-  # TODO: Wait for upstream fixes in auto timezone
+  # TODO: Switch to automatic-timezoned once nixpkgs#478774 is fixed
+  # (GeoClue shuts down after 60s inactivity, crashing automatic-timezoned)
   # services.automatic-timezoned.enable = true;
-  # services.geoclue2.geoProviderUrl = "https://api.beacondb.net/v1/geolocate";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -338,7 +344,7 @@
     {
       enable = true;
       allowedTCPPorts = [ 443 1701 9001 56150 ]; #443 nordvpn, 1701/9001 weylus, 56150 m365agentsplayground
-      allowedUDPPorts = [ 1194 ]; #nordvpn
+      allowedUDPPorts = [ 1194 41641 ]; #1194 nordvpn, 41641 tailscale
 
       allowedUDPPortRanges = [
         { from = 1714; to = 1764; } #kdeconnect
@@ -348,7 +354,7 @@
       ];
 
     };
-  networking.firewall.checkReversePath = false; #nordvpn
+  networking.firewall.checkReversePath = "loose"; #nordvpn + tailscale
   networking.enableIPv6 = true;
   networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
 
