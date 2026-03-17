@@ -18,6 +18,35 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # macOS system management (nix-darwin)
+    darwin = {
+      url = "github:LnL7/nix-darwin/nix-darwin-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Declarative Homebrew management
+    nix-homebrew = {
+      url = "github:zhaofengli-wip/nix-homebrew";
+    };
+    homebrew-bundle = {
+      url = "github:homebrew/homebrew-bundle";
+      flake = false;
+    };
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
+
+    # Fix Nix apps in macOS Spotlight/Dock
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-colors.url = "github:misterio77/nix-colors";
 
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
@@ -38,12 +67,12 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, mac-app-util, ... }@inputs:
     let
       home-manager-modules = inputs.home-manager.nixosModules;
 
       # Helper to create a NixOS system configuration
-      mkSystem = { system, config, homeConfig, hardwareModules ? [], extraModules ? [], extraSpecialArgs ? {} }:
+      mkSystem = { system, config, homeConfig, hardwareModules ? [ ], extraModules ? [ ], extraSpecialArgs ? { } }:
         let
           unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
         in
@@ -57,6 +86,47 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
+              home-manager.extraSpecialArgs = { inherit unstable; } // extraSpecialArgs;
+              home-manager.users.matt = import homeConfig { inherit inputs; };
+            }
+          ];
+        };
+
+      # Helper to create a macOS (nix-darwin) system configuration
+      mkDarwin = { system, homeConfig, extraSpecialArgs ? { } }:
+        let
+          unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
+        in
+        darwin.lib.darwinSystem {
+          inherit system;
+          specialArgs = { inherit unstable; } // extraSpecialArgs;
+          modules = [
+            mac-app-util.darwinModules.default
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.sharedModules = [
+                mac-app-util.homeManagerModules.default
+              ];
+            }
+            nix-homebrew.darwinModules.nix-homebrew
+            {
+              nix-homebrew = {
+                user = "matt";
+                enable = true;
+                taps = {
+                  "homebrew/homebrew-core" = homebrew-core;
+                  "homebrew/homebrew-cask" = homebrew-cask;
+                  "homebrew/homebrew-bundle" = homebrew-bundle;
+                };
+                mutableTaps = false;
+                autoMigrate = true;
+              };
+            }
+            ./hosts/mac/configuration.nix
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "backup";
               home-manager.extraSpecialArgs = { inherit unstable; } // extraSpecialArgs;
               home-manager.users.matt = import homeConfig { inherit inputs; };
             }
@@ -130,6 +200,15 @@
             };
           }
         ];
+      };
+
+      #----- macOS (nix-darwin) -----
+      darwinConfigurations.mac = mkDarwin {
+        system = "aarch64-darwin";
+        homeConfig = ./home/home-mac.nix;
+        extraSpecialArgs = {
+          opencode-packages = inputs.opencode.packages."aarch64-darwin";
+        };
       };
     };
 }

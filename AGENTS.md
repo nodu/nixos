@@ -4,7 +4,7 @@ Instructions for AI coding agents working in this NixOS configuration repository
 
 ## Repository Overview
 
-Personal NixOS configuration using Nix flakes, home-manager, GNOME + i3 (X11 primary), and Sway (Wayland secondary). Two hosts: `baremetal` (Framework 13 AMD, x86_64) and `rpi3` (Raspberry Pi 3, aarch64 headless server).
+Personal NixOS configuration using Nix flakes, home-manager, GNOME + i3 (X11 primary), and Sway (Wayland secondary). Three host types: `baremetal` (Framework 13 AMD, x86_64), `rpi3` (Raspberry Pi 3, aarch64 headless server), and `mac` (macOS via nix-darwin, aarch64-darwin).
 
 ## Build / Test / Apply Commands
 
@@ -52,6 +52,19 @@ make vm/copy         # Copy configuration to VM
 make vm/switch       # Apply configuration on VM
 ```
 
+### macOS (nix-darwin) Deployment
+
+```bash
+make mac/switch      # Apply darwin configuration (run on the Mac)
+make mac/build       # Build darwin configuration
+make mac/list        # List darwin generations
+make mac/rollback    # Rollback to previous generation
+make mac/clean       # Run garbage collection
+make backup-karabiner # Copy live karabiner.json into repo
+```
+
+The macOS config uses `darwinConfigurations.mac` in `flake.nix` via a `mkDarwin` helper (analogous to `mkSystem` for NixOS). It includes nix-homebrew for declarative Homebrew cask management and mac-app-util for Spotlight/Dock integration.
+
 There is no unit test suite, linter, or CI pipeline. The primary validation method is `make test`, which evaluates the full NixOS configuration and reports any Nix evaluation errors. **Always run `make test` after making changes.**
 
 ## File Organization
@@ -63,10 +76,13 @@ There is no unit test suite, linter, or CI pipeline. The primary validation meth
 | `hosts/baremetal/hardware-configuration.nix` | Auto-generated hardware config (**do not edit**) |
 | `hosts/rpi3/configuration.nix` | System-level config for Raspberry Pi 3 (headless, SSH-only) |
 | `hosts/rpi3/hardware-configuration.nix` | Auto-generated hardware config (**do not edit**) |
+| `hosts/mac/configuration.nix` | System-level config for macOS: nix settings, system.defaults, homebrew, fonts |
 | `home/home-baremetal.nix` | User-level config for baremetal: GUI apps, dev tools, dotfiles |
 | `home/home-rpi3.nix` | User-level config for rpi3: minimal, imports shared modules |
+| `home/home-mac.nix` | User-level config for macOS: alacritty, dev tools, imports shared + darwin modules |
 | `home/shared/` | Shared home-manager modules: `shell.nix`, `git.nix`, `cli.nix`, `gpg.nix`, `ssh.nix`, `neovim.nix` |
 | `home/i3/`, `home/sway/` | Window manager configs (nix modules + external config files) |
+| `home/darwin/` | macOS WM config: aerospace, sketchybar, karabiner (nix module + config files) |
 | `modules/` | Custom NixOS modules (`vpns.nix`, `fhs-compat.nix`) and package derivations (`vpn.nix`) |
 | `Makefile` | Build/deploy commands |
 
@@ -75,9 +91,12 @@ There is no unit test suite, linter, or CI pipeline. The primary validation meth
 - **System packages (baremetal)**: `hosts/baremetal/configuration.nix` in `environment.systemPackages`
 - **System packages (rpi3)**: `hosts/rpi3/configuration.nix` in `environment.systemPackages`
 - **User packages (baremetal)**: `home/home-baremetal.nix` in `home.packages`
-- **Shared user config**: `home/shared/` modules (imported by both hosts)
+- **User packages (mac)**: `home/home-mac.nix` in `home.packages`
+- **Shared user config**: `home/shared/` modules (imported by all hosts)
 - **NixOS services/modules**: `modules/` directory, imported in the host's `configuration.nix`
 - **WM-specific packages/config**: `home/i3/i3.nix` or `home/sway/sway.nix`
+- **macOS WM config**: `home/darwin/darwin.nix` (aerospace, sketchybar, karabiner)
+- **macOS Homebrew casks**: `hosts/mac/configuration.nix` in `homebrew.casks`
 
 ## Desktop & Development Environment
 

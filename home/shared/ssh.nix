@@ -1,6 +1,10 @@
 # Shared SSH configuration
 { config, lib, pkgs, ... }:
 
+let
+  # Use the same key name across hosts; secrets/restore puts the key in place
+  identityFile = if pkgs.stdenv.isDarwin then "~/.ssh/mac" else "~/.ssh/baremetal";
+in
 {
   programs.ssh = {
     enable = true;
@@ -9,55 +13,55 @@
     matchBlocks = {
       "bitbucket.org" = {
         hostname = "bitbucket.org";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
       };
 
       "github.com" = {
         hostname = "github.com";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
         extraOptions.IdentitiesOnly = "yes";
       };
 
       "bau-slate-wifi" = {
         user = "matt";
         hostname = "192.168.8.8";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
       };
 
       "bau-slate" = {
         user = "matt";
         hostname = "192.168.8.6";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
       };
 
       "bau" = {
         user = "matt";
         hostname = "bau";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
       };
 
       "bau-kai" = {
         user = "matt";
         hostname = "192.168.0.6";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
       };
 
       "bau-att" = {
         user = "matt";
         hostname = "192.168.1.76";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
       };
 
       "bau-mesh-ip" = {
         user = "matt";
         hostname = "100.105.37.182";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
       };
 
       "rpi3" = {
         user = "matt";
         hostname = "rpi3";
-        identityFile = "~/.ssh/baremetal";
+        identityFile = identityFile;
       };
 
       "moode" = {

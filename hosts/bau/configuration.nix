@@ -93,7 +93,6 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = [
-    pkgs.git
     pkgs.gnumake
     pkgs.vim
     pkgs.wget

@@ -10,7 +10,7 @@
     };
   };
 
-  services.gpg-agent = {
+  services.gpg-agent = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     # cache the keys forever so we don't get asked for a password until reboot
     defaultCacheTtl = 31536000;

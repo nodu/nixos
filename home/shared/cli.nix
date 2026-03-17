@@ -22,10 +22,15 @@
     pkgs.unzip
     pkgs.entr # maybe not needed
     pkgs.killall
-    pkgs.lshw
     pkgs.tealdeer
     pkgs.openpomodoro-cli
     pkgs.file
     pkgs.dnsutils
+    pkgs.lazygit
+    pkgs.difftastic
+    pkgs.dust
+    pkgs.imagemagick
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    pkgs.lshw # Linux only
   ];
 }

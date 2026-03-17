@@ -42,6 +42,14 @@ help:
 	@echo "Updates:"
 	@echo "  make update-nordvpn      - Update pinned NordVPN version"
 	@echo ""
+	@echo "macOS (nix-darwin):"
+	@echo "  make mac/switch          - Apply darwin configuration"
+	@echo "  make mac/build           - Build darwin configuration"
+	@echo "  make mac/list            - List darwin generations"
+	@echo "  make mac/rollback        - Rollback to previous generation"
+	@echo "  make mac/clean           - Run garbage collection"
+	@echo "  make backup-karabiner    - Copy karabiner.json from live config"
+	@echo ""
 	@echo "Secrets:"
 	@echo "  make secrets/backup      - Backup SSH keys and GPG keyring"
 	@echo "  make secrets/restore     - Restore from backup"
@@ -309,6 +317,28 @@ bau/partition:
 	@echo "   sudo mount /dev/sdY1 /mnt/old          # old Debian root"
 	@echo "   sudo mount /dev/sdX3 /mnt/new-data      # new data partition"
 	@echo "   sudo rsync -av /mnt/old/path/to/data/ /mnt/new-data/"
+
+#---------------------------------------------------------------------
+# macOS (nix-darwin) targets
+#---------------------------------------------------------------------
+
+mac/switch:
+	darwin-rebuild switch --flake ".#mac"
+
+mac/build:
+	nix build ".#darwinConfigurations.mac.system"
+
+mac/list:
+	darwin-rebuild --list-generations
+
+mac/rollback:
+	darwin-rebuild switch --rollback
+
+mac/clean:
+	nix-collect-garbage -d
+
+backup-karabiner:
+	cp ~/.config/karabiner/karabiner.json $(MAKEFILE_DIR)/home/darwin/config/karabiner.json
 
 # Backup secrets so that we can transer them to new machines via
 # sneakernet or other means.
