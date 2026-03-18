@@ -4,6 +4,44 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Option+O => Spotlight (physical Cmd+O)",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "o",
+                                    "modifiers": {
+                                        "mandatory": ["left_option"]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "osascript -e 'tell application \"System Events\" to keystroke space using {command down}'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Option+N => New Alacritty (physical Cmd+N)",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "n",
+                                    "modifiers": {
+                                        "mandatory": ["left_option"]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "osascript -e 'tell application \"Alacritty\" to activate' -e 'tell application \"System Events\" to keystroke \"n\" using {command down}'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Ctrl+0 => Cmd+0 (Chrome - Zoom Reset)",
                         "manipulators": [
                             {

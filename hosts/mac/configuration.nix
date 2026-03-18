@@ -59,6 +59,8 @@ in
         launchanim = true;
         orientation = "bottom";
         tilesize = 48;
+        # Group windows by application in Mission Control (required for AeroSpace)
+        expose-group-apps = true;
       };
 
       # TODO: check if I like this behaviour
@@ -69,6 +71,18 @@ in
       trackpad = {
         Clicking = true;
         TrackpadThreeFingerDrag = true;
+      };
+
+      CustomUserPreferences = {
+        AeroSpaceApp = {
+          menuBarStyle = "i3";
+        };
+        # Disable "Displays have separate Spaces" for better AeroSpace stability
+        # and multi-monitor support. Requires logout to take effect.
+        # See: https://nikitabobko.github.io/AeroSpace/guide#a-note-on-displays-have-separate-spaces
+        "com.apple.spaces" = {
+          spans-displays = true;
+        };
       };
     };
   };
