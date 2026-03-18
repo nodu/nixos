@@ -43,6 +43,7 @@ help:
 	@echo "  make update-nordvpn      - Update pinned NordVPN version"
 	@echo ""
 	@echo "macOS (nix-darwin):"
+	@echo "  make mac/bootstrap       - First-time setup (run on a fresh Mac)"
 	@echo "  make mac/switch          - Apply darwin configuration"
 	@echo "  make mac/build           - Build darwin configuration"
 	@echo "  make mac/list            - List darwin generations"
@@ -322,8 +323,11 @@ bau/partition:
 # macOS (nix-darwin) targets
 #---------------------------------------------------------------------
 
+mac/bootstrap:
+	$(MAKEFILE_DIR)/scripts/mac-bootstrap.sh
+
 mac/switch:
-	darwin-rebuild switch --flake ".#mac"
+	sudo darwin-rebuild switch --flake ".#mac"
 
 mac/build:
 	nix build ".#darwinConfigurations.mac.system"
@@ -332,7 +336,7 @@ mac/list:
 	darwin-rebuild --list-generations
 
 mac/rollback:
-	darwin-rebuild switch --rollback
+	sudo darwin-rebuild switch --rollback
 
 mac/clean:
 	nix-collect-garbage -d
