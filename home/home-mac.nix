@@ -23,7 +23,7 @@
   #----- Programs -----
   programs.defaults = {
     enable = true;
-    basic.enable = true;
+    basic.enable = false; # unrar-free doesn't build on aarch64-darwin
     git.enable = true;
     network.enable = false; # iproute2/wireshark in defaults are Linux-only
   };
