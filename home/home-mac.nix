@@ -25,7 +25,7 @@
     enable = true;
     basic.enable = true;
     git.enable = true;
-    network.enable = true;
+    network.enable = false; # iproute2/wireshark in defaults are Linux-only
   };
 
   # Marked broken Oct 20, 2022 check later to remove this
