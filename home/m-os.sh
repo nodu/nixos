@@ -358,12 +358,14 @@ function m() {
   echo "Command copied to clipboard: $selected_command"
 }
 
-function open() {
-  xdg-open $1
-}
-function o() {
-  xdg-open $1
-}
+if [[ "$(uname)" != "Darwin" ]]; then
+  function open() {
+    xdg-open $1
+  }
+  function o() {
+    xdg-open $1
+  }
+fi
 m.screen() {
   echo "xrandr --query"
   echo "-------------------------------"

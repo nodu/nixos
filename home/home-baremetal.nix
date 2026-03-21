@@ -146,6 +146,7 @@ in
     ./shared/git.nix
     ./shared/cli.nix
     ./shared/gpg.nix
+    ./shared/alacritty.nix
     ./shared/tmux.nix
     ./shared/ssh.nix
     ./sway/sway.nix
@@ -506,157 +507,10 @@ in
     "theme" = "./catppuccin-mocha.rasi";
   };
 
+  # Baremetal-specific alacritty overrides (shared config in ./shared/alacritty.nix)
   programs.alacritty = {
-    enable = true;
-
     package = unstable.alacritty;
-
-    settings =
-      {
-        env.TERM = "xterm-256color";
-        env.WINIT_X11_SCALE_FACTOR = "1"; #https://major.io/p/disable-hidpi-alacritty/ #i3 font size fix
-        font = {
-          size = 12.0;
-          normal = {
-            family = "Hack Nerd Font Mono";
-            style = "Regular";
-          };
-
-          bold = {
-            family = "Hack Nerd Font Mono";
-            style = "Bold";
-          };
-
-          italic = {
-            family = "Hack Nerd Font Mono";
-            style = "Italic";
-          };
-
-          bold_italic = {
-            family = "Hack Nerd Font Mono";
-            style = "Bold Italic";
-          };
-
-          # echo -e 'Normal, \x1b[1mbold\x1b[22m, \x1b[3mitalic\x1b[23m, \x1b[1;3mbold italic\x1b[22;23m'
-          # fc-list
-          # https://www.nerdfonts.com/cheat-sheet
-          # don't really love the darkgrey backgroun in term and vim... onedark.
-          # ➜  ~ fc-list | grep NerdFont |grep Hack
-        };
-
-        cursor.style = "Block";
-        window.dynamic_title = true;
-        window.decorations = "Full";
-        scrolling.history = 100000;
-        #padding.y = 27;
-
-        keyboard.bindings = [
-          # { key = "K"; mods = "Alt"; chars = "ClearHistory"; } #remap
-          { key = "Key0"; mods = "Alt"; action = "ResetFontSize"; }
-          { key = "Equals"; mods = "Alt"; action = "IncreaseFontSize"; }
-          { key = "Plus"; mods = "Alt"; action = "IncreaseFontSize"; }
-          { key = "NumpadAdd"; mods = "Alt"; action = "IncreaseFontSize"; }
-          { key = "Minus"; mods = "Alt"; action = "DecreaseFontSize"; }
-          { key = "NumpadSubtract"; mods = "Alt"; action = "DecreaseFontSize"; }
-          { key = "F"; mods = "Shift|Alt"; action = "SearchBackward"; }
-          { key = "V"; mods = "Alt"; action = "ToggleViMode"; }
-          { key = "N"; mods = "Shift|Control"; action = "CreateNewWindow"; }
-        ];
-
-        colors = with config.colorScheme.palette; {
-          draw_bold_text_with_bright_colors = true;
-          cursor = {
-            cursor = "0x${base06}";
-            text = "0x${base00}";
-          };
-          vi_mode_cursor = {
-            cursor = "0x${base07}";
-            text = "0x${base00}";
-          };
-          hints = {
-            start = {
-              foreground = "0x${base00}";
-              background = "0x${base0A}";
-            };
-            end = {
-              foreground = "0x${base00}";
-              # background = "0x${A6ADC8}";
-            };
-          };
-          selection = {
-            text = "0x${base00}";
-            background = "0x${base06}";
-          };
-          search.matches = {
-            foreground = "0x${base00}";
-            # background = "0x${A6ADC8}";
-          };
-          footer_bar = {
-            foreground = "0x${base00}";
-            # background = "0x${A6ADC8}";
-          };
-
-          search.focused_match = {
-            foreground = "0x${base00}";
-            background = "0x${base0B}";
-          };
-          primary = {
-            background = "0x${base00}";
-            foreground = "0x${base05}";
-            dim_foreground = "0x${base05}";
-            bright_foreground = "0x${base05}";
-          };
-          indexed_colors = [
-            {
-              index = 16;
-              color = "0x${base09}";
-            }
-            {
-              index = 17;
-              color = "0x${base06}";
-            }
-          ];
-          # https://github.com/catppuccin/nvim/blob/main/lua/catppuccin/palettes/mocha.lua
-          # https://github.com/catppuccin/alacritty/blob/main/catppuccin-mocha.toml
-          # https://github.com/tinted-theming/schemes/blob/spec-0.11/base16/catppuccin-mocha.yaml
-          # https://github.com/tinted-theming/base16-schemes/blob/main/catppuccin-mocha.yaml
-          # normal ={
-          # black = "0x${base03}";
-          # white = "0x${BAC2DE}";
-          # magenta = "0x${F5C2E7}";
-          # };
-          #
-          # bright = {
-          # black = "0x${base04}";
-          # white = "0x${A6ADC8}";
-          # yellow = "0x${base0A}";
-          # magenta = "0x${F5C2E7}";
-          # };
-          normal = {
-            black = "0x${base03}";
-            white = "0x${base06}";
-            blue = "0x${base0D}";
-            cyan = "0x${base0C}";
-            green = "0x${base0B}";
-            magenta = "0x${base0E}";
-            red = "0x${base08}";
-            yellow = "0x${base0A}";
-          };
-
-          bright = {
-            black = "0x${base00}";
-            white = "0x${base06}";
-            blue = "0x${base0D}";
-            cyan = "0x${base0C}";
-            green = "0x${base0B}";
-            magenta = "0x${base0E}";
-            red = "0x${base08}";
-            yellow = "0x${base09}";
-          };
-
-        };
-
-      };
+    settings.env.WINIT_X11_SCALE_FACTOR = "1"; # https://major.io/p/disable-hidpi-alacritty/ #i3 font size fix
   };
 
   home.pointerCursor = {

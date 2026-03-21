@@ -77,6 +77,15 @@
 
     #https://mynixos.com/home-manager/option/programs.zsh.initContent
     initContent = lib.mkMerge [
+      (lib.mkOrder 500
+        ''
+          # Bind Alt+Arrow and Alt+Backspace escape sequences for word navigation/deletion.
+          # Alacritty with option_as_alt sends xterm CSI sequences with modifier 3
+          # (e.g. \e[1;3D for Alt+Left) which zsh does not bind by default.
+          bindkey '\e[1;3D' backward-word        # Alt+Left Arrow
+          bindkey '\e[1;3C' forward-word         # Alt+Right Arrow
+          bindkey '\e\x7f'  backward-kill-word   # Alt+Backspace
+        '')
       (lib.mkOrder 1000
         ''
           # Add hostname to prompt for distinguishing between hosts

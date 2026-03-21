@@ -4,6 +4,7 @@
 
 {
   imports = [
+    inputs.nix-colors.homeManagerModules.default
     inputs.defaults.homeManagerModules.default
     (import ./shared/neovim.nix { inherit inputs; })
     ./shared/shell.nix
@@ -12,8 +13,11 @@
     ./shared/gpg.nix
     ./shared/ssh.nix
     ./shared/tmux.nix
+    ./shared/alacritty.nix
     ./darwin/darwin.nix
   ];
+
+  colorScheme = inputs.nix-colors.colorSchemes.catppuccin-mocha;
 
   home.stateVersion = "23.11";
   home.enableNixpkgsReleaseCheck = false;
@@ -23,66 +27,22 @@
   #----- Programs -----
   programs.defaults = {
     enable = true;
-    basic.enable = false; # unrar-free doesn't build on aarch64-darwin
+    basic.enable = true; # unrar-free doesn't build on aarch64-darwin
     git.enable = true;
-    network.enable = false; # iproute2/wireshark in defaults are Linux-only
+    network.enable = true; # iproute2/wireshark in defaults are Linux-only
   };
 
   # Marked broken Oct 20, 2022 check later to remove this
   # https://github.com/nix-community/home-manager/issues/3344
   manual.manpages.enable = false;
 
-  #----- Alacritty (macOS-specific color scheme + font size) -----
-  programs.alacritty = {
-    enable = true;
-    settings = {
-      cursor.style = "Block";
-
-      # Fix for shell path when launching from desktop
-      terminal.shell = {
-        program = "${pkgs.zsh}/bin/zsh";
-      };
-
-      font = {
-        normal = {
-          family = "Hack Nerd Font";
-          style = "Regular";
-        };
-        size = 14;
-      };
-
-      keyboard.bindings = [
-        { key = "V"; mods = "Alt"; action = "ToggleViMode"; }
-        { key = "F"; mods = "Shift|Alt"; action = "SearchBackward"; }
-      ];
-
-      colors = {
-        primary = {
-          background = "0x1f2528";
-          foreground = "0xc0c5ce";
-        };
-        normal = {
-          black = "0x1f2528";
-          red = "0xec5f67";
-          green = "0x99c794";
-          yellow = "0xfac863";
-          blue = "0x6699cc";
-          magenta = "0xc594c5";
-          cyan = "0x5fb3b3";
-          white = "0xc0c5ce";
-        };
-        bright = {
-          black = "0x65737e";
-          red = "0xec5f67";
-          green = "0x99c794";
-          yellow = "0xfac863";
-          blue = "0x6699cc";
-          magenta = "0xc594c5";
-          cyan = "0x5fb3b3";
-          white = "0xd8dee9";
-        };
-      };
-    };
+  #----- Alacritty (macOS-specific overrides; shared config in ./shared/alacritty.nix) -----
+  programs.alacritty.settings = {
+    font.size = 14;
+    # Treat Option as Alt/Meta so escape sequences (word-jump, delete-word, etc.) work
+    window.option_as_alt = "Both";
+    # Fix for shell path when launching from desktop
+    terminal.shell.program = "${pkgs.zsh}/bin/zsh";
   };
 
   #----- macOS-specific packages -----

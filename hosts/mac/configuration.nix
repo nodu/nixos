@@ -61,6 +61,19 @@ in
         tilesize = 48;
         # Group windows by application in Mission Control (required for AeroSpace)
         expose-group-apps = true;
+
+        persistent-apps = [
+          "/Users/${user}/Applications/Home Manager Trampolines/Alacritty.app"
+          "/Applications/Google Chrome.app"
+          "/Applications/Slack.app"
+          "/Applications/Spotify.app"
+          "/Applications/Bitwarden.app"
+          "/System/Applications/Games.app"
+        ];
+
+        persistent-others = [
+          "/Users/${user}/Downloads"
+        ];
       };
 
       # TODO: check if I like this behaviour
@@ -86,6 +99,10 @@ in
       };
     };
   };
+
+  #----- Security -----
+  security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local.reattach = true;
 
   #----- Fonts -----
   fonts.packages = [
@@ -120,6 +137,9 @@ in
       "zoom"
       "handy"
       "bitwarden"
+      "linear-linear"
+      "loom"
+      "steam"
     ];
 
     brews = [

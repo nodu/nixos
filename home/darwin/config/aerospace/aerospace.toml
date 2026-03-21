@@ -1,7 +1,7 @@
 # Place a copy of this config to ~/.aerospace.toml
 # After that, you can edit ~/.aerospace.toml to your liking
 
-# config-version = 2
+config-version = 2
 
 # You can use it to add commands that run after login to macOS user session.
 # 'start-at-login' needs to be 'true' for 'after-login-command' to work
@@ -12,13 +12,14 @@ after-login-command = []
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = [
-  # 'exec-and-forget /Users/matt/.nix-profile/bin/sketchybar',
-  'exec-and-forget /Users/matt/.nix-profile/bin/borders  active_color=0xffe1e3e4 inactive_color=0xff494d64 width=8.0',
+  # 'exec-and-forget /etc/profiles/per-user/matt/bin/sketchybar',
+  'exec-and-forget /etc/profiles/per-user/matt/bin/borders  active_color=0xffe1e3e4 inactive_color=0xff494d64 width=8.0',
+  'exec-and-forget open -a Spotify',
 ]
 # exec-on-workspace-change = [
 #   '/bin/bash',
 #   '-c',
-#   '/Users/matt/.nix-profile/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
+#   '/etc/profiles/per-user/matt/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
 # ]
 
 # Start AeroSpace at login
@@ -104,7 +105,13 @@ outer.top = [{ monitor."Built-in" = 4 }, { monitor."Dell" = 4 }, 4]
 
 # All possible commands: https://nikitabobko.github.io/AeroSpace/commands
 
-alt-shift-o = 'exec-and-forget open ~/Downloads/'
+alt-a = 'exec-and-forget open -a Claude'
+alt-shift-o = '''exec-and-forget osascript -e '
+tell application "Finder"
+    make new Finder window to folder "Downloads" of home
+    activate
+end tell'
+'''
 
 # alt-n and alt-o moved to Karabiner complex_modifications
 # (macOS dead keys consume Option+N/O before AeroSpace can intercept)
@@ -156,7 +163,7 @@ alt-shift-7 = 'move-node-to-workspace 7'
 alt-shift-8 = 'move-node-to-workspace 8'
 alt-shift-9 = 'move-node-to-workspace 9'
 
-alt-s = 'exec-and-forget screencapture -i -x ~/Documents/$(date "+%Y-%m-%d-%H.%M.%S").png'
+alt-s = 'exec-and-forget f=~/Documents/$(date "+%Y-%m-%d-%H.%M.%S").png && screencapture -i -x "$f" && [ -f "$f" ] && osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)"'
 alt-shift-s = 'exec-and-forget screencapture -cs'
 # alt-shift-s = 'exec-and-forget normcap'
 
@@ -228,3 +235,15 @@ run = "move-node-to-workspace 3"
 [[on-window-detected]]
 if.app-id = "com.spotify.client"
 run = "move-node-to-workspace 5"
+
+[[on-window-detected]]
+if.app-id = "com.microsoft.teams2"
+run = "move-node-to-workspace 4"
+
+[[on-window-detected]]
+if.app-id = "com.google.Chrome.app.hnpfjngllnobngcgfapefoaidbinmjnm"
+run = "move-node-to-workspace 4"
+
+[[on-window-detected]]
+if.app-id = "com.google.Chrome.app.hpfldicfbfomlpcikngkocigghgafkph"
+run = "move-node-to-workspace 4"

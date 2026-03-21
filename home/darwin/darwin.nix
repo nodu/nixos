@@ -1,9 +1,9 @@
 # macOS WM configuration: aerospace, sketchybar, karabiner, jankyborders
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, unstable, ... }:
 
 {
   home.packages = [
-    pkgs.aerospace
+    unstable.aerospace
     pkgs.jankyborders
     pkgs.sketchybar
     pkgs.sketchybar-app-font
