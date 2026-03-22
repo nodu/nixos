@@ -38,6 +38,7 @@
   home.packages = [
     # neovim
     pkgs.tree-sitter
+    pkgs.nodejs_22 # Required by Copilot.lua and Mason (npm-based LSP installations)
 
     # Minimal LSPs for Nix/shell config editing (shared across all hosts)
     pkgs.nil
@@ -45,5 +46,6 @@
     pkgs.shellcheck
     pkgs.nixpkgs-fmt
     pkgs.shfmt
+    pkgs.statix
   ];
 }

@@ -39,12 +39,9 @@
       scrolling.history = 100000;
 
       keyboard.bindings = [
-        { key = "Key0"; mods = "Alt"; action = "ResetFontSize"; }
-        { key = "Equals"; mods = "Alt"; action = "IncreaseFontSize"; }
-        { key = "Plus"; mods = "Alt"; action = "IncreaseFontSize"; }
-        { key = "NumpadAdd"; mods = "Alt"; action = "IncreaseFontSize"; }
-        { key = "Minus"; mods = "Alt"; action = "DecreaseFontSize"; }
-        { key = "NumpadSubtract"; mods = "Alt"; action = "DecreaseFontSize"; }
+        { key = "Key0"; mods = "Control"; action = "ResetFontSize"; }
+        { key = "Equals"; mods = "Control"; action = "IncreaseFontSize"; }
+        { key = "Minus"; mods = "Control"; action = "DecreaseFontSize"; }
         { key = "F"; mods = "Shift|Alt"; action = "SearchBackward"; }
         { key = "V"; mods = "Alt"; action = "ToggleViMode"; }
         { key = "N"; mods = "Shift|Control"; action = "CreateNewWindow"; }

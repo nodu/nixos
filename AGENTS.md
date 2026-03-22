@@ -138,6 +138,53 @@ The Framework 13 AMD uses **s2idle** (S0ix) for suspend -- not S3 deep sleep. s2
 - **Battery notifications**: [`home/i3/i3.nix`](home/i3/i3.nix) -- batsignal systemd user service, sends notifications via dunst
 - **Swap/hibernation**: [`hosts/baremetal/hardware-configuration.nix`](hosts/baremetal/hardware-configuration.nix) -- 32GB swapfile, resume auto-detected by systemd initrd
 
+## Karabiner-Elements (macOS)
+
+### Symlink Chain
+
+`karabiner.json` is an **out-of-store symlink**. Edits to `home/darwin/config/karabiner.json` take effect immediately -- no `make mac/switch` needed. The chain is: `~/.config/karabiner/karabiner.json` -> nix store -> `home/darwin/config/karabiner.json`.
+
+### Physical Key Modifier Swaps
+
+The `simple_modifications` on the catch-all keyboard device swap modifiers:
+
+| Physical key | After simple_modifications | Karabiner modifier name |
+|---|---|---|
+| **Cmd** (near spacebar) | left_option | `left_option` |
+| **Option** (outer key) | left_command | `left_command` |
+| **Caps Lock** | left_control | `left_control` |
+
+When writing complex_modification rules, always use the **post-swap** modifier names in `from.modifiers.mandatory`. Rule descriptions should note the physical key for clarity, e.g. `"Option+N => ... (physical Cmd+N)"`.
+
+### Alacritty Bundle IDs
+
+Use both `^org\\.alacritty$` and `^io\\.alacritty$` in `frontmost_application_unless` exclusion lists. Current stable (0.16.x) uses `org.alacritty`; newer versions use `io.alacritty`. Do NOT add alacritty to arrow key exclusion lists -- Ctrl+arrow should pass through natively in Alacritty.
+
+### shell_command vs key_code Rules
+
+Rules using `shell_command` depend on the `karabiner_console_user_server` process. Rules using `key_code` remapping work via the core service and do not need it. If `shell_command` rules stop working but key remapping rules still work, check if the process is running:
+
+```bash
+launchctl list | grep console_user
+```
+
+A corrupted PID file at `~/.local/share/karabiner/pid/karabiner_console_user_server.pid` can prevent it from starting -- delete the file and launchd will restart it automatically (via `KeepAlive`).
+
+### Editing karabiner.json
+
+Use `python3 -c "import json; ..."` to parse, modify, and write the JSON programmatically (preserving structure, avoiding manual edit errors). Always validate after changes:
+
+```bash
+python3 -m json.tool home/darwin/config/karabiner.json > /dev/null
+```
+
+### Key Files
+
+- [`home/darwin/config/karabiner.json`](home/darwin/config/karabiner.json) -- complex_modifications, simple_modifications, device configs
+- [`home/darwin/darwin.nix`](home/darwin/darwin.nix) -- defines the out-of-store symlink
+- [`home/shared/alacritty.nix`](home/shared/alacritty.nix) -- Alacritty keyboard bindings
+- [`home/darwin/config/aerospace/aerospace.toml`](home/darwin/config/aerospace/aerospace.toml) -- AeroSpace tiling WM config (separate concerns from karabiner)
+
 ## Nix Code Style
 
 ### Formatting

@@ -41,7 +41,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "/etc/profiles/per-user/matt/bin/alacritty msg create-window || /etc/profiles/per-user/matt/bin/alacritty"
+                                        "shell_command": "/etc/profiles/per-user/matt/bin/alacritty msg create-window || open -a Alacritty"
                                     }
                                 ],
                                 "type": "basic"
@@ -171,6 +171,7 @@
                                             "^co\\.zeit\\.hyperterm$",
                                             "^co\\.zeit\\.hyper$",
                                             "^io\\.alacritty$",
+                                            "^org\\.alacritty$",
                                             "^net\\.kovidgoyal\\.kitty$",
                                             "^tv\\.parsec\\.www$"
                                         ],

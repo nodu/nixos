@@ -6,7 +6,7 @@ help:
 	@echo "Baremetal (Framework 13):"
 	@echo "  make switch              - Apply configuration"
 	@echo "  make switch-logs         - Apply with detailed build logs"
-	@echo "  make test                - Test configuration without switching"
+	@echo "  make test                - Test configuration without switching (works on macOS too)"
 	@echo "  make list                - List system generations"
 	@echo "  make clean               - Run garbage collection"
 	@echo "  make clean-generations   - Delete generations older than 10 days"
@@ -86,7 +86,11 @@ switch-logs:
 	sudo NIXPKGS_ALLOW_UNFREE=1 NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nixos-rebuild switch --flake ".#${NIXNAME}" --print-build-logs
 
 test:
+ifeq ($(shell uname), Darwin)
+	nix build ".#darwinConfigurations.mac.system"
+else
 	sudo NIXPKGS_ALLOW_UNFREE=1 NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nixos-rebuild test --flake ".#$(NIXNAME)"
+endif
 
 list:
 	sudo nix-env --list-generations -p /nix/var/nix/profiles/system
