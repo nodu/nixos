@@ -3,12 +3,12 @@
 { config, lib, pkgs, unstable, opencode-packages, ... }:
 
 let
-  makeGmailApp = { name, appName, profile }:
+  # Helper to create a Gmail .app bundle via activation script (bypasses
+  # mac-app-util trampolines so Raycast only indexes one copy per app).
+  makeGmailActivation = { name, appName, profile }:
     let
-      script = pkgs.writeShellScript name ''
-        open -na "Google Chrome" --args --app=https://mail.google.com --profile-directory='${profile}'
-      '';
-      plist = pkgs.writeText "${name}-Info.plist" ''
+      appDir = "$HOME/Applications/${appName}.app";
+      plist = ''
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
         <plist version="1.0">
@@ -24,15 +24,16 @@ let
         </dict>
         </plist>
       '';
-    in
-    pkgs.runCommand name { } ''
-      mkdir -p "$out/Applications/${appName}.app/Contents/MacOS"
-      cp ${script} "$out/Applications/${appName}.app/Contents/MacOS/${name}"
-      chmod +x "$out/Applications/${appName}.app/Contents/MacOS/${name}"
-      cp ${plist} "$out/Applications/${appName}.app/Contents/Info.plist"
+      script = ''
+        #!/bin/bash
+        open -na "Google Chrome" --args --app=https://mail.google.com --profile-directory='${profile}'
+      '';
+    in ''
+      mkdir -p "${appDir}/Contents/MacOS"
+      printf '%s\n' ${lib.escapeShellArg script} > "${appDir}/Contents/MacOS/${name}"
+      chmod +x "${appDir}/Contents/MacOS/${name}"
+      printf '%s\n' ${lib.escapeShellArg plist} > "${appDir}/Contents/Info.plist"
     '';
-  gmailPersonal = makeGmailApp { name = "gmail"; appName = "Gmail"; profile = "Profile 2"; };
-  gmailWork = makeGmailApp { name = "gmail-work"; appName = "Gmail Work"; profile = "Profile 1"; };
 in
 {
   imports = [
@@ -78,6 +79,14 @@ in
     terminal.shell.program = "${pkgs.zsh}/bin/zsh";
   };
 
+  #----- Gmail app shortcuts -----
+  # Created directly in ~/Applications/ to avoid duplicate Raycast results
+  # (mac-app-util trampolines + nix store copies).
+  home.activation.gmailApps = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+    (makeGmailActivation { name = "gmail"; appName = "Gmail"; profile = "Profile 2"; })
+    + (makeGmailActivation { name = "gmail-work"; appName = "Gmail Work"; profile = "Profile 1"; })
+  );
+
   #----- macOS-specific packages -----
   home.packages = [
     # pkgs.bun
@@ -91,8 +100,5 @@ in
 
     # Dev tools
     opencode-packages.opencode
-
-    gmailPersonal
-    gmailWork
   ];
 }
