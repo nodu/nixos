@@ -53,6 +53,7 @@
       color.ui = true;
       github.user = "nodu";
       push.default = "tracking";
+      push.autoSetupRemote = true;
       init.defaultBranch = "main";
       # url = {
       #   "git@bitbucket.com:" = {

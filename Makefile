@@ -49,7 +49,6 @@ help:
 	@echo "  make mac/list            - List darwin generations"
 	@echo "  make mac/rollback        - Rollback to previous generation"
 	@echo "  make mac/clean           - Run garbage collection"
-	@echo "  make backup-karabiner    - Copy karabiner.json from live config"
 	@echo ""
 	@echo "Secrets:"
 	@echo "  make secrets/backup      - Backup SSH keys and GPG keyring"
@@ -344,9 +343,6 @@ mac/rollback:
 
 mac/clean:
 	nix-collect-garbage -d
-
-backup-karabiner:
-	cp ~/.config/karabiner/karabiner.json $(MAKEFILE_DIR)/home/darwin/config/karabiner.json
 
 # Backup secrets so that we can transer them to new machines via
 # sneakernet or other means.

@@ -60,7 +60,6 @@ make mac/build       # Build darwin configuration
 make mac/list        # List darwin generations
 make mac/rollback    # Rollback to previous generation
 make mac/clean       # Run garbage collection
-make backup-karabiner # Copy live karabiner.json into repo
 ```
 
 The macOS config uses `darwinConfigurations.mac` in `flake.nix` via a `mkDarwin` helper (analogous to `mkSystem` for NixOS). It includes nix-homebrew for declarative Homebrew cask management and mac-app-util for Spotlight/Dock integration.

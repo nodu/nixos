@@ -4,7 +4,59 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Option+O => Spotlight (physical Cmd+O)",
+                        "description": "Option+Shift+S => Screenshot selection to clipboard (physical Cmd+Shift+S)",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "s",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "left_option",
+                                            "left_shift"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "4",
+                                        "modifiers": [
+                                            "left_command",
+                                            "left_shift",
+                                            "left_control"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Option+S => Screenshot selection to file (physical Cmd+S)",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "s",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "left_option"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "4",
+                                        "modifiers": [
+                                            "left_command",
+                                            "left_shift"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Option+O => Raycast (physical Cmd+O)",
                         "manipulators": [
                             {
                                 "from": {
@@ -266,16 +318,47 @@
                         ]
                     },
                     {
-                        "description": "Slack - Command to Control (K)",
+                        "description": "Ctrl+K => Cmd+K (Link)",
                         "manipulators": [
                             {
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "com.tinyspeck.slackmacgap"
+                                            "^com\\.microsoft\\.rdc$",
+                                            "^com\\.microsoft\\.rdc\\.mac$",
+                                            "^com\\.microsoft\\.rdc\\.macos$",
+                                            "^com\\.microsoft\\.rdc\\.osx\\.beta$",
+                                            "^net\\.sf\\.cord$",
+                                            "^com\\.thinomenon\\.RemoteDesktopConnection$",
+                                            "^com\\.itap-mobile\\.qmote$",
+                                            "^com\\.nulana\\.remotixmac$",
+                                            "^com\\.p5sys\\.jump\\.mac\\.viewer$",
+                                            "^com\\.p5sys\\.jump\\.mac\\.viewer\\.web$",
+                                            "^com\\.teamviewer\\.TeamViewer$",
+                                            "^com\\.vmware\\.horizon$",
+                                            "^com\\.2X\\.Client\\.Mac$",
+                                            "^com\\.vmware\\.fusion$",
+                                            "^com\\.vmware\\.horizon$",
+                                            "^com\\.vmware\\.view$",
+                                            "^com\\.parallels\\.desktop$",
+                                            "^com\\.parallels\\.vm$",
+                                            "^com\\.parallels\\.desktop\\.console$",
+                                            "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
+                                            "^com\\.citrix\\.XenAppViewer$",
+                                            "^com\\.vmware\\.proxyApp\\.",
+                                            "^com\\.parallels\\.winapp\\.",
+                                            "^tv\\.parsec\\.www$",
+                                            "^org\\.macports\\.X11$",
+                                            "^com\\.apple\\.Terminal$",
+                                            "^com\\.googlecode\\.iterm2$",
+                                            "^co\\.zeit\\.hyperterm$",
+                                            "^co\\.zeit\\.hyper$",
+                                            "^io\\.alacritty$",
+                                            "^org\\.alacritty$",
+                                            "^net\\.kovidgoyal\\.kitty$",
+                                            "^com\\.github\\.wez\\.wezterm$"
                                         ],
-                                        "description": "Slack - Command K to Control K",
-                                        "type": "frontmost_application_if"
+                                        "type": "frontmost_application_unless"
                                     }
                                 ],
                                 "from": {
@@ -283,6 +366,9 @@
                                     "modifiers": {
                                         "mandatory": [
                                             "control"
+                                        ],
+                                        "optional": [
+                                            "any"
                                         ]
                                     }
                                 },
@@ -290,7 +376,7 @@
                                     {
                                         "key_code": "k",
                                         "modifiers": [
-                                            "command"
+                                            "left_command"
                                         ]
                                     }
                                 ],
@@ -2671,7 +2757,7 @@
                         ]
                     },
                     {
-                        "description": "Alt+Left => Cmd+[ (Back) (Finder & Browsers)",
+                        "description": "Alt+Left => Cmd+[ (Back) (Finder, Browsers & Slack)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -2681,7 +2767,8 @@
                                             "^com\\.google\\.Chrome$",
                                             "^org\\.mozilla\\.firefox$",
                                             "^com\\.brave\\.Browser$",
-                                            "^com\\.apple\\.Safari$"
+                                            "^com\\.apple\\.Safari$",
+                                            "^com\\.tinyspeck\\.slackmacgap$"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -2707,7 +2794,7 @@
                         ]
                     },
                     {
-                        "description": "Alt+Right => Cmd+] (Forward) (Finder & Browsers)",
+                        "description": "Alt+Right => Cmd+] (Forward) (Finder, Browsers & Slack)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -2717,7 +2804,8 @@
                                             "^com\\.google\\.Chrome$",
                                             "^org\\.mozilla\\.firefox$",
                                             "^com\\.brave\\.Browser$",
-                                            "^com\\.apple\\.Safari$"
+                                            "^com\\.apple\\.Safari$",
+                                            "^com\\.tinyspeck\\.slackmacgap$"
                                         ],
                                         "type": "frontmost_application_if"
                                     }

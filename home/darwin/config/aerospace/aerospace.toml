@@ -163,9 +163,7 @@ alt-shift-7 = 'move-node-to-workspace 7'
 alt-shift-8 = 'move-node-to-workspace 8'
 alt-shift-9 = 'move-node-to-workspace 9'
 
-alt-s = 'exec-and-forget f=~/Documents/$(date "+%Y-%m-%d-%H.%M.%S").png && screencapture -i -x "$f" && [ -f "$f" ] && osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)"'
-alt-shift-s = 'exec-and-forget screencapture -cs'
-# alt-shift-s = 'exec-and-forget normcap'
+# Screenshot bindings moved to Karabiner (Option+S => Cmd+Shift+4, Option+Shift+S => Cmd+Shift+Ctrl+4)
 
 cmd-h = []     # Disable "hide application"
 cmd-alt-h = [] # Disable "hide others"

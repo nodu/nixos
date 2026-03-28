@@ -96,6 +96,15 @@ in
         "com.apple.spaces" = {
           spans-displays = true;
         };
+        # Disable Spotlight keyboard shortcuts so Raycast can claim Cmd+Space
+        "com.apple.symbolichotkeys" = {
+          AppleSymbolicHotKeys = {
+            # 64 = Spotlight Search (Cmd+Space)
+            "64" = { enabled = false; };
+            # 65 = Finder Search Window (Cmd+Option+Space)
+            "65" = { enabled = false; };
+          };
+        };
       };
     };
   };
@@ -139,7 +148,10 @@ in
       "bitwarden"
       "linear-linear"
       "loom"
+      "ollama"
       "steam"
+      "raycast"
+      #"flameshot" MacOS Gatekeeper fails
     ];
 
     brews = [
