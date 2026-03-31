@@ -152,6 +152,7 @@ in
       "steam"
       "raycast"
       #"flameshot" MacOS Gatekeeper fails
+      "discord"
     ];
 
     brews = [
