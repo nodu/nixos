@@ -153,10 +153,11 @@ in
       "raycast"
       #"flameshot" MacOS Gatekeeper fails
       "discord"
+      "audacity"
     ];
 
     brews = [
-      # Add brews here as needed
+      "anomalyco/tap/opencode"
     ];
   };
 }

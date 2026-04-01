@@ -2,7 +2,7 @@
 #
 # These are "global" tools I want available everywhere
 #
-{ config, lib, pkgs, unstable, opencode-packages, ... }:
+{ config, lib, pkgs, unstable, ... }:
 
 {
   home.packages = [

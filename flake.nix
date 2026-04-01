@@ -40,6 +40,10 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    homebrew-opencode = {
+      url = "github:anomalyco/homebrew-tap";
+      flake = false;
+    };
 
     # Fix Nix apps in macOS Spotlight/Dock
     mac-app-util = {
@@ -67,7 +71,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, mac-app-util, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-opencode, mac-app-util, ... }@inputs:
     let
       home-manager-modules = inputs.home-manager.nixosModules;
 
@@ -117,6 +121,7 @@
                   "homebrew/homebrew-core" = homebrew-core;
                   "homebrew/homebrew-cask" = homebrew-cask;
                   "homebrew/homebrew-bundle" = homebrew-bundle;
+                  "anomalyco/homebrew-tap" = homebrew-opencode;
                 };
                 mutableTaps = false;
                 autoMigrate = true;
@@ -206,9 +211,6 @@
       darwinConfigurations.mac = mkDarwin {
         system = "aarch64-darwin";
         homeConfig = ./home/home-mac.nix;
-        extraSpecialArgs = {
-          opencode-packages = inputs.opencode.packages."aarch64-darwin";
-        };
       };
     };
 }

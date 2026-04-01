@@ -1,6 +1,6 @@
 # macOS home-manager configuration
 { inputs, ... }:
-{ config, lib, pkgs, unstable, opencode-packages, ... }:
+{ config, lib, pkgs, unstable, ... }:
 
 let
   # Helper to create a Gmail .app bundle via activation script (bypasses
@@ -99,6 +99,5 @@ in
     # pkgs.nodejs_22
 
     # Dev tools
-    opencode-packages.opencode
   ];
 }
