@@ -154,6 +154,7 @@ in
       #"flameshot" MacOS Gatekeeper fails
       "discord"
       "audacity"
+      "redisinsight"
     ];
 
     brews = [
