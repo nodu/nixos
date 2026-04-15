@@ -24,6 +24,16 @@ in
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
+
+    # Linux builder VM for building aarch64-linux configs (rpi3, bau) on macOS
+    linux-builder.enable = true;
+  };
+
+  # Don't run the linux-builder VM persistently -- it's only needed for ad-hoc
+  # rpi3/bau builds. The Makefile targets start/stop it on demand.
+  launchd.daemons.linux-builder.serviceConfig = {
+    KeepAlive = lib.mkForce false;
+    RunAtLoad = lib.mkForce false;
   };
 
   #----- nixpkgs -----
@@ -155,6 +165,8 @@ in
       "discord"
       "audacity"
       "redisinsight"
+      "dbeaver-community"
+      "1password"
     ];
 
     brews = [

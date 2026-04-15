@@ -10,6 +10,9 @@
     # We use the unstable nixpkgs repo for some packages.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
+    # Pinned nixpkgs 25.05 for packages that need older versions (e.g. terraform 1.12.x)
+    nixpkgs-2505.url = "github:nixos/nixpkgs/nixos-25.05";
+
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     home-manager = {
@@ -53,7 +56,11 @@
 
     nix-colors.url = "github:misterio77/nix-colors";
 
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+    # TODO: pinned to last commit before neovim renamed nvim.desktop -> org.neovim.nvim.desktop
+    # which breaks the nixpkgs neovim wrapper (rm $out/share/applications/nvim.desktop fails).
+    # Unpin once nixpkgs wrapper.nix is updated to handle the new desktop file name:
+    #   neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay/80b1f16dba171a70c44c2ee6ec9529876152a7f5";
 
     handy = {
       url = "github:cjpais/Handy";
@@ -71,7 +78,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-opencode, mac-app-util, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-2505, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-opencode, mac-app-util, ... }@inputs:
     let
       home-manager-modules = inputs.home-manager.nixosModules;
 
@@ -79,9 +86,10 @@
       mkSystem = { system, config, homeConfig, hardwareModules ? [ ], extraModules ? [ ], extraSpecialArgs ? { } }:
         let
           unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
+          pkgs-2505 = import nixpkgs-2505 { inherit system; config.allowUnfree = true; };
         in
         nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit unstable; } // extraSpecialArgs;
+          specialArgs = { inherit unstable pkgs-2505; } // extraSpecialArgs;
           modules = [
             { nixpkgs.hostPlatform = system; }
             config
@@ -90,7 +98,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.extraSpecialArgs = { inherit unstable; } // extraSpecialArgs;
+              home-manager.extraSpecialArgs = { inherit unstable pkgs-2505; } // extraSpecialArgs;
               home-manager.users.matt = import homeConfig { inherit inputs; };
             }
           ];
@@ -100,10 +108,11 @@
       mkDarwin = { system, homeConfig, extraSpecialArgs ? { } }:
         let
           unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
+          pkgs-2505 = import nixpkgs-2505 { inherit system; config.allowUnfree = true; };
         in
         darwin.lib.darwinSystem {
           inherit system;
-          specialArgs = { inherit unstable; } // extraSpecialArgs;
+          specialArgs = { inherit unstable pkgs-2505; } // extraSpecialArgs;
           modules = [
             mac-app-util.darwinModules.default
             home-manager.darwinModules.home-manager
@@ -132,7 +141,7 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "backup";
-              home-manager.extraSpecialArgs = { inherit unstable; } // extraSpecialArgs;
+              home-manager.extraSpecialArgs = { inherit unstable pkgs-2505; } // extraSpecialArgs;
               home-manager.users.matt = import homeConfig { inherit inputs; };
             }
           ];

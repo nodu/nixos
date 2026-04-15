@@ -27,7 +27,12 @@
 
   programs.defaults = {
     enable = true;
+    network.enable = false; # wireshark-cli, nmap, etc. add ~500 MiB -- too heavy for Pi
   };
+
+  # Disable heavy packages to keep closure small on the Pi's 8 GB SD card
+  cli.enableHeavyPackages = false;      # neofetch (~285 MiB), imagemagick (~194 MiB)
+  neovim.enableNodejs = false;          # nodejs_22 (~224 MiB) -- no Copilot on Pi
 
   # GPG agent uses pinentry-curses (default from shared/gpg.nix)
   # No override needed for headless

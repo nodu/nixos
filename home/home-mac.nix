@@ -28,7 +28,8 @@ let
         #!/bin/bash
         open -na "Google Chrome" --args --app=https://mail.google.com --profile-directory='${profile}'
       '';
-    in ''
+    in
+    ''
       mkdir -p "${appDir}/Contents/MacOS"
       printf '%s\n' ${lib.escapeShellArg script} > "${appDir}/Contents/MacOS/${name}"
       chmod +x "${appDir}/Contents/MacOS/${name}"
@@ -99,5 +100,9 @@ in
     # pkgs.nodejs_22
 
     # Dev tools
+    pkgs.go
+    pkgs.cmake
+    pkgs.ffmpeg
+    pkgs.uv
   ];
 }

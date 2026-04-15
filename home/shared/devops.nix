@@ -2,7 +2,7 @@
 #
 # These are "global" tools I want available everywhere
 #
-{ config, lib, pkgs, unstable, ... }:
+{ config, lib, pkgs, unstable, pkgs-2505, ... }:
 
 {
   home.packages = [
@@ -25,7 +25,7 @@
         gke-gcloud-auth-plugin
       ]
     ))
-    pkgs.terraform
+    pkgs-2505.terraform  # pinned to 1.12.x
 
     # Networking
     pkgs.tailscale

@@ -2,10 +2,16 @@
 { config, lib, pkgs, ... }:
 
 {
-  home.packages = [
-    # TODO: audit and narrow this list.
+  options.cli = {
+    enableHeavyPackages = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Include heavy CLI packages (neofetch, imagemagick). Disable on constrained devices.";
+    };
+  };
+
+  config.home.packages = [
     pkgs.nix-search-cli
-    pkgs.neofetch
     pkgs.rclone
     pkgs.fd
     pkgs.bat
@@ -20,7 +26,7 @@
     pkgs.tree
     pkgs.zip
     pkgs.unzip
-    pkgs.entr # maybe not needed
+    pkgs.entr
     pkgs.killall
     pkgs.tealdeer
     pkgs.openpomodoro-cli
@@ -29,6 +35,8 @@
     pkgs.lazygit
     pkgs.difftastic
     pkgs.dust
+  ] ++ lib.optionals config.cli.enableHeavyPackages [
+    pkgs.neofetch
     pkgs.imagemagick
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     pkgs.lshw # Linux only

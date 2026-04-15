@@ -38,6 +38,12 @@
     memoryPercent = 50;
   };
 
+  # Only include RPi WiFi/BT firmware instead of the full 736 MiB linux-firmware blob.
+  # The not-detected.nix import sets enableRedistributableFirmware = true by default;
+  # override it to dramatically shrink the closure.
+  hardware.enableRedistributableFirmware = lib.mkForce false;
+  hardware.firmware = [ pkgs.raspberrypiWirelessFirmware ];
+
   environment.pathsToLink = [ "/share/zsh" ];
   environment.localBinInPath = true;
 
@@ -78,6 +84,7 @@
 
   environment.systemPackages = [
     pkgs.gnumake
+    pkgs.picocom
     pkgs.vim
     pkgs.wget
   ];
@@ -91,6 +98,20 @@
     };
   };
 
+  # mDNS -- advertise hostname on local network (enables rpi3.local resolution)
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      domain = true;
+      hinfo = true;
+      userServices = true;
+      workstation = true;
+    };
+  };
+
   # gaggimate
   services.udev.extraRules = ''
     # ESP32-S3 USB JTAG/serial (Espressif VID:PID 303a:1001)
@@ -101,7 +122,7 @@
   networking.firewall.enable = true;
   networking.firewall.checkReversePath = false; # required for NordVPN
   networking.firewall.allowedTCPPorts = [ 443 ]; # NordVPN
-  networking.firewall.allowedUDPPorts = [ 1194 ]; # NordVPN
+  networking.firewall.allowedUDPPorts = [ 1194 5353 ]; # NordVPN, mDNS
 
   # Make hosts writable for nordvpn mesh
   environment.etc.hosts.mode = "0644";

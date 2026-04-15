@@ -15,7 +15,7 @@ help:
 	@echo "  make set-current gen=N   - Switch to generation N"
 	@echo ""
 	@echo "Raspberry Pi 3:"
-	@echo "  make rpi3/deploy         - Build on Framework, push and activate on Pi"
+	@echo "  make rpi3/deploy         - Build on host, push and activate on Pi"
 	@echo "  make rpi3/copy           - Copy config to Pi"
 	@echo "  make rpi3/switch         - Rebuild and switch (run on the Pi)"
 	@echo "  make rpi3/switch-remote  - Rebuild and switch via SSH"
@@ -23,7 +23,7 @@ help:
 	@echo "  make rpi3/secrets        - Copy SSH keys to Pi"
 	@echo ""
 	@echo "Raspberry Pi 4 (bau):"
-	@echo "  make bau/deploy          - Build on Framework, push and activate on bau"
+	@echo "  make bau/deploy          - Build on host, push and activate on bau"
 	@echo "  make bau/copy            - Copy config to bau"
 	@echo "  make bau/switch          - Rebuild and switch (run on bau)"
 	@echo "  make bau/switch-remote   - Rebuild and switch via SSH"
@@ -49,6 +49,9 @@ help:
 	@echo "  make mac/list            - List darwin generations"
 	@echo "  make mac/rollback        - Rollback to previous generation"
 	@echo "  make mac/clean           - Run garbage collection"
+	@echo "  make mac/builder-status  - Check if linux-builder VM is running"
+	@echo "  make mac/builder-start   - Start linux-builder VM (auto by rpi3/bau targets)"
+	@echo "  make mac/builder-stop    - Stop linux-builder VM (auto by rpi3/bau targets)"
 	@echo ""
 	@echo "Secrets:"
 	@echo "  make secrets/backup      - Backup SSH keys and GPG keyring"
@@ -66,6 +69,9 @@ RPIADDR ?= rpi3
 
 # Raspberry Pi 4 (bau) connectivity
 BAUADDR ?= bau
+
+# Detect OS for linux-builder VM lifecycle (macOS only)
+UNAME := $(shell uname)
 
 # Get the path to this Makefile and directory
 MAKEFILE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
@@ -193,9 +199,17 @@ vm/switch:
 # Raspberry Pi 3 targets
 #---------------------------------------------------------------------
 
-# Build rpi3 configuration (cross-compile via binfmt on x86_64 host)
+# Build rpi3 configuration (cross-compile via binfmt on x86_64, or linux-builder VM on macOS)
 rpi3/build:
+ifeq ($(UNAME), Darwin)
+	@$(MAKE) mac/builder-start
+	@nix build ".#nixosConfigurations.rpi3.config.system.build.toplevel"; \
+		status=$$?; \
+		$(MAKE) mac/builder-stop; \
+		exit $$status
+else
 	nix build ".#nixosConfigurations.rpi3.config.system.build.toplevel"
+endif
 
 # Copy configuration to RPi3
 # Note: git init + git add is required because Nix flakes only sees git-tracked
@@ -227,9 +241,17 @@ rpi3/secrets:
 # rpi3/sd-image:
 # 	nix build ".#nixosConfigurations.rpi3.config.system.build.sdImage"
 
-# Build rpi3 on x86_64 host (via binfmt), push closure, and activate on the Pi
+# Build rpi3 on host (via binfmt or linux-builder VM), push closure, and activate on the Pi
 rpi3/deploy:
+ifeq ($(UNAME), Darwin)
+	@$(MAKE) mac/builder-start
+	@nix build ".#nixosConfigurations.rpi3.config.system.build.toplevel"; \
+		status=$$?; \
+		$(MAKE) mac/builder-stop; \
+		exit $$status
+else
 	nix build ".#nixosConfigurations.rpi3.config.system.build.toplevel"
+endif
 	nix copy --to ssh://$(NIXUSER)@$(RPIADDR) ./result
 	# readlink runs locally to resolve the store path; this is intentional
 	# because nix copy already pushed this exact path to the Pi
@@ -246,9 +268,17 @@ rpi3/switch:
 # Raspberry Pi 4 (bau) targets
 #---------------------------------------------------------------------
 
-# Build bau configuration (cross-compile via binfmt on x86_64 host)
+# Build bau configuration (cross-compile via binfmt on x86_64, or linux-builder VM on macOS)
 bau/build:
+ifeq ($(UNAME), Darwin)
+	@$(MAKE) mac/builder-start
+	@nix build ".#nixosConfigurations.bau.config.system.build.toplevel"; \
+		status=$$?; \
+		$(MAKE) mac/builder-stop; \
+		exit $$status
+else
 	nix build ".#nixosConfigurations.bau.config.system.build.toplevel"
+endif
 
 # Copy configuration to bau
 bau/copy:
@@ -272,9 +302,17 @@ bau/secrets:
 		--exclude='config' \
 		$(HOME)/.ssh/ $(NIXUSER)@$(BAUADDR):~/.ssh
 
-# Build bau on x86_64 host (via binfmt), push closure, and activate
+# Build bau on host (via binfmt or linux-builder VM), push closure, and activate
 bau/deploy:
+ifeq ($(UNAME), Darwin)
+	@$(MAKE) mac/builder-start
+	@nix build ".#nixosConfigurations.bau.config.system.build.toplevel"; \
+		status=$$?; \
+		$(MAKE) mac/builder-stop; \
+		exit $$status
+else
 	nix build ".#nixosConfigurations.bau.config.system.build.toplevel"
+endif
 	nix copy --to ssh://$(NIXUSER)@$(BAUADDR) ./result
 	ssh -t -p22 $(NIXUSER)@$(BAUADDR) " \
 		sudo nix-env -p /nix/var/nix/profiles/system --set $$(readlink -f ./result) && \
@@ -321,6 +359,54 @@ bau/partition:
 	@echo "   sudo mount /dev/sdY1 /mnt/old          # old Debian root"
 	@echo "   sudo mount /dev/sdX3 /mnt/new-data      # new data partition"
 	@echo "   sudo rsync -av /mnt/old/path/to/data/ /mnt/new-data/"
+
+#---------------------------------------------------------------------
+# Linux builder VM lifecycle (macOS only, for aarch64-linux builds)
+# The VM is started on-demand by rpi3/bau build/deploy targets and
+# stopped after the build finishes.
+#---------------------------------------------------------------------
+
+mac/builder-start:
+ifeq ($(UNAME), Darwin)
+	@echo "Starting linux-builder VM..."
+	@sudo launchctl kickstart system/org.nixos.linux-builder
+	@echo "Waiting for builder to be ready..."
+	@for i in $$(seq 1 60); do \
+		if nc -z localhost 31022 2>/dev/null; then \
+			echo "Builder ready."; \
+			exit 0; \
+		fi; \
+		sleep 1; \
+	done; \
+	echo "ERROR: Builder did not start within 60s"; exit 1
+endif
+
+mac/builder-stop:
+ifeq ($(UNAME), Darwin)
+	@echo "Stopping linux-builder VM..."
+	@sudo launchctl kill SIGTERM system/org.nixos.linux-builder || true
+endif
+
+mac/builder-status:
+ifeq ($(UNAME), Darwin)
+	@pid=$$(sudo launchctl print system/org.nixos.linux-builder 2>/dev/null | grep '^\s*pid' | awk '{print $$NF}'); \
+	port_ok=false; \
+	if nc -z localhost 31022 2>/dev/null; then port_ok=true; fi; \
+	if [ -n "$$pid" ] && [ "$$pid" != "-" ]; then \
+		if $$port_ok; then \
+			echo "linux-builder VM: RUNNING (PID $$pid, port 31022 reachable)"; \
+		else \
+			echo "linux-builder VM: STARTING (PID $$pid, port 31022 not yet reachable)"; \
+		fi; \
+	else \
+		if $$port_ok; then \
+			echo "linux-builder VM: UNKNOWN (no launchd PID but port 31022 reachable)"; \
+		else \
+			echo "linux-builder VM: STOPPED"; \
+			echo "  Start with: make mac/builder-start"; \
+		fi; \
+	fi
+endif
 
 #---------------------------------------------------------------------
 # macOS (nix-darwin) targets
