@@ -50,6 +50,8 @@
     enable = true;
     enableZshIntegration = true;
     nix-direnv.enable = true;
+    # TODO: remove override once nixpkgs is updated past direnv fish test failure
+    package = pkgs.direnv.overrideAttrs { doCheck = false; };
   };
 
   programs.zsh = {

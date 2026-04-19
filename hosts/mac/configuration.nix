@@ -148,8 +148,9 @@ in
       "spotify"
       "karabiner-elements"
       "claude"
-      "pgadmin4"
+      "claude-code"
       "opencode-desktop"
+      "pgadmin4"
       "nordvpn"
       "slack"
       "microsoft-teams"
@@ -167,6 +168,7 @@ in
       "redisinsight"
       "dbeaver-community"
       "1password"
+      "microsoft-word"
     ];
 
     brews = [
