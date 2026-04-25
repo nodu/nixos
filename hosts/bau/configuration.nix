@@ -77,7 +77,7 @@
     LC_TIME = "en_GB.UTF-8";
   };
 
-  # TODO: Don't forget to set a password with 'passwd'.
+  # NOTE: Don't forget to set a password with 'passwd'.
   users.users.matt = {
     isNormalUser = true;
     home = "/home/matt";

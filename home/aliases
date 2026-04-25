@@ -241,16 +241,6 @@ function vault-list() {
 	vault kv list secret/$1
 }
 
-alias edit-zsh="v ~/repos/dotenv/.zshrc"
-alias edit-osx-alias="v ~/repos/dotenv/shortcuts/macos_aliases.sh"
-
-#TODO: - Move all cheatsheets to notes repo
-alias edit-vimCheatSheet="nvim ~/repos/dotenv/shortcuts/vimCheatSheet"
-
-mn-help-vimCheatSheet() {
-	cat ~/repos/dotenv/shortcuts/vimCheatSheet
-}
-
 alias spud-start='az vm start --resource-group Matt --name SPUD'
 alias spud-stop='az vm stop --resource-group Matt --name SPUD && az vm deallocate --resource-group MATT --name SPUD'
 

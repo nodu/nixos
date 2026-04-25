@@ -7,7 +7,7 @@
     enableGitIntegration = true;
     options = {
       line-numbers = true;
-      syntax-theme = "base16";
+      syntax-theme = "OneHalfDark";
       dark = true;
       minus-style = "normal \"#3b1219\"";
       minus-emph-style = "normal \"#6e2532\"";
