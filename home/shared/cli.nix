@@ -35,6 +35,7 @@
     pkgs.lazygit
     pkgs.difftastic
     pkgs.dust
+    pkgs.yt-dlp
   ] ++ lib.optionals config.cli.enableHeavyPackages [
     pkgs.neofetch
     pkgs.imagemagick

@@ -29,7 +29,7 @@
 
     # Declarative Homebrew management
     nix-homebrew = {
-      url = "github:zhaofengli-wip/nix-homebrew";
+      url = "github:zhaofengli/nix-homebrew";
     };
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
@@ -56,11 +56,7 @@
 
     nix-colors.url = "github:misterio77/nix-colors";
 
-    # TODO: pinned to last commit before neovim renamed nvim.desktop -> org.neovim.nvim.desktop
-    # which breaks the nixpkgs neovim wrapper (rm $out/share/applications/nvim.desktop fails).
-    # Unpin once nixpkgs wrapper.nix is updated to handle the new desktop file name:
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
-    # neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay/80b1f16dba171a70c44c2ee6ec9529876152a7f5";
 
     handy = {
       url = "github:cjpais/Handy";
