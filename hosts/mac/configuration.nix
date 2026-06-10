@@ -172,6 +172,8 @@ in
       "dbeaver-community"
       "1password"
       "microsoft-word"
+      "prusaslicer"
+      "tailscale-app"
     ];
 
     brews = [

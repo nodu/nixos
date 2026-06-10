@@ -349,13 +349,13 @@ m.mos-show() {
 
 #menu
 function m() {
-  tmpfile=$(mktemp)
-  typeset -f >"$tmpfile"
-  # TODO fix fzf --bind 'enter:exectue'
-  # compgen -c | fzf --bind "ctrl-d:preview-page-down,ctrl-u:preview-page-up,enter:execute({})" --preview "source $tmpfile > /dev/null 2>&1; declare -f {1}"
-  selected_command=$(compgen -c | fzf --bind "ctrl-n:down,ctrl-p:up,ctrl-d:preview-page-down,ctrl-u:preview-page-up" --preview "source $tmpfile > /dev/null 2>&1; declare -f {1}")
-  echo -n "$selected_command" | xclip -selection clipboard
-  echo "Command copied to clipboard: $selected_command"
+  local tmpfile=$(mktemp)
+  typeset -f > "$tmpfile"
+  selected_command=$(compgen -c | fzf \
+    --bind "ctrl-n:down,ctrl-p:up,ctrl-d:preview-page-down,ctrl-u:preview-page-up" \
+    --preview "sed -n '/^{1} () {$/,/^}$/p' $tmpfile || which {1} 2>/dev/null")
+  rm -f "$tmpfile"
+  print -z "$selected_command "
 }
 
 if [[ "$(uname)" != "Darwin" ]]; then

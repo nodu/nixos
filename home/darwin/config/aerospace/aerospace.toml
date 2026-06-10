@@ -105,7 +105,8 @@ outer.top = [{ monitor."Built-in" = 4 }, { monitor."Dell" = 4 }, 4]
 
 # All possible commands: https://nikitabobko.github.io/AeroSpace/commands
 
-alt-a = 'exec-and-forget open -a Claude'
+alt-a = 'exec-and-forget $HOME/Applications/Claude\ Work.app/Contents/MacOS/claude-work'
+alt-shift-a = 'exec-and-forget $HOME/Applications/Claude\ Personal.app/Contents/MacOS/claude-personal'
 alt-shift-o = '''exec-and-forget osascript -e '
 tell application "Finder"
     make new Finder window to folder "Downloads" of home
