@@ -116,6 +116,7 @@ end tell'
 
 # alt-n and alt-o moved to Karabiner complex_modifications
 # (macOS dead keys consume Option+N/O before AeroSpace can intercept)
+alt-shift-s = 'exec-and-forget /etc/profiles/per-user/matt/bin/normcap'
 alt-shift-n = '''exec-and-forget osascript -e '
 tell application "Google Chrome"
     make new window

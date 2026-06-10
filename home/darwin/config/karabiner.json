@@ -4,28 +4,6 @@
       "complex_modifications": {
         "rules": [
           {
-            "description": "Option+Shift+S => NormCap OCR screenshot (physical Cmd+Shift+S)",
-            "manipulators": [
-              {
-                "from": {
-                  "key_code": "s",
-                  "modifiers": {
-                    "mandatory": [
-                      "left_option",
-                      "left_shift"
-                    ]
-                  }
-                },
-                "to": [
-                  {
-                    "shell_command": "open -a NormCap"
-                  }
-                ],
-                "type": "basic"
-              }
-            ]
-          },
-          {
             "description": "Option+S => Screenshot selection to file (physical Cmd+S)",
             "manipulators": [
               {

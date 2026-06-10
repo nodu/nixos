@@ -3,6 +3,15 @@
 { config, lib, pkgs, unstable, ... }:
 
 let
+  # normcap: upstream unconditionally sets QT_QPA_PLATFORM=xcb which crashes
+  # on macOS. Patch preFixup to use the cocoa backend instead.
+  normcap = pkgs.normcap.overrideAttrs (old: {
+    preFixup = builtins.replaceStrings
+      [ "--set QT_QPA_PLATFORM xcb" ]
+      [ "--set QT_QPA_PLATFORM cocoa" ]
+      old.preFixup;
+  });
+
   # Helper to create a Gmail .app bundle via activation script (bypasses
   # mac-app-util trampolines so Raycast only indexes one copy per app).
   makeGmailActivation = { name, appName, profile }:
@@ -79,6 +88,7 @@ in
     # Fix for shell path when launching from desktop
     terminal.shell.program = "${pkgs.zsh}/bin/zsh";
   };
+
 
   #----- Gmail app shortcuts -----
   # Created directly in ~/Applications/ to avoid duplicate Raycast results
@@ -186,5 +196,8 @@ in
     pkgs.cmake
     pkgs.ffmpeg
     pkgs.uv
+
+    # Screenshot OCR
+    normcap
   ];
 }
