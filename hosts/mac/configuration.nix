@@ -172,6 +172,7 @@ in
       "dbeaver-community"
       "1password"
       "microsoft-word"
+      "microsoft-excel"
       "prusaslicer"
       "tailscale-app"
     ];
