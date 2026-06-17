@@ -175,6 +175,7 @@ in
       "microsoft-excel"
       "prusaslicer"
       "tailscale-app"
+      "shottr"
     ];
 
     brews = [
