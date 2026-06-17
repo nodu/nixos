@@ -114,9 +114,12 @@ tell application "Finder"
 end tell'
 '''
 
+# Screenshot bindings: alt-s => Shottr area capture, alt-shift-s => Shottr OCR
+alt-s = 'exec-and-forget open shottr://grab/area'
+alt-shift-s = 'exec-and-forget open shottr://ocr'
+
 # alt-n and alt-o moved to Karabiner complex_modifications
 # (macOS dead keys consume Option+N/O before AeroSpace can intercept)
-alt-shift-s = 'exec-and-forget open shottr://ocr'
 alt-shift-n = '''exec-and-forget osascript -e '
 tell application "Google Chrome"
     make new window
@@ -164,8 +167,6 @@ alt-shift-6 = 'move-node-to-workspace 6'
 alt-shift-7 = 'move-node-to-workspace 7'
 alt-shift-8 = 'move-node-to-workspace 8'
 alt-shift-9 = 'move-node-to-workspace 9'
-
-# Screenshot bindings moved to Karabiner (Option+S => Cmd+Shift+4, Option+Shift+S => Cmd+Shift+Ctrl+4)
 
 cmd-h = []     # Disable "hide application"
 cmd-alt-h = [] # Disable "hide others"
