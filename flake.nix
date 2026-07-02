@@ -130,6 +130,9 @@
                 };
                 mutableTaps = false;
                 autoMigrate = true;
+                trust = {
+                  taps = [ "anomalyco/tap" ];
+                };
               };
             }
             ./hosts/mac/configuration.nix

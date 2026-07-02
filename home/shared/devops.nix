@@ -9,9 +9,6 @@
     # GitHub CLI
     pkgs.gh
 
-    # Containers
-    pkgs.docker
-
     # Kubernetes CLI & utilities
     unstable.kubectl
     pkgs.k9s
@@ -26,7 +23,7 @@
         gke-gcloud-auth-plugin
       ]
     ))
-    pkgs-2505.terraform  # pinned to 1.12.x
+    pkgs-2505.terraform # pinned to 1.12.x
 
     # Networking
     pkgs.tailscale
@@ -46,7 +43,7 @@
     pkgs.msgviewer
 
     # CLI aliases
-    (pkgs.writeShellScriptBin "k"  ''exec kubectl "$@"'')
+    (pkgs.writeShellScriptBin "k" ''exec kubectl "$@"'')
     (pkgs.writeShellScriptBin "kx" ''exec kubectx "$@"'')
     (pkgs.writeShellScriptBin "kn" ''exec kubens "$@"'')
 
@@ -68,8 +65,11 @@
     '')
 
     # Tailscale exit node shortcuts
-    (pkgs.writeShellScriptBin "ts-on"  ''sudo tailscale set --exit-node=tailscale-subnet-router'')
+    (pkgs.writeShellScriptBin "ts-on" ''sudo tailscale set --exit-node=tailscale-subnet-router'')
     (pkgs.writeShellScriptBin "ts-off" ''sudo tailscale set --exit-node='')
 
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    # macOS uses Docker Desktop via Homebrew
+    pkgs.docker
   ];
 }

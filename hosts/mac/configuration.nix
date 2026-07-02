@@ -160,7 +160,7 @@ in
       "zoom"
       "handy"
       "bitwarden"
-      "linear-linear"
+      "linear"
       "loom"
       "ollama-app"
       "steam"
@@ -179,6 +179,7 @@ in
       "google-drive"
       "windows-app"
       "thaw"
+      "libreoffice"
     ];
 
     brews = [
