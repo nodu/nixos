@@ -176,6 +176,9 @@ in
       "prusaslicer"
       "tailscale-app"
       "shottr"
+      "google-drive"
+      "windows-app"
+      "thaw"
     ];
 
     brews = [
