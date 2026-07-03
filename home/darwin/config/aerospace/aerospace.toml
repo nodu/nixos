@@ -120,12 +120,8 @@ alt-shift-s = 'exec-and-forget open shottr://ocr'
 
 # alt-n and alt-o moved to Karabiner complex_modifications
 # (macOS dead keys consume Option+N/O before AeroSpace can intercept)
-alt-shift-n = '''exec-and-forget osascript -e '
-tell application "Google Chrome"
-    make new window
-    activate
-end tell'
-'''
+alt-shift-n = '''exec-and-forget /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --new-window --profile-directory="Profile 1"'''
+alt-shift-m = '''exec-and-forget /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --new-window --profile-directory="Profile 2"'''
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
 alt-slash = 'layout tiles horizontal vertical'
