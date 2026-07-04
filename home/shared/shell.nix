@@ -90,8 +90,18 @@
         '')
       (lib.mkOrder 1000
         ''
-          # Add hostname to prompt for distinguishing between hosts
-          PROMPT="%{$fg[magenta]%}%m%{$reset_color%} $PROMPT"
+          # Add hostname to prompt when connected via SSH (helps distinguish remote sessions)
+          if [[ -n "$SSH_CONNECTION" ]]; then
+            PROMPT="%{$fg[magenta]%}%m%{$reset_color%} $PROMPT"
+          fi
+
+          # Kubernetes context on the right-hand side of the prompt.
+          # kube_ps1 is provided by the oh-my-zsh "kube-ps1" plugin (already enabled above).
+          RPROMPT='$(kube_ps1)'
+          KUBE_PS1_SYMBOL_ENABLE=true      # keep the ⎈ helm-wheel symbol
+          KUBE_PS1_NS_ENABLE=true          # show namespace after context
+          KUBE_PS1_CTX_COLOR=cyan          # readable on dark terminal
+          KUBE_PS1_NS_COLOR=yellow
 
           source $HOME/.config/nixos-functions.sh
           source $HOME/.config/apps.sh

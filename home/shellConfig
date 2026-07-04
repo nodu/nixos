@@ -4,5 +4,4 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bold,underline"
 #export PATH="${PATH}:${HOME}/.krew/bin"¬
 #export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
-#PROMPT=$PROMPT'$(kube_ps1) '
 #KUBE_EDITOR="nvim"
