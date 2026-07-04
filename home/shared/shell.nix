@@ -23,7 +23,6 @@
     "apps.sh".text = builtins.readFile ../apps.sh;
     "aliases".text = builtins.readFile ../aliases;
     "m-os.sh".text = builtins.readFile ../m-os.sh;
-    "shellConfig".text = builtins.readFile ../shellConfig;
     "fzf-m-os-preview-function.sh".source = config.lib.file.mkOutOfStoreSymlink ../fzf-m-os-preview-function.sh;
   };
 
@@ -90,6 +89,9 @@
         '')
       (lib.mkOrder 1000
         ''
+          # Highlight zsh-autosuggestions ghost text (magenta, bold, underlined)
+          ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bold,underline"
+
           # Add hostname to prompt when connected via SSH (helps distinguish remote sessions)
           if [[ -n "$SSH_CONNECTION" ]]; then
             PROMPT="%{$fg[magenta]%}%m%{$reset_color%} $PROMPT"
@@ -107,7 +109,6 @@
           source $HOME/.config/apps.sh
           source $HOME/.config/aliases
           source $HOME/.config/m-os.sh
-          source $HOME/.config/shellConfig
         '')
       (lib.mkOrder 1500
         ''
