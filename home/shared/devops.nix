@@ -70,6 +70,6 @@
 
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     # macOS uses Docker Desktop via Homebrew
-    pkgs.docker
+    pkgs.docker_29
   ];
 }

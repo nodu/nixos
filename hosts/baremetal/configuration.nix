@@ -47,6 +47,7 @@
       # IdleAction = "suspend-then-hibernate";
       HandlePowerKey = "suspend";
       HandleLidSwitch = "suspend";
+      HandleLidSwitchDocked = "ignore";
       IdleAction = "suspend";
       IdleActionSec = "5min";
     };
@@ -64,6 +65,7 @@
   # '';
 
   virtualisation.docker.enable = true;
+  virtualisation.docker.package = pkgs.docker_29;
 
   nix = {
     package = pkgs.nixVersions.latest;
@@ -97,7 +99,9 @@
   };
 
   nixpkgs.config.permittedInsecurePackages = [
+    "electron-39.8.10"
   ];
+
   #wayland requirments/stuff
   security.polkit.enable = true;
   hardware.graphics.enable = true;
