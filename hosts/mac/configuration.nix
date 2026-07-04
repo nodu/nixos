@@ -143,6 +143,20 @@ in
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";
+    # Pass --force to `brew bundle` so cleanup runs non-interactively during
+    # `make mac/switch` (otherwise Homebrew prompts `Do you want to proceed
+    # with the cleanup? [y/n]`).
+    onActivation.extraFlags = [ "--force" ];
+
+    # Declare the baseline Homebrew taps so cleanup does not try (and fail) to
+    # untap them. `homebrew/cask` is required by the casks below; `homebrew/bundle`
+    # is required by `brew bundle` itself. Without these entries, cleanup emits
+    # `Error: Refusing to untap homebrew/cask because it contains ... `
+    # on every activation.
+    taps = [
+      "homebrew/bundle"
+      "homebrew/cask"
+    ];
 
     casks = [
       "docker-desktop"
