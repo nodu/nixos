@@ -10,6 +10,14 @@
     settings = {
       env.TERM = "xterm-256color";
 
+      # Ctrl+1..9 => CSI-u sequences so tmux can bind C-1..C-9 for
+      # Chrome-style window switching (legacy terminal encoding cannot
+      # distinguish Ctrl+digit from the plain digit). The bindings live in an
+      # imported raw TOML file because the ESC escape (backslash-u001b) must reach
+      # Alacritty's TOML parser verbatim, which the settings generator can't
+      # guarantee for control characters.
+      general.import = [ "~/.config/alacritty/ctrl-num.toml" ];
+
       font = {
         size = lib.mkDefault 12.0;
         normal = {
@@ -43,7 +51,10 @@
         { key = "Equals"; mods = "Control"; action = "IncreaseFontSize"; }
         { key = "Minus"; mods = "Control"; action = "DecreaseFontSize"; }
         { key = "F"; mods = "Shift|Alt"; action = "SearchBackward"; }
-        { key = "V"; mods = "Alt"; action = "ToggleViMode"; }
+        # Shift+Alt: plain Alt+V must pass through to tmux, which binds M-v
+        # to copy-mode (the "vim mode" used day-to-day; see tmux.nix). This
+        # terminal-level vi mode is the fallback for bare alacritty.
+        { key = "V"; mods = "Shift|Alt"; action = "ToggleViMode"; }
         { key = "N"; mods = "Shift|Control"; action = "CreateNewWindow"; }
       ];
 
@@ -119,4 +130,22 @@
       };
     };
   };
+
+  # Raw binding file imported by alacritty above. Written verbatim (nix ''..''
+  # does not treat \u as an escape), so Alacritty parses the TOML
+  # backslash-u001b escapes into real ESC bytes. Ctrl+N sends CSI-u <codepoint>;5u, which tmux
+  # decodes as C-N for the window-switching binds in tmux.nix.
+  xdg.configFile."alacritty/ctrl-num.toml".text = ''
+    keyboard.bindings = [
+      { key = "1", mods = "Control", chars = "\u001b[49;5u" },
+      { key = "2", mods = "Control", chars = "\u001b[50;5u" },
+      { key = "3", mods = "Control", chars = "\u001b[51;5u" },
+      { key = "4", mods = "Control", chars = "\u001b[52;5u" },
+      { key = "5", mods = "Control", chars = "\u001b[53;5u" },
+      { key = "6", mods = "Control", chars = "\u001b[54;5u" },
+      { key = "7", mods = "Control", chars = "\u001b[55;5u" },
+      { key = "8", mods = "Control", chars = "\u001b[56;5u" },
+      { key = "9", mods = "Control", chars = "\u001b[57;5u" },
+    ]
+  '';
 }

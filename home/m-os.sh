@@ -415,3 +415,66 @@ m.copy() {
 m.paste() {
   xclip -o -selection clipboard
 }
+
+#----- tmux helpers -----
+
+m.tmux() { # Attach-or-create: m.tmux [name]  (name defaults to current dir)
+  local name="${1:-$(basename "$PWD")}"
+  if tmux has-session -t "$name" 2>/dev/null; then
+    if [ -n "$TMUX" ]; then
+      tmux switch-client -t "$name"
+    else
+      tmux attach -t "$name"
+    fi
+  else
+    tmux new-session -s "$name"
+  fi
+}
+
+m.tmux-new() { # New session: m.tmux-new [name]  (name defaults to current dir)
+  local name="${1:-$(basename "$PWD")}"
+  tmux new-session -s "$name"
+}
+
+m.tmux-list() { # List sessions
+  tmux list-sessions
+}
+
+m.tmux-attach() { # Attach: m.tmux-attach [name]  (fzf picker if no arg)
+  if [ -n "$1" ]; then
+    tmux attach -t "$1"
+  else
+    local target
+    target=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf) || return
+    [ -n "$target" ] && tmux attach -t "$target"
+  fi
+}
+
+m.tmux-kill() { # Kill a session: m.tmux-kill [name]  (fzf picker if no arg)
+  if [ -n "$1" ]; then
+    tmux kill-session -t "$1"
+  else
+    local target
+    target=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf) || return
+    [ -n "$target" ] && tmux kill-session -t "$target"
+  fi
+}
+
+m.tmux-rename() { # Rename session: m.tmux-rename newname [oldname]
+  if [ -n "$2" ]; then
+    tmux rename-session -t "$2" "$1"
+  else
+    tmux rename-session "$1"
+  fi
+}
+
+m.tmux-switch() { # fzf session switcher (attaches or switches depending on context)
+  local target
+  target=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf) || return
+  [ -z "$target" ] && return
+  if [ -n "$TMUX" ]; then
+    tmux switch-client -t "$target"
+  else
+    tmux attach -t "$target"
+  fi
+}

@@ -13,6 +13,12 @@
       minus-emph-style = "normal \"#6e2532\"";
       plus-style = "normal \"#132d1d\"";
       plus-emph-style = "normal \"#1f5e37\"";
+      # Pin the pager instead of relying on $PAGER: tmux panes inherit env
+      # from the tmux server, which goes stale when it outlives rebuilds.
+      # --mouse makes less claim wheel events so tmux passes scroll through
+      # instead of entering copy-mode; no -X so less uses the alternate
+      # screen (the tmux wheel binds in tmux.nix also key off that).
+      pager = "less -RFi --mouse --wheel-lines=3";
     };
   };
 

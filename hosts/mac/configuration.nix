@@ -194,6 +194,7 @@ in
       "windows-app"
       "thaw"
       "libreoffice"
+      "fathom"
     ];
 
     brews = [

@@ -128,10 +128,13 @@ alt-slash = 'layout tiles horizontal vertical'
 # alt-comma = 'layout accordion horizontal vertical'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-alt-h = 'focus left'
-alt-j = 'focus down'
-alt-k = 'focus up'
-alt-l = 'focus right'
+# Unified i3-style navigation: inside the terminal these move between tmux
+# panes first, falling through to AeroSpace window focus at pane edges.
+# See ./tmux-nav.sh
+alt-h = 'exec-and-forget ~/.config/aerospace/tmux-nav.sh left'
+alt-j = 'exec-and-forget ~/.config/aerospace/tmux-nav.sh down'
+alt-k = 'exec-and-forget ~/.config/aerospace/tmux-nav.sh up'
+alt-l = 'exec-and-forget ~/.config/aerospace/tmux-nav.sh right'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 alt-shift-h = 'move left'
