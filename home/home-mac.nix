@@ -49,6 +49,8 @@ in
     ./shared/ssh.nix
     ./shared/tmux.nix
     ./shared/alacritty.nix
+    ./shared/ghostty.nix
+    ./shared/agent-sessions.nix
     ./darwin/darwin.nix
   ];
 
@@ -78,6 +80,17 @@ in
     window.option_as_alt = "Both";
     # Fix for shell path when launching from desktop
     terminal.shell.program = "${pkgs.zsh}/bin/zsh";
+  };
+
+  #----- Ghostty (macOS-specific overrides; shared config in ./shared/ghostty.nix) -----
+  # nixpkgs cannot compile ghostty from source on darwin; ghostty-bin is a
+  # repackaging of the official signed .dmg, so we use it in place of the
+  # Linux GTK `ghostty` package.
+  programs.ghostty.package = pkgs.ghostty-bin;
+  programs.ghostty.settings = {
+    font-size = 14;
+    # Treat Option as Alt/Meta so escape sequences (word-jump, delete-word, etc.) work
+    macos-option-as-alt = true;
   };
 
 

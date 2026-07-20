@@ -147,6 +147,7 @@ in
     ./shared/cli.nix
     ./shared/gpg.nix
     ./shared/alacritty.nix
+    ./shared/ghostty.nix
     ./shared/tmux.nix
     ./shared/ssh.nix
     ./sway/sway.nix
@@ -410,10 +411,6 @@ in
   #---------------------------------------------------------------------
   # Programs
   #---------------------------------------------------------------------
-
-  programs = {
-    ghostty.enable = true;
-  };
 
   programs.defaults = {
     enable = true;
