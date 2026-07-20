@@ -161,6 +161,7 @@ in
     casks = [
       "docker-desktop"
       "google-chrome"
+      "firefox"
       "vlc"
       "spotify"
       "karabiner-elements"
