@@ -135,6 +135,9 @@
   # does not treat \u as an escape), so Alacritty parses the TOML
   # backslash-u001b escapes into real ESC bytes. Ctrl+N sends CSI-u <codepoint>;5u, which tmux
   # decodes as C-N for the window-switching binds in tmux.nix.
+  # Ctrl+/ is bound the same way: Alacritty on macOS drops the Ctrl modifier
+  # and emits a bare "/", so nvim never sees the key. tmux decodes 47;5u as
+  # C-/ and re-encodes per pane (0x1f legacy, CSI 27;5;47~ for nvim).
   xdg.configFile."alacritty/ctrl-num.toml".text = ''
     keyboard.bindings = [
       { key = "1", mods = "Control", chars = "\u001b[49;5u" },
@@ -146,6 +149,7 @@
       { key = "7", mods = "Control", chars = "\u001b[55;5u" },
       { key = "8", mods = "Control", chars = "\u001b[56;5u" },
       { key = "9", mods = "Control", chars = "\u001b[57;5u" },
+      { key = "/", mods = "Control", chars = "\u001b[47;5u" },
     ]
   '';
 }
