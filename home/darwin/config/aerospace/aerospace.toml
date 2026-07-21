@@ -114,6 +114,10 @@ tell application "Finder"
 end tell'
 '''
 
+# Comms grid: workspace 4 as Slack|Calendar over Teams|Gmail, launching
+# anything not already running. See ./comms-grid.sh
+alt-g = 'exec-and-forget ~/.config/aerospace/comms-grid.sh'
+
 # Screenshot bindings: alt-s => Shottr area capture, alt-shift-s => Shottr OCR
 alt-s = 'exec-and-forget open shottr://grab/area'
 alt-shift-s = 'exec-and-forget open shottr://ocr'
