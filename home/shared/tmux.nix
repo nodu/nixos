@@ -143,6 +143,28 @@ in
       bind -n C-8 select-window -t :8
       bind -n C-9 select-window -t :9
 
+      # Browser-tab numbering: windows start at 1 (so Ctrl+1 is the first
+      # tab — Ctrl+0 stays reset-zoom in the terminal) and renumber on
+      # close, so killing window 2 of 1/2/3 slides 3 down into its slot.
+      set -g base-index 1
+      set -g renumber-windows on
+
+      # Reordering: prefix+< / prefix+> nudge the current window one slot
+      # left/right (-r = repeatable within repeat-time, -d = focus follows
+      # the window). prefix+m prompts for an index and inserts the window
+      # there Chrome-style: move-window -b places it before that index and
+      # shifts the rest right, rather than erroring because the slot is
+      # taken (m replaces the default mark-pane bind, which is unused here).
+      # -b silently no-ops when the target index doesn't exist, so past the
+      # last window fall back to a plain move, which renumbering compacts
+      # to the end. Indexes are contiguous 1..N (renumber-windows), so
+      # "target exists" reduces to input <= window count.
+      bind -r "<" swap-window -d -t -1
+      bind -r ">" swap-window -d -t +1
+      # %1 (not %%) for the prompt response: each %% consumes a successive
+      # response, so with one prompt only the first %% would be filled in.
+      bind m command-prompt -p "move window to:" 'if -F "#{e|<=:%1,#{session_windows}}" "move-window -b -t :%1" "move-window -t :%1"'
+
       # Theme: red/yellow/black, pinned to the nix-colors palette so tmux
       # matches the terminal scheme exactly and renders identically in
       # Alacritty and Ghostty. Dark text on colored chips must be base00
