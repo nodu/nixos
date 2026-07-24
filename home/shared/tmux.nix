@@ -139,6 +139,11 @@ in
       # terminal (Alacritty/Ghostty, via CSI-u) to encode them distinctly.
       set -s extended-keys on
       set -as terminal-features 'xterm*:extkeys'
+
+      # Pass OSC 8 hyperlinks (Claude Code, opencode, ls --hyperlink) through
+      # to the outer terminal instead of stripping them; open with Shift+click
+      # in Alacritty, Cmd+click in Ghostty.
+      set -as terminal-features '*:hyperlinks'
       bind -n C-1 select-window -t :1
       bind -n C-2 select-window -t :2
       bind -n C-3 select-window -t :3
