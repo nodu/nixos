@@ -6,7 +6,7 @@ let
   # Used to pin the theme to the terminal scheme instead of ANSI names.
   p = config.colorScheme.palette;
 
-  # fzf picker for the prefix+f bind below. A separate script rather than an
+  # fzf picker for the prefix+Space bind below. A separate script rather than an
   # inline popup command: display-popup format-expands #{...} in its
   # argument, and nix/tmux/sh quoting three levels deep is fragile.
   # Cancelling fzf (Esc) exits 130, so `|| exit 0` makes dismissal silent.
@@ -122,10 +122,16 @@ in
       bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded"
 
       # Fuzzy window finder (fzf in a centered popup; Esc dismisses):
-      # prefix+f jumps to any window in any session, matching on window name
-      # and pane title (replaces find-window's prompt + choose-tree flow).
-      # Session switching stays on the native choose-tree (prefix+s).
-      bind f display-popup -E -w 70% -h 50% ${fzfWindow}
+      # prefix+Space jumps to any window in any session, matching on window
+      # name and pane title (replaces find-window's prompt + choose-tree
+      # flow, and Space's default next-layout, which is unused). Session
+      # switching stays on the native choose-tree (prefix+s).
+      bind Space display-popup -E -w 70% -h 50% ${fzfWindow}
+
+      # Pane zoom on f: the default z is a stretch from the C-a prefix, and
+      # f's default (find-window) is superseded by the fzf finder above.
+      bind f resize-pane -Z
+      unbind z
 
       # Chrome-style window switching: Ctrl+1..9 jumps straight to that window.
       # Needs extended keys — in the legacy encoding Ctrl+digit is

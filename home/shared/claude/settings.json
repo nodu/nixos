@@ -1,0 +1,176 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(gh pr list *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh api user)",
+      "Bash(gh api user *)",
+      "Bash(gh api repos/10four-ai/10four-app/pulls/*)",
+      "Bash(git fetch origin *)",
+      "Bash(git worktree list)",
+      "Bash(git worktree add --detach ../10four-app-review-pr-*)",
+      "Bash(git -C /Users/matt/repos/raiz/10four-app worktree list)",
+      "Bash(git -C /Users/matt/repos/raiz/10four-app fetch origin *)",
+      "Bash(git -C /Users/matt/repos/raiz/10four-app worktree add --detach ../10four-app-review-pr-*)",
+      "Bash(echo *)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git remote get-url origin)",
+      "Bash(cd *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(jq *)",
+      "Bash(date)",
+      "Bash(date *)",
+      "Bash(mkdir -p /Users/matt/repos/raiz/pr-reviews)",
+      "Bash(python3 -m json.tool *)",
+      "Bash(python3 /Users/matt/repos/raiz/agent-config/scripts/diff-commentable-lines.py *)",
+      "Bash(npm test)",
+      "Bash(npm test *)",
+      "Bash(npm run test *)",
+      "Bash(npx vitest *)",
+      "Bash(npx jest *)",
+      "Bash(pnpm test *)",
+      "Bash(pytest *)",
+      "Bash(uv run pytest)",
+      "Bash(uv run pytest *)",
+      "Bash(git fetch *)",
+      "Bash(kubectl get *)",
+      "Bash(kubectl describe *)",
+      "Bash(kubectl logs *)",
+      "Bash(kubectl top *)",
+      "Bash(helm list *)",
+      "Bash(helm status *)",
+      "Bash(helm get *)",
+      "Bash(helm history *)",
+      "Bash(terraform validate *)",
+      "Bash(terraform show *)",
+      "Bash(terraform output *)",
+      "Bash(terraform state list *)",
+      "Bash(terraform providers)",
+      "Bash(terraform version)",
+      "Bash(gcloud auth list)",
+      "Bash(gcloud config list *)",
+      "Bash(gcloud secrets list *)",
+      "Bash(gcloud container clusters list *)",
+      "Bash(npm run lint)",
+      "Bash(make lint)",
+      "Bash(aerospace list-windows *)",
+      "Bash(aerospace list-workspaces *)",
+      "Bash(aerospace list-monitors *)",
+      "Bash(aerospace list-apps *)",
+      "Bash(nix eval *)",
+      "Bash(defaults read *)",
+      "Bash(tmux ls *)",
+      "Bash(tmux list-keys *)",
+      "Bash(tmux list-windows *)",
+      "Bash(tmux show-options *)",
+      "Bash(tmux display *)",
+      "Write(//Users/matt/repos/raiz/pr-reviews/**)",
+      "mcp__claude_ai_Linear__get_issue",
+      "mcp__claude_ai_Linear__list_teams",
+      "mcp__claude_ai_Linear__list_issues",
+      "mcp__claude_ai_Linear__get_team",
+      "mcp__claude_ai_Linear__get_release",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Linear__list_comments",
+      "mcp__claude_ai_Linear__list_projects",
+      "mcp__claude_ai_Linear__list_releases",
+      "mcp__claude_ai_Linear__get_project",
+      "mcp__claude_ai_Linear__list_issue_labels",
+      "Read(//Users/matt/repos/**)",
+      "Read(//Users/matt/.config/**)",
+      "Read(//Users/matt/.claude/**)",
+      "Read(//nix/**)",
+      "Read(//etc/nix/**)"
+    ],
+    "deny": [
+      "Read(//Users/matt/.config/gcloud/**)",
+      "Read(//Users/matt/.config/gh/hosts.yml)",
+      "Read(//Users/matt/.config/1Password/**)",
+      "Read(//Users/matt/repos/**/.env)",
+      "Read(//Users/matt/repos/**/.env.*)",
+      "Read(//Users/matt/repos/**/.envrc)",
+      "Read(//Users/matt/repos/**/*.pem)",
+      "Read(//Users/matt/repos/**/*.tfstate)",
+      "Read(//Users/matt/.claude/.credentials.json)",
+      "Bash(gh pr review *)",
+      "Bash(gh pr merge *)",
+      "Bash(gh pr close *)",
+      "Bash(git push *)"
+    ],
+    "defaultMode": "plan",
+    "additionalDirectories": ["/Users/matt/repos/raiz"]
+  },
+  "model": "claude-fable-5[1m]",
+  "statusLine": {
+    "type": "command",
+    "command": "/Users/matt/.claude/statusline.sh"
+  },
+  "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": true,
+    "overroute-skills@overroute": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "overroute": {
+      "source": {
+        "source": "github",
+        "repo": "10four-ai/skills-prompts"
+      },
+      "autoUpdate": true
+    }
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": [
+        "cache.nixos.org",
+        "channels.nixos.org",
+        "nix-community.cachix.org",
+        "github.com",
+        "api.github.com",
+        "codeload.github.com",
+        "*.githubusercontent.com",
+        "registry.npmjs.org"
+      ],
+      "allowUnixSockets": ["/nix/var/nix/daemon-socket/socket"],
+      "allowLocalBinding": true
+    },
+    "filesystem": {
+      "allowWrite": ["/Users/matt/.cache/nix"]
+    },
+    "excludedCommands": [
+      "git",
+      "ssh",
+      "gh",
+      "gcloud",
+      "terraform",
+      "kubectl",
+      "helm",
+      "darwin-rebuild",
+      "darwin-rebuild *",
+      "sudo darwin-rebuild *"
+    ]
+  },
+  "tui": "fullscreen"
+}

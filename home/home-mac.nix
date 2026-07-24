@@ -51,6 +51,8 @@ in
     ./shared/alacritty.nix
     ./shared/ghostty.nix
     ./shared/agent-sessions.nix
+    ./shared/claude.nix
+    ./shared/opencode.nix
     ./darwin/darwin.nix
   ];
 

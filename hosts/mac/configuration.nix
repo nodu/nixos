@@ -56,6 +56,9 @@ in
       NSGlobalDomain = {
         AppleShowAllExtensions = true;
         ApplePressAndHoldEnabled = false;
+        AppleInterfaceStyle = "Dark";
+        # Keyboard navigation: Tab moves focus between controls (2 = enabled on Sonoma+)
+        AppleKeyboardUIMode = 2;
 
         KeyRepeat = 2;
         InitialKeyRepeat = 15;
@@ -89,14 +92,23 @@ in
         ];
       };
 
-      # TODO: check if I like this behaviour
       finder = {
-        # _FXShowPosixPathInTitle = false;
+        ShowPathbar = true;
+        ShowStatusBar = true;
+        # Default to list view
+        FXPreferredViewStyle = "Nlsv";
       };
 
       trackpad = {
         Clicking = true;
         TrackpadThreeFingerDrag = true;
+        # Disable three-finger-tap "Look up"
+        TrackpadThreeFingerTapGesture = 0;
+      };
+
+      WindowManager = {
+        # Don't reveal desktop when clicking wallpaper
+        EnableStandardClickToShowDesktop = false;
       };
 
       CustomUserPreferences = {
@@ -121,6 +133,9 @@ in
       };
     };
   };
+
+  #----- Power -----
+  power.sleep.computer = "never";
 
   #----- Security -----
   security.pam.services.sudo_local.touchIdAuth = true;
@@ -168,10 +183,14 @@ in
       "claude"
       "claude-code"
       "opencode-desktop"
+      "chatgpt"
       "pgadmin4"
       "nordvpn"
       "slack"
       "microsoft-teams"
+      "microsoft-powerpoint"
+      "microsoft-word"
+      "microsoft-excel"
       "zoom"
       "handy"
       "bitwarden"
@@ -186,8 +205,6 @@ in
       "redis-insight"
       "dbeaver-community"
       "1password"
-      "microsoft-word"
-      "microsoft-excel"
       "prusaslicer"
       "tailscale-app"
       "shottr"
