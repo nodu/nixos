@@ -200,10 +200,10 @@ in
       # here would clobber continuum's autosave hook.
 
       setw -g window-status-current-style 'fg=#${p.base00} bg=#${p.base08} bold'
-      setw -g window-status-current-format ' #I #W #F '
+      setw -g window-status-current-format ' #I #W #{s/Z/F/;s/\*//:window_flags} '
 
       setw -g window-status-style 'fg=#${p.base08} bg=#${p.base02}'
-      setw -g window-status-format ' #I #[fg=#${p.base05}]#W #[fg=#${p.base0A}]#F '
+      setw -g window-status-format ' #I #[fg=#${p.base05}]#W #[fg=#${p.base0A}]#{s/Z/F/:window_flags} '
 
       setw -g window-status-bell-style 'fg=#${p.base00} bg=#${p.base09} bold'
 

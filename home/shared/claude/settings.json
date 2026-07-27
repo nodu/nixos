@@ -112,7 +112,9 @@
       "Bash(git push *)"
     ],
     "defaultMode": "plan",
-    "additionalDirectories": ["/Users/matt/repos/raiz"]
+    "additionalDirectories": [
+      "/Users/matt/repos/raiz"
+    ]
   },
   "model": "claude-fable-5[1m]",
   "statusLine": {
@@ -153,11 +155,15 @@
         "*.githubusercontent.com",
         "registry.npmjs.org"
       ],
-      "allowUnixSockets": ["/nix/var/nix/daemon-socket/socket"],
+      "allowUnixSockets": [
+        "/nix/var/nix/daemon-socket/socket"
+      ],
       "allowLocalBinding": true
     },
     "filesystem": {
-      "allowWrite": ["/Users/matt/.cache/nix"]
+      "allowWrite": [
+        "/Users/matt/.cache/nix"
+      ]
     },
     "excludedCommands": [
       "git",
