@@ -171,7 +171,9 @@ nvimNewSplit() {
 # echo ""
 
 
-function dsf() { diff -u $1 $2 | diff-so-fancy; }
+# Interactive-only override: scripts still get the real diff (use `command diff` to bypass)
+alias diff='difft'
+alias diffd='delta' # delta's two-file mode, diff-prefixed so tab completion finds it
 
 
 alias switch-to-windows='~/dotenv/switch-to-windows.sh'

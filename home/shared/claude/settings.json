@@ -153,7 +153,8 @@
         "api.github.com",
         "codeload.github.com",
         "*.githubusercontent.com",
-        "registry.npmjs.org"
+        "registry.npmjs.org",
+        "api.smith.langchain.com"
       ],
       "allowUnixSockets": [
         "/nix/var/nix/daemon-socket/socket"
@@ -163,6 +164,9 @@
     "filesystem": {
       "allowWrite": [
         "/Users/matt/.cache/nix"
+      ],
+      "allowRead": [
+        "/Users/matt/repos/raiz/10four-app*/.env.local.yaml"
       ]
     },
     "excludedCommands": [
