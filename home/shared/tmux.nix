@@ -189,8 +189,11 @@ in
       # Catppuccin Mocha overlay0 — the palette's brightblack (#45475a) is
       # near-invisible against the Mocha background.
       set -g pane-border-style 'fg=#6c7086'
-      set -g pane-active-border-style 'fg=#${p.base0A}'
+      set -g pane-active-border-style 'fg=#${p.base08},bold'
       set -g pane-border-indicators both
+
+      set -g pane-border-status top
+      set -g pane-border-format '#[fg=#${p.base00},bg=#${p.base08},bold] #P #{pane_current_command} #[default]'
 
       set -g status-position bottom
       set -g status-justify left
