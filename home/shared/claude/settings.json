@@ -1,8 +1,4 @@
 {
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
   "env": {
     "GIT_CONFIG_COUNT": "3",
     "GIT_CONFIG_KEY_0": "url.https://github.com/.insteadOf",
@@ -11,6 +7,10 @@
     "GIT_CONFIG_VALUE_1": "",
     "GIT_CONFIG_KEY_2": "credential.https://github.com.helper",
     "GIT_CONFIG_VALUE_2": "!gh auth git-credential"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
   },
   "permissions": {
     "allow": [
@@ -125,7 +125,7 @@
       "/Users/matt/repos/raiz"
     ]
   },
-  "model": "claude-fable-5[1m]",
+  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "/Users/matt/.claude/statusline.sh"
@@ -153,7 +153,6 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
-    "enableWeakerNetworkIsolation": true,
     "network": {
       "allowedDomains": [
         "cache.nixos.org",
@@ -179,6 +178,7 @@
         "/Users/matt/repos/raiz/10four-app*/.env.local.yaml"
       ]
     },
+    "enableWeakerNetworkIsolation": true,
     "excludedCommands": [
       "ssh *",
       "gh",

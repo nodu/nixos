@@ -174,6 +174,7 @@ in
     ];
 
     casks = [
+      "uhk-agent"
       "docker-desktop"
       "google-chrome"
       "firefox"

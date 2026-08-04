@@ -141,10 +141,13 @@ alt-k = 'exec-and-forget ~/.config/aerospace/tmux-nav.sh up'
 alt-l = 'exec-and-forget ~/.config/aerospace/tmux-nav.sh right'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
-alt-shift-h = 'move left'
-alt-shift-j = 'move down'
-alt-shift-k = 'move up'
-alt-shift-l = 'move right'
+# Unified i3-style movement: inside the terminal these swap the current tmux
+# pane in that direction first, falling through to AeroSpace window movement
+# at pane edges. Sibling of the Alt+hjkl focus binds above. See ./tmux-move.sh
+alt-shift-h = 'exec-and-forget ~/.config/aerospace/tmux-move.sh left'
+alt-shift-j = 'exec-and-forget ~/.config/aerospace/tmux-move.sh down'
+alt-shift-k = 'exec-and-forget ~/.config/aerospace/tmux-move.sh up'
+alt-shift-l = 'exec-and-forget ~/.config/aerospace/tmux-move.sh right'
 
 alt-f = 'fullscreen'
 # alt-q = 'close'

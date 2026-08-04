@@ -16,6 +16,26 @@ let
       | awk '{print $1}') || exit 0
     [ -n "$target" ] && tmux switch-client -t "$target"
   '';
+
+  # Sibling of fzfWindow: fuzzy-pick where to send the current pane. The list
+  # is every window except the current one (moving a pane into its own window
+  # is pointless), plus a synthetic "＋ new window" row at the top. Picking a
+  # window joins the pane into it; picking the new-window row pops the pane out
+  # into a fresh window (break-pane). Both follow focus to the pane's new home.
+  # Cancelling fzf (Esc) exits 130, so `|| exit 0` makes dismissal silent.
+  fzfMovePane = pkgs.writeShellScript "tmux-fzf-move-pane" ''
+    current=$(tmux display-message -p '#{session_name}:#{window_index}')
+    choice=$( { echo '__new__  ＋ new window'; \
+      tmux list-windows -a -F '#{session_name}:#{window_index}  #{window_name}  #{pane_title}' \
+        | grep -v "^$current  "; } \
+      | ${pkgs.fzf}/bin/fzf --reverse --header 'move pane to window' \
+      | awk '{print $1}') || exit 0
+    case "$choice" in
+      "") ;;
+      __new__) tmux break-pane ;;
+      *) tmux join-pane -t "$choice" ;;
+    esac
+  '';
 in
 {
   programs.tmux = {
@@ -128,6 +148,12 @@ in
       # switching stays on the native choose-tree (prefix+s).
       bind Space display-popup -E -w 70% -h 50% ${fzfWindow}
 
+      # Move the current pane into another window, chosen via fzf (sibling of
+      # the prefix+Space window finder). prefix+! replaces the default
+      # break-pane bind; focus follows the pane to its new window, and the
+      # picker's top row pops it out into a brand-new window instead.
+      bind "!" display-popup -E -w 70% -h 50% ${fzfMovePane}
+
       # Pane zoom on f: the default z is a stretch from the C-a prefix, and
       # f's default (find-window) is superseded by the fzf finder above.
       bind f resize-pane -Z
@@ -193,7 +219,7 @@ in
       set -g pane-border-indicators both
 
       set -g pane-border-status top
-      set -g pane-border-format '#[fg=#${p.base00},bg=#${p.base08},bold] #P #{pane_current_command} #[default]'
+      set -g pane-border-format '#{?pane_active,#[fg=#${p.base00} bg=#${p.base08} bold] #P #{pane_current_command} #[default],}'
 
       set -g status-position bottom
       set -g status-justify left
