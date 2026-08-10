@@ -164,12 +164,12 @@ in
     onActivation.extraFlags = [ "--force" ];
 
     # Declare the baseline Homebrew taps so cleanup does not try (and fail) to
-    # untap them. `homebrew/cask` is required by the casks below; `homebrew/bundle`
-    # is required by `brew bundle` itself. Without these entries, cleanup emits
-    # `Error: Refusing to untap homebrew/cask because it contains ... `
-    # on every activation.
+    # untap them. `homebrew/cask` is required by the casks below. Without this
+    # entry, cleanup emits `Error: Refusing to untap homebrew/cask because it
+    # contains ... ` on every activation. (`homebrew/bundle` is no longer a tap —
+    # `brew bundle` is built into Homebrew 6.x — so it must NOT be listed here,
+    # or activation would try to re-tap the archived, incompatible repo.)
     taps = [
-      "homebrew/bundle"
       "homebrew/cask"
     ];
 
@@ -185,6 +185,7 @@ in
       "claude-code"
       "opencode-desktop"
       "chatgpt"
+      "codex"
       "pgadmin4"
       "nordvpn"
       "slack"

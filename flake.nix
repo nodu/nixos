@@ -31,10 +31,6 @@
     nix-homebrew = {
       url = "github:zhaofengli/nix-homebrew";
     };
-    homebrew-bundle = {
-      url = "github:homebrew/homebrew-bundle";
-      flake = false;
-    };
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
       flake = false;
@@ -74,7 +70,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-2505, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-opencode, mac-app-util, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-2505, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-core, homebrew-cask, homebrew-opencode, mac-app-util, ... }@inputs:
     let
       home-manager-modules = inputs.home-manager.nixosModules;
 
@@ -125,7 +121,6 @@
                 taps = {
                   "homebrew/homebrew-core" = homebrew-core;
                   "homebrew/homebrew-cask" = homebrew-cask;
-                  "homebrew/homebrew-bundle" = homebrew-bundle;
                   "anomalyco/homebrew-tap" = homebrew-opencode;
                 };
                 mutableTaps = false;

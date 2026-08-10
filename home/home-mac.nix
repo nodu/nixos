@@ -193,11 +193,11 @@ in
     # pkgs.yarn
     # pkgs.postgresql
     # pkgs.awscli2
-    # pkgs.zulu11
     # pkgs.cargo
     # pkgs.nodejs_22
 
     # Dev tools
+    pkgs.jre
     pkgs.go
     pkgs.cmake
     pkgs.ffmpeg

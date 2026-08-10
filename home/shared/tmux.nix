@@ -36,6 +36,74 @@ let
       *) tmux join-pane -t "$choice" ;;
     esac
   '';
+
+  # Single source of truth for the custom prefix bindings. Each entry generates
+  # BOTH its `bind -N` line and a row in the fzf command palette (prefix + ?), so
+  # the two can never drift. Two action shapes:
+  #   cmd   — a raw tmux command; the bind runs it, the palette runs `tmux <cmd>`.
+  #           Must be valid both as a tmux config command and after `tmux ` in sh
+  #           (true for all of ours — tmux/sh quoting agrees for these).
+  #   popup — a script; the bind wraps it in display-popup, the palette `exec`s it
+  #           so its fzf runs in THIS popup's terminal (no display-popup nesting).
+  # `desc` is used verbatim as the `-N` note and the palette label.
+  customBinds = [
+    # fzf sibling pickers (see fzfMovePane / fzfWindow above). ! replaces the
+    # default break-pane bind; Space replaces the unused next-layout bind.
+    { key = "!";     desc = "Move pane to window (fzf)"; popup = fzfMovePane; }
+    { key = "Space"; desc = "Find window (fzf)";         popup = fzfWindow; }
+    # Pane zoom on f: default z is a stretch from C-a, and f's default
+    # (find-window) is superseded by the fzf finder. (`unbind z` stays below.)
+    { key = "f";     desc = "Zoom / unzoom pane";          cmd = "resize-pane -Z"; }
+    # Reorder: < / > nudge the current window one slot (-r repeatable, -d keeps
+    # focus on the moved window).
+    { key = "<";     desc = "Move window left";  cmd = "swap-window -d -t -1"; repeat = true; }
+    { key = ">";     desc = "Move window right"; cmd = "swap-window -d -t +1"; repeat = true; }
+    # Splits / new window open in the active pane's directory.
+    { key = "|";     desc = "Split pane right (same dir)"; cmd = ''split-window -h -c "#{pane_current_path}"''; }
+    { key = "-";     desc = "Split pane down (same dir)";  cmd = ''split-window -v -c "#{pane_current_path}"''; }
+    { key = "n";     desc = "New window (same dir)";       cmd = ''new-window -c "#{pane_current_path}"''; }
+    # `\; display …` chains a confirmation toast. Dual-valid: as a tmux config
+    # line `\;` separates the two commands; in the palette's `tmux …` shell call
+    # `\;` passes a literal `;` arg (tmux's CLI command separator) and the quoted
+    # message stays a single arg — so both the bind and the palette show it.
+    { key = "r";     desc = "Reload tmux config";          cmd = ''source-file ~/.config/tmux/tmux.conf \; display "Config reloaded"''; }
+    # Chrome-style insert: -b places the window before the given index and shifts
+    # the rest right; past the last window -b no-ops so fall back to a plain move,
+    # which renumber-windows compacts to the end. %1 (not %%) so the single prompt
+    # response fills the one slot. (m replaces the unused mark-pane bind.)
+    { key = "m";     desc = "Move window to index";
+      cmd = ''command-prompt -p "move window to:" 'if -F "#{e|<=:%1,#{session_windows}}" "move-window -b -t :%1" "move-window -t :%1"' ''; }
+  ];
+
+  # Generators over customBinds ------------------------------------------------
+  mkBindLine = b:
+    let action = if b ? popup
+                 then "display-popup -E -w 70% -h 50% ${b.popup}"
+                 else b.cmd;
+    in ''bind ${lib.optionalString (b.repeat or false) "-r "}-N "${b.desc}" "${b.key}" ${action}'';
+  customBindLines = lib.concatMapStringsSep "\n      " mkBindLine customBinds;
+
+  # fzf command palette bound to prefix + ?: search the custom commands, run the
+  # selection on Enter. Rows are "<key> · <desc>"; the key is the first token, so
+  # the case matches on it. Popup entries are exec'd (fzf reuses this terminal);
+  # direct entries run then fall through, closing the popup (-E). Esc = 130 → || exit 0.
+  # A trailing "⋯" row (not a bind — palette-only) pipes the full built-in
+  # list-keys reference into fzf so it's searchable, so overriding `?` doesn't
+  # lose the old help. Browse-only: Enter just closes (executing an arbitrary
+  # selected default bind is the brittle replay path we avoid).
+  paletteRows  = lib.concatMapStringsSep " \\\n      " (b: ''"${b.key} · ${b.desc}"'') customBinds;
+  paletteCases = lib.concatMapStringsSep "\n      " (b:
+    ''"${b.key}") ${if b ? popup then "exec ${b.popup}" else "tmux ${b.cmd}"} ;;'') customBinds;
+  tmuxHelp = pkgs.writeShellScript "tmux-help" ''
+    sel=$(printf '%s\n' \
+      ${paletteRows} \
+      "⋯ · All tmux key bindings" \
+      | ${pkgs.fzf}/bin/fzf --reverse --header 'run command (enter)') || exit 0
+    case "$(printf '%s' "$sel" | awk '{print $1}')" in
+      ${paletteCases}
+      "⋯") tmux list-keys -N | ${pkgs.fzf}/bin/fzf --reverse --header 'all key bindings (search only)' >/dev/null || true ;;
+    esac
+  '';
 in
 {
   programs.tmux = {
@@ -129,34 +197,21 @@ in
       # lives on Shift+Alt+V for that reason (see alacritty.nix).
       bind -n M-v copy-mode
 
-      # Intuitive splits (open in current directory)
-      bind | split-window -h -c "#{pane_current_path}"
-      bind - split-window -v -c "#{pane_current_path}"
+      # Custom prefix bindings — splits, new window, reload, the fzf pickers,
+      # window reorder/move, zoom — are generated from the `customBinds` list in
+      # the let block above, which ALSO generates the fzf command palette bound
+      # to prefix + ? (search + run on Enter). One source, so a bind and its
+      # palette row can't drift. Per-command rationale lives on that list.
+      ${customBindLines}
 
-      # New windows in current directory: n (Chrome-ish; replaces the default
-      # next-window bind, which Ctrl+1..9 makes redundant). c = tmux default.
-      bind n new-window -c "#{pane_current_path}"
-      bind c new-window -c "#{pane_current_path}"
+      # c mirrors n (new window in cwd) but is kept off the palette to avoid a
+      # duplicate row; it overrides tmux's default new-window bind.
+      bind -N "New window (same dir)" c new-window -c "#{pane_current_path}"
 
-      # Reload config
-      bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded"
+      # prefix + ? opens the fzf command palette, replacing the default list-keys.
+      bind -N "Command palette" ? display-popup -E -w 70% -h 70% ${tmuxHelp}
 
-      # Fuzzy window finder (fzf in a centered popup; Esc dismisses):
-      # prefix+Space jumps to any window in any session, matching on window
-      # name and pane title (replaces find-window's prompt + choose-tree
-      # flow, and Space's default next-layout, which is unused). Session
-      # switching stays on the native choose-tree (prefix+s).
-      bind Space display-popup -E -w 70% -h 50% ${fzfWindow}
-
-      # Move the current pane into another window, chosen via fzf (sibling of
-      # the prefix+Space window finder). prefix+! replaces the default
-      # break-pane bind; focus follows the pane to its new window, and the
-      # picker's top row pops it out into a brand-new window instead.
-      bind "!" display-popup -E -w 70% -h 50% ${fzfMovePane}
-
-      # Pane zoom on f: the default z is a stretch from the C-a prefix, and
-      # f's default (find-window) is superseded by the fzf finder above.
-      bind f resize-pane -Z
+      # f's zoom (generated above) frees z, whose default zoom is a stretch from C-a.
       unbind z
 
       # Chrome-style window switching: Ctrl+1..9 jumps straight to that window.
@@ -186,21 +241,8 @@ in
       set -g base-index 1
       set -g renumber-windows on
 
-      # Reordering: prefix+< / prefix+> nudge the current window one slot
-      # left/right (-r = repeatable within repeat-time, -d = focus follows
-      # the window). prefix+m prompts for an index and inserts the window
-      # there Chrome-style: move-window -b places it before that index and
-      # shifts the rest right, rather than erroring because the slot is
-      # taken (m replaces the default mark-pane bind, which is unused here).
-      # -b silently no-ops when the target index doesn't exist, so past the
-      # last window fall back to a plain move, which renumbering compacts
-      # to the end. Indexes are contiguous 1..N (renumber-windows), so
-      # "target exists" reduces to input <= window count.
-      bind -r "<" swap-window -d -t -1
-      bind -r ">" swap-window -d -t +1
-      # %1 (not %%) for the prompt response: each %% consumes a successive
-      # response, so with one prompt only the first %% would be filled in.
-      bind m command-prompt -p "move window to:" 'if -F "#{e|<=:%1,#{session_windows}}" "move-window -b -t :%1" "move-window -t :%1"'
+      # Window reorder (< / >) and move-to-index (m) are generated from
+      # customBinds above (see there for the -b Chrome-insert / renumber logic).
 
       # Theme: red/yellow/black, pinned to the nix-colors palette so tmux
       # matches the terminal scheme exactly and renders identically in
