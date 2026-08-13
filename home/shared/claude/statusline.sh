@@ -13,10 +13,12 @@ mapfile -t F < <(
     ( .context_window.remaining_percentage | if . == null then "" else . end ),
     ( .context_window.total_input_tokens   | if . == null then "" else . end ),
     ( .context_window.context_window_size  | if . == null then "" else . end ),
-    ( .cost.total_cost_usd                 | if . == null then "" else . end )'
+    ( .cost.total_cost_usd                 | if . == null then "" else . end ),
+    ( .session_id                          | if . == null then "" else . end ),
+    ( .session_name                        | if . == null then "" else . end )'
 )
 model=${F[0]}; dir=${F[1]}; used_pct=${F[2]}; remain_pct=${F[3]}
-used_tok=${F[4]}; ctx_size=${F[5]}; cost=${F[6]}
+used_tok=${F[4]}; ctx_size=${F[5]}; cost=${F[6]}; sid=${F[7]}; sname=${F[8]}
 
 dir_name=$(basename "$dir")
 
@@ -60,3 +62,15 @@ fi
 
 printf "${CYAN}%s${RESET}${SEP}${BLUE}%s${RESET}${SEP}%b${cost_seg}\n" \
   "$model" "$dir_name" "$ctx_seg"
+
+# --- resume command on its own row: the full copy-pasteable command, so a
+# pane restored after a crash can be relaunched (tmux resurrect keeps cwd but
+# not the session id). A dedicated row keeps the full 36-char UUID from being
+# truncated on narrow windows, which would break `claude -r`. ---
+if [ -n "$sid" ]; then
+  name_str=""
+  if [ -n "$sname" ]; then
+    name_str="${DIM}(${sname})${RESET} "
+  fi
+  printf "%b${DIM}claude -r %s${RESET}\n" "$name_str" "$sid"
+fi
