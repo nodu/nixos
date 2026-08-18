@@ -102,6 +102,8 @@
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
+    # 28.x is marked insecure in nixpkgs 25.11 (unmaintained since Nov 2025)
+    package = pkgs.docker_29;
   };
 
   #----- NordVPN -----

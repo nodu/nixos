@@ -30,6 +30,16 @@ in
 
     # Linux builder VM for building aarch64-linux configs (rpi3, bau) on macOS
     linux-builder.enable = true;
+
+    # Temporary high-resource allocation for kernel builds (rpi3 6.18 bump)
+    linux-builder.config = { lib, ... }: {
+      virtualisation.cores = lib.mkForce 8;
+      virtualisation.memorySize = lib.mkForce 16384;
+      # 20 GB is too small for a parallel kernel build (toolchain + objects)
+      virtualisation.diskSize = lib.mkForce 40960;
+      # GCC on 8 cores can exceed 16 GB RAM when linking
+      virtualisation.msize = lib.mkForce 16384;
+    };
   };
 
   # Don't run the linux-builder VM persistently -- it's only needed for ad-hoc

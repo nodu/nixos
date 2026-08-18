@@ -120,12 +120,11 @@
       "Bash(gh pr close *)",
       "Bash(git push *)"
     ],
-    "defaultMode": "plan",
+    "defaultMode": "default",
     "additionalDirectories": [
       "/Users/matt/repos/raiz"
     ]
   },
-  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "/Users/matt/.claude/statusline.sh"

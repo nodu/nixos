@@ -54,7 +54,7 @@ in
 
       "bau-mesh-ip" = {
         user = "matt";
-        hostname = "100.105.37.182";
+        hostname = "100.69.158.138";
         identityFile = identityFile;
       };
 

@@ -97,6 +97,22 @@ There is no unit test suite, linter, or CI pipeline. The primary validation meth
 - **macOS WM config**: `home/darwin/darwin.nix` (aerospace, sketchybar, karabiner)
 - **macOS Homebrew casks**: `hosts/mac/configuration.nix` in `homebrew.casks`
 
+## Agent Session IDs (claude / opencode)
+
+So a pane restored after a crash (tmux resurrect keeps cwd but not the session
+id) can be relaunched, both agent TUIs show the copy-pasteable resume command:
+
+- **Claude Code**: bottom statusline appends `claude -r <session-uuid>` (plus the
+  session name when set). Source: [`home/shared/claude/statusline.sh`](home/shared/claude/statusline.sh).
+- **opencode**: a TUI slot plugin renders `opencode -s <session-id>` on the
+  prompt row. Source: [`home/shared/opencode/plugins/session-id/index.tsx`](home/shared/opencode/plugins/session-id/index.tsx),
+  declared in [`home/shared/opencode/tui.json`](home/shared/opencode/tui.json)
+  (`plugin` array). TUI-only plugins go in `tui.json`, **not** `opencode.json` —
+  the server plugin pass rejects a module that has no `server()` export.
+
+`nx-save-sessions` (`home/scripts/agent-sessions.py`) remains the batch
+save/restore path; the on-screen IDs complement it for single-pane recovery.
+
 ## Desktop & Development Environment
 
 - **Primary WM**: GNOME + i3 (X11)

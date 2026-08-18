@@ -5,6 +5,7 @@
 
 {
   imports = [
+    inputs.nix-colors.homeManagerModules.default
     inputs.defaults.homeManagerModules.default
     (import ./shared/neovim.nix { inherit inputs; })
     ./shared/shell.nix
@@ -14,6 +15,9 @@
     ./shared/ssh.nix
     ./shared/tmux.nix
   ];
+
+  # shared/tmux.nix themes the statusline from the nix-colors palette
+  colorScheme = inputs.nix-colors.colorSchemes.catppuccin-mocha;
 
   home.stateVersion = "25.11";
 
