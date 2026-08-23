@@ -201,6 +201,5 @@ in
     pkgs.go
     pkgs.cmake
     pkgs.ffmpeg
-    pkgs.uv
   ];
 }

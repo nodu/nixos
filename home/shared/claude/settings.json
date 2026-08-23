@@ -118,13 +118,18 @@
       "Bash(gh pr review *)",
       "Bash(gh pr merge *)",
       "Bash(gh pr close *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git add)",
+      "Bash(git add *)",
+      "Bash(git stage)",
+      "Bash(git stage *)"
     ],
     "defaultMode": "default",
     "additionalDirectories": [
       "/Users/matt/repos/raiz"
     ]
   },
+  "model": "sonnet",
   "statusLine": {
     "type": "command",
     "command": "/Users/matt/.claude/statusline.sh"
@@ -190,6 +195,5 @@
       "sudo darwin-rebuild *"
     ]
   },
-  "tui": "fullscreen",
-  "model": "claude-fable-5[1m]"
+  "tui": "fullscreen"
 }

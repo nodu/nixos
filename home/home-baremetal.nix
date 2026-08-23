@@ -4,16 +4,12 @@
 # https://mipmip.github.io/home-manager-option-search
 
 let
-
   # Note: Nix Search for package, click on platform to find binary build status
   # Get specific versions of packages here:
   #   https://lazamar.co.uk/nix-versions/
   # To get the sha256 hash:
   #   nix-prefetch-url --unpack https://github.com/NixOS/nixpkgs/archive/<commit>.tar.gz
   #   or use an empty sha256 = ""; string, it'll show the hash; prefetch is safer
-  gcloud = pkgs.google-cloud-sdk.withExtraComponents [
-    pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
-  ];
   # Disable GPU hardware acceleration to fix grey screen/freeze on amdgpu
   # Supply gst-plugins-good so WebKit's GStreamer backend can create an audio
   # sink (autoaudiosink/pulsesink). Without it, WebKitWebProcess crashes with
@@ -145,6 +141,7 @@ in
     ./shared/shell.nix
     ./shared/git.nix
     ./shared/cli.nix
+    ./shared/devops.nix
     ./shared/gpg.nix
     ./shared/alacritty.nix
     ./shared/ghostty.nix
@@ -255,7 +252,6 @@ in
     vpnSwitch
 
     # pkgs.postgresql_11
-    pkgs.kubectl
     # pkgs.krew
     # pkgs.terraform
     # pkgs.vault
@@ -267,10 +263,7 @@ in
     unstable.claude-code
     opencode-packages.opencode
     openCodeDesktop
-    gcloud
     pkgs.go
-    pkgs.python3
-    pkgs.nodejs_22
     pkgs.yarn
     pkgs.cargo
 

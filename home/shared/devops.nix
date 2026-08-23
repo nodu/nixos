@@ -1,6 +1,6 @@
 # Shared DevOps / cloud / Kubernetes tooling
 #
-# These are "global" tools I want available everywhere
+# These are global tools used across workstation projects.
 #
 { config, lib, pkgs, unstable, pkgs-2505, ... }:
 
@@ -41,6 +41,7 @@
     # Build tools
     pkgs.gnumake
     pkgs.msgviewer
+    unstable.openspec
 
     # CLI aliases
     (pkgs.writeShellScriptBin "k" ''exec kubectl "$@"'')

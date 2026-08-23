@@ -225,6 +225,7 @@ in
       "thaw"
       "libreoffice"
       "fathom"
+      "t3-code"
     ];
 
     brews = [
