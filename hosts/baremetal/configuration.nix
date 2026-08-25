@@ -42,20 +42,42 @@
   services = {
     #----- Power Management -----
     logind.settings.Login = {
-      # HandlePowerKey = "suspend-then-hibernate";
-      # HandleLidSwitch = "suspend-then-hibernate";
-      # IdleAction = "suspend-then-hibernate";
       HandlePowerKey = "suspend";
+      HandlePowerKeyLongPress = "poweroff";
       HandleLidSwitch = "suspend";
+      HandleLidSwitchExternalPower = "ignore";
       HandleLidSwitchDocked = "ignore";
-      IdleAction = "suspend";
-      IdleActionSec = "5min";
+      IdleAction = "ignore";
     };
+
+    displayManager.gdm.autoSuspend = false;
+
     upower.criticalPowerAction = "Hibernate";
     upower.percentageAction = 3;
 
     #----- Thermal / Fan -----
     lact.enable = true;
+  };
+
+  systemd.services.framework-charge-limit = {
+    description = "Cap battery charge at 80% (host is permanently on AC)";
+    wantedBy = [ "multi-user.target" "post-resume.target" ];
+    after = [ "post-resume.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.framework-tool}/bin/framework_tool --charge-limit 80";
+    };
+  };
+
+  boot.kernel.sysctl = {
+    "kernel.panic" = 30;
+    "kernel.panic_on_oops" = 1;
+  };
+
+  systemd.settings.Manager = {
+    RuntimeWatchdogSec = "60s";
+    RebootWatchdogSec = "10min";
   };
 
   # TODO: re-enable suspend-then-hibernate once s2idle is fixed on kernel 6.19
@@ -169,6 +191,7 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+  networking.networkmanager.wifi.powersave = false;
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
@@ -281,8 +304,10 @@
     home = "/home/matt";
     description = "Matt N";
     extraGroups = [ "nordvpn" "docker" "networkmanager" "wheel" "adbusers" "dialout" "input" ];
-    openssh.authorizedKeys.keys = [ "ssh blah blah" ];
+    openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDsX9th55Gnh54WPClEHrylw7Uw7Uu4MfF2lR2Ugi6Jfk2p0/nSdc0eGea8+hulccGgP7UxsZdOnA83ugZ7K+6SdDbc7qdTOst/amfGPYZoJVrAbDhRwfV9JBytjru+MADHPGCp2VBP+5/ko83SWreZZWIhRQypOMCbtvLCLByEk6HxVO19v5RrsQcals19tcwYn9tyCYHYcJxgbY3Y0sH3CrDXLMcy447Yeix7ljTpDDvAV+bW6cyBqUMC1upJ7jNPE4e/r5RudlEytr4JPAGQQPrxLPoBojvz1QE3qOtHdEy151Cz765WdZj23mKNnReWMV4eNm7XWGmQPsvEkWmAeCbYBw6PYNBvMrQSh45+TtJFPC3M+IXdHZhX4GxIPDKp1V0ohG56awp94WTqVvwOaiEO4S8fkVbv/zVzqWfawDKc7p1nFtc1A7Dn8LOxmMUEPn2FkoQjBNoWAxkb5Pch8jV2vRcGrkNP5A5++y/m0AcMR9eomeSn1JLKINGrDIM= matt@nixos" ];
     shell = pkgs.zsh;
+
+    linger = true;
 
     packages = with pkgs; [
 
@@ -337,7 +362,8 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.openssh.settings.PasswordAuthentication = true;
+  services.openssh.settings.PasswordAuthentication = false;
+  services.openssh.settings.KbdInteractiveAuthentication = false;
   services.openssh.settings.PermitRootLogin = "no";
 
   services.fstrim.enable = true;
