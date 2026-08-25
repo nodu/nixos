@@ -167,11 +167,15 @@ in
   #----- Homebrew -----
   homebrew = {
     enable = true;
-    onActivation.cleanup = "uninstall";
-    # Pass --force to `brew bundle` so cleanup runs non-interactively during
-    # `make mac/switch` (otherwise Homebrew prompts `Do you want to proceed
-    # with the cleanup? [y/n]`).
-    onActivation.extraFlags = [ "--force" ];
+    onActivation =
+      {
+        cleanup = "uninstall";
+        upgrade = true;
+        # Pass --force to `brew bundle` so cleanup runs non-interactively during
+        # `make mac/switch` (otherwise Homebrew prompts `Do you want to proceed
+        # with the cleanup? [y/n]`).
+        extraFlags = [ "--force" ];
+      };
 
     # Declare the baseline Homebrew taps so cleanup does not try (and fail) to
     # untap them. `homebrew/cask` is required by the casks below. Without this

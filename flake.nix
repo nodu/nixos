@@ -97,6 +97,9 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
+              # Matches mkDarwin: move a pre-existing dotfile aside instead of
+              # failing activation with "would be clobbered".
+              home-manager.backupFileExtension = "backup";
               home-manager.extraSpecialArgs = { inherit unstable pkgs-2505; } // extraSpecialArgs;
               home-manager.users.matt = import homeConfig { inherit inputs; };
             }

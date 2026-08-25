@@ -60,7 +60,14 @@ in
 
       "baremetal" = {
         user = "matt";
-        hostname = "nix";
+        hostname = "baremetal";
+        identityFile = identityFile;
+      };
+
+      # Fallback for when meshnet nickname resolution is flaky
+      "baremetal-mesh-ip" = {
+        user = "matt";
+        hostname = "100.125.97.192";
         identityFile = identityFile;
       };
 

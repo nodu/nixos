@@ -350,7 +350,7 @@ m.mos-show() {
 #menu
 function m() {
   local tmpfile=$(mktemp)
-  typeset -f > "$tmpfile"
+  typeset -f >"$tmpfile"
   selected_command=$(compgen -c | fzf \
     --bind "ctrl-n:down,ctrl-p:up,ctrl-d:preview-page-down,ctrl-u:preview-page-up" \
     --preview "sed -n '/^{1} () {$/,/^}$/p' $tmpfile || which {1} 2>/dev/null")
@@ -417,9 +417,19 @@ m.paste() {
 }
 
 #----- tmux helpers -----
+# One entry point: m.tmux
+#   m.tmux                    fzf menu: sessions + actions (new/kill/rename/detach/ls)
+#   m.tmux <name>             attach-or-create <name> (fast path, no fzf)
+#   m.tmux ls                 plain list-sessions
+#   m.tmux kill [name]        kill session (fzf picker if no arg)
+#   m.tmux rename <new> [old] rename session (pickers/prompts if args missing)
+#   m.tmux detach             detach current client (like prefix + d)
 
-m.tmux() { # Attach-or-create: m.tmux [name]  (name defaults to current dir)
-  local name="${1:-$(basename "$PWD")}"
+# Session names can't contain spaces (tmux restriction), so fzf rows are
+# parsed by taking the first whitespace-separated token.
+
+_tmux_attach_or_create() { # Attach/switch if session exists, else create it
+  local name="$1"
   if tmux has-session -t "$name" 2>/dev/null; then
     if [ -n "$TMUX" ]; then
       tmux switch-client -t "$name"
@@ -431,50 +441,102 @@ m.tmux() { # Attach-or-create: m.tmux [name]  (name defaults to current dir)
   fi
 }
 
-m.tmux-new() { # New session: m.tmux-new [name]  (name defaults to current dir)
-  local name="${1:-$(basename "$PWD")}"
-  tmux new-session -s "$name"
+_tmux_session_rows() { # Formatted session rows for fzf menus
+  tmux list-sessions -F '#{session_name} · #{session_windows}w#{?session_attached, · attached,} · #{t:session_last_attached}' 2>/dev/null
 }
 
-m.tmux-list() { # List sessions
-  tmux list-sessions
+_tmux_pick_session() { # fzf-pick a session name; $1 = header. Prints name or nothing.
+  local target
+  target=$(_tmux_session_rows | fzf --reverse --header "$1" \
+    --preview 'tmux list-windows -t {1} -F "  #{window_index}: #{window_name} #{window_flags}"' \
+    --preview-window=right:40% | awk '{print $1}') || return 1
+  [ -n "$target" ] && printf '%s' "$target"
 }
 
-m.tmux-attach() { # Attach: m.tmux-attach [name]  (fzf picker if no arg)
-  if [ -n "$1" ]; then
-    tmux attach -t "$1"
-  else
-    local target
-    target=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf) || return
-    [ -n "$target" ] && tmux attach -t "$target"
+_tmux_kill() { # m.tmux kill [name]
+  local target="$1"
+  if [ -z "$target" ]; then
+    target=$(_tmux_pick_session 'kill session (enter) · esc to cancel') || return
   fi
+  [ -n "$target" ] && tmux kill-session -t "$target"
 }
 
-m.tmux-kill() { # Kill a session: m.tmux-kill [name]  (fzf picker if no arg)
-  if [ -n "$1" ]; then
-    tmux kill-session -t "$1"
-  else
-    local target
-    target=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf) || return
-    [ -n "$target" ] && tmux kill-session -t "$target"
-  fi
-}
-
-m.tmux-rename() { # Rename session: m.tmux-rename newname [oldname]
+_tmux_rename() { # m.tmux rename <new> [old]
   if [ -n "$2" ]; then
     tmux rename-session -t "$2" "$1"
-  else
-    tmux rename-session "$1"
+    return
   fi
+  if [ -n "$1" ]; then
+    tmux rename-session "$1"
+    return
+  fi
+  # No args: pick a session, then prompt for the new name.
+  local target newname
+  target=$(_tmux_pick_session 'rename which session? (enter) · esc to cancel') || return
+  [ -z "$target" ] && return
+  printf 'new name for %s: ' "$target"
+  read -r newname
+  [ -n "$newname" ] && tmux rename-session -t "$target" "$newname"
 }
 
-m.tmux-switch() { # fzf session switcher (attaches or switches depending on context)
-  local target
-  target=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf) || return
-  [ -z "$target" ] && return
-  if [ -n "$TMUX" ]; then
-    tmux switch-client -t "$target"
-  else
-    tmux attach -t "$target"
+_tmux_menu() { # Bare m.tmux: fzf menu of sessions + actions
+  local dirname
+  dirname=$(basename "$PWD")
+
+  # No sessions at all: skip the menu, create one named after cwd.
+  if ! tmux has-session 2>/dev/null; then
+    tmux new-session -s "$dirname"
+    return
   fi
+
+  local sel
+  sel=$(
+    {
+      echo "＋ new session ($dirname)"
+      _tmux_session_rows
+      echo "✂ kill session →"
+      echo "✎ rename session →"
+      if [ -n "$TMUX" ]; then
+        echo "⇤ detach client"
+      fi
+      echo "≡ list sessions"
+    } | fzf --reverse --header 'session or action (enter) · esc to cancel' \
+      --preview 'case {1} in ＋|✂|✎|⇤|≡) ;; *) tmux list-windows -t {1} -F "  #{window_index}: #{window_name} #{window_flags}" ;; esac' \
+      --preview-window=right:40%
+  ) || return
+  [ -z "$sel" ] && return
+
+  local first
+  first=$(printf '%s' "$sel" | awk '{print $1}')
+  case "$first" in
+  ＋) _tmux_attach_or_create "$dirname" ;;
+  ✂) _tmux_kill ;;
+  ✎) _tmux_rename ;;
+  ⇤) tmux detach-client ;;
+  ≡) tmux list-sessions ;;
+  *) _tmux_attach_or_create "$first" ;;
+  esac
+}
+
+m.tmux() { # tmux session manager: m.tmux [name | ls | kill | rename | detach]
+  case "$1" in
+  ls) tmux list-sessions ;;
+  kill)
+    shift
+    _tmux_kill "$@"
+    ;;
+  rename)
+    shift
+    _tmux_rename "$@"
+    ;;
+  detach)
+    if [ -n "$TMUX" ]; then
+      tmux detach-client
+    else
+      echo "not in tmux"
+    fi
+    ;;
+  "") _tmux_menu ;;
+  *) _tmux_attach_or_create "$1" ;;
+  esac
 }
