@@ -57,6 +57,13 @@
     handy = {
       url = "github:cjpais/Handy";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
+      # handy consumes bun2nix.overlays.default, and bun2nix (flake-parts)
+      # computes `self'`, which forces flake.formatter for every system it
+      # declares -- including x86_64-darwin. nixpkgs-unstable is 26.11, which
+      # dropped x86_64-darwin, so that throws while evaluating ANY config with
+      # handy in home.packages (reached via fonts.fontconfig -> home.path).
+      # Pin only the bun2nix tooling to 25.11; handy itself stays on unstable.
+      inputs.bun2nix.inputs.nixpkgs.follows = "nixpkgs";
     };
 
     defaults = {
