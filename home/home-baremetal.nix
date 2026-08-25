@@ -182,7 +182,7 @@ in
     # GUI Apps
     pkgs.google-chrome
     pkgs.firefox
-    unstable.ladybird
+    #unstable.ladybird
     pkgs.obs-studio
     pkgs.vlc
     pkgs.jellyfin-media-player
