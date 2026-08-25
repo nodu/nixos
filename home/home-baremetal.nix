@@ -261,6 +261,8 @@ in
     # pkgs.beekeeper-studio
 
     unstable.claude-code
+    unstable.t3code
+    unstable.codex
     opencode-packages.opencode
     openCodeDesktop
     pkgs.go
