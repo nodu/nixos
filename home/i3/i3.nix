@@ -29,7 +29,7 @@
       pkgs.feh
       pkgs.i3blocks
       pkgs.i3lock-color
-      # needed for i3blocks scripts:
+      # needed for i3blocks scripts;
       pkgs.python3
       pkgs.acpi
       pkgs.font-awesome

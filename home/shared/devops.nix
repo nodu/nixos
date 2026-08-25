@@ -30,7 +30,7 @@
 
     # Languages / runtimes
     pkgs.nodejs_22
-    pkgs.python312
+    pkgs.python3
     pkgs.uv
 
     # Kubernetes dev workflow
