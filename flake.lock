@@ -38,7 +38,6 @@
         "flake-parts": "flake-parts",
         "import-tree": "import-tree",
         "nixpkgs": [
-          "handy",
           "nixpkgs"
         ],
         "systems": "systems",
