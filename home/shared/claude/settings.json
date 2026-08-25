@@ -20,12 +20,14 @@
       "Bash(gh api user)",
       "Bash(gh api user *)",
       "Bash(gh api repos/10four-ai/10four-app/pulls/*)",
+      "Bash(gh api graphql --input /Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/.scratch/*)",
       "Bash(git fetch origin *)",
       "Bash(git worktree list)",
-      "Bash(git worktree add --detach ../10four-app-review-pr-*)",
+      "Bash(git worktree add --detach /Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/pr-*)",
       "Bash(git -C /Users/matt/repos/raiz/10four-app worktree list)",
       "Bash(git -C /Users/matt/repos/raiz/10four-app fetch origin *)",
-      "Bash(git -C /Users/matt/repos/raiz/10four-app worktree add --detach ../10four-app-review-pr-*)",
+      "Bash(git -C /Users/matt/repos/raiz/10four-app worktree add --detach /Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/pr-*)",
+      "Bash(git checkout --detach FETCH_HEAD)",
       "Bash(echo *)",
       "Bash(git status)",
       "Bash(git status *)",
@@ -42,9 +44,8 @@
       "Bash(jq *)",
       "Bash(date)",
       "Bash(date *)",
-      "Bash(mkdir -p /Users/matt/repos/raiz/pr-reviews)",
+      "Bash(mkdir -p /Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/*)",
       "Bash(python3 -m json.tool *)",
-      "Bash(python3 /Users/matt/repos/raiz/agent-config/scripts/diff-commentable-lines.py *)",
       "Bash(npm test)",
       "Bash(npm test *)",
       "Bash(npm run test *)",
@@ -87,7 +88,8 @@
       "Bash(tmux list-windows *)",
       "Bash(tmux show-options *)",
       "Bash(tmux display *)",
-      "Edit(//Users/matt/repos/raiz/pr-reviews/**)",
+      "Edit(//Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/**)",
+      "Write(//Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/**)",
       "mcp__claude_ai_Linear__get_issue",
       "mcp__claude_ai_Linear__list_teams",
       "mcp__claude_ai_Linear__list_issues",
@@ -177,9 +179,6 @@
     "filesystem": {
       "allowWrite": [
         "/Users/matt/.cache/nix"
-      ],
-      "allowRead": [
-        "/Users/matt/repos/raiz/10four-app*/.env.local.yaml"
       ]
     },
     "enableWeakerNetworkIsolation": true,
