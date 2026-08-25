@@ -58,6 +58,12 @@ in
         identityFile = identityFile;
       };
 
+      "baremetal" = {
+        user = "matt";
+        hostname = "nix";
+        identityFile = identityFile;
+      };
+
       "rpi3" = {
         user = "matt";
         hostname = "rpi3";
