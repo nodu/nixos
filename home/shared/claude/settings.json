@@ -34,6 +34,7 @@
       "Bash(git diff *)",
       "Bash(git log *)",
       "Bash(git show *)",
+      "Bash(git rev-parse *)",
       "Bash(git remote get-url origin)",
       "Bash(cd *)",
       "Bash(ls *)",
@@ -89,7 +90,6 @@
       "Bash(tmux show-options *)",
       "Bash(tmux display *)",
       "Edit(//Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/**)",
-      "Write(//Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/**)",
       "mcp__claude_ai_Linear__get_issue",
       "mcp__claude_ai_Linear__list_teams",
       "mcp__claude_ai_Linear__list_issues",
@@ -131,7 +131,6 @@
       "/Users/matt/repos/raiz"
     ]
   },
-  "model": "sonnet",
   "statusLine": {
     "type": "command",
     "command": "/Users/matt/.claude/statusline.sh"

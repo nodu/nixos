@@ -432,20 +432,21 @@ m.paste() {
 
 _tmux_attach_or_create() { # Attach/switch if session exists, else create it
   local name="$1"
-  if tmux has-session -t "$name" 2>/dev/null; then
-    if [ -n "$TMUX" ]; then
+  if [ -n "$TMUX" ]; then
+    # Nested: new-session refuses under $TMUX and attach would nest -- the only
+    # sane in-client action is switching to an existing session. A missing
+    # session gets the escape-hatch hint instead.
+    if tmux has-session -t "$name" 2>/dev/null; then
       tmux switch-client -t "$name"
     else
-      tmux attach -t "$name"
-    fi
-  else
-    # tmux refuses new-session while TMUX is set, and nesting is almost never
-    # intended (e.g. SSH'd somewhere from inside a local tmux). Hint the escape.
-    if [ -n "$TMUX" ]; then
       echo "in a tmux client and '$name' doesn't exist -- run: env -u TMUX tmux new-session -s '$name'"
       return 1
     fi
-    tmux new-session -s "$name"
+  else
+    # -A is atomic attach-or-create: no check-then-act window, so a concurrent
+    # creator (e.g. continuum's boot-time restore racing a cold-start menu)
+    # can't fail us with "duplicate session".
+    tmux new-session -A -s "$name"
   fi
 }
 
