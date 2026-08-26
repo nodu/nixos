@@ -419,7 +419,9 @@ m.paste() {
 #----- tmux helpers -----
 # One entry point: m.tmux
 #   m.tmux                    fzf menu: sessions + actions (new/kill/rename/detach/ls)
-#   m.tmux <name>             attach-or-create <name> (fast path, no fzf)
+#   m.tmux <name>             attach-or-create <name> (fast path, no fzf).
+#                             Nested ($TMUX set) + missing session prints a hint
+#                             rather than nesting, which tmux refuses anyway.
 #   m.tmux ls                 plain list-sessions
 #   m.tmux kill [name]        kill session (fzf picker if no arg)
 #   m.tmux rename <new> [old] rename session (pickers/prompts if args missing)
@@ -437,6 +439,12 @@ _tmux_attach_or_create() { # Attach/switch if session exists, else create it
       tmux attach -t "$name"
     fi
   else
+    # tmux refuses new-session while TMUX is set, and nesting is almost never
+    # intended (e.g. SSH'd somewhere from inside a local tmux). Hint the escape.
+    if [ -n "$TMUX" ]; then
+      echo "in a tmux client and '$name' doesn't exist -- run: env -u TMUX tmux new-session -s '$name'"
+      return 1
+    fi
     tmux new-session -s "$name"
   fi
 }
@@ -482,12 +490,6 @@ _tmux_rename() { # m.tmux rename <new> [old]
 _tmux_menu() { # Bare m.tmux: fzf menu of sessions + actions
   local dirname
   dirname=$(basename "$PWD")
-
-  # No sessions at all: skip the menu, create one named after cwd.
-  if ! tmux has-session 2>/dev/null; then
-    tmux new-session -s "$dirname"
-    return
-  fi
 
   local sel
   sel=$(
