@@ -178,6 +178,10 @@
     "filesystem": {
       "allowWrite": [
         "/Users/matt/.cache/nix"
+      ],
+      "allowRead": [
+        "/Users/matt/repos/**/.env.example",
+        "/Users/matt/repos/**/.env.example.*"
       ]
     },
     "enableWeakerNetworkIsolation": true,

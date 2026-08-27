@@ -366,6 +366,17 @@
   services.openssh.settings.KbdInteractiveAuthentication = false;
   services.openssh.settings.PermitRootLogin = "no";
 
+  # Remote desktop. xrdp spawns its own i3 session on connect, so it does not
+  # depend on anyone being logged in physically -- which matters because this
+  # host runs headless with the lid shut and GDM otherwise sits at the greeter.
+  # Deliberately NOT exposed on the network: reach it through the SSH tunnel
+  # declared in home/shared/ssh.nix (`ssh baremetal` forwards localhost:3389).
+  services.xrdp = {
+    enable = true;
+    defaultWindowManager = "i3";
+    openFirewall = false;
+  };
+
   services.fstrim.enable = true;
 
   # Open ports in the firewall.

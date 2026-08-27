@@ -62,6 +62,11 @@ in
         user = "matt";
         hostname = "baremetal";
         identityFile = identityFile;
+        localForwards = [{
+          bind.port = 3389;
+          host.address = "localhost";
+          host.port = 3389;
+        }];
       };
 
       # Fallback for when meshnet nickname resolution is flaky
