@@ -429,12 +429,28 @@ in
   # models regardless of workarounds. To retry: package = unstable.ollama-rocm
   # with those three env vars.
   #
-  # Context window: Ollama defaults to OLLAMA_CONTEXT_LENGTH=4096, which silently
-  # truncates anything larger (opencode's system prompt + MCP tool schemas + a
+  # Context window: pin it explicitly, because the default has been wrong in
+  # both directions and neither failure is loud.
+  #
+  # Ollama <= 0.32 defaulted to OLLAMA_CONTEXT_LENGTH=4096 and silently
+  # truncated anything larger (opencode's system prompt + MCP tool schemas + a
   # pasted doc blow past it in one message, and the model ends up blind to its
-  # own instructions). Bump to 32k to match the per-model `limit.context` in
-  # opencode.json. KV cache grows with this, so pin one loaded model at a time
-  # to stay inside the 30 GB of RAM alongside a 20-27B model.
+  # own instructions).
+  #
+  # Ollama >= 0.33 inverted it: the default is now sized from reported VRAM and
+  # will happily take a model's full advertised window -- 262144 tokens on the
+  # current qwen3.x builds -- whose KV cache alone can exceed free RAM. On the
+  # Mac that OOMs the Metal backend into a state where every model returns an
+  # empty response (see hosts/mac/configuration.nix); here it just means
+  # allocating far more than a 30 GB box has.
+  #
+  # 32k is also what nx-opencode-ollama-sync emits for gguf models, which is
+  # every model here -- this box runs ggml on CPU, and ggml pre-allocates the
+  # whole window at load, so the cap is a real reservation rather than a
+  # ceiling. (The sync script raises it for MLX models, which allocate lazily,
+  # but those are Apple-Silicon-only and will never appear on this host.) KV
+  # cache grows with this, so pin one loaded model at a time to stay inside the
+  # 30 GB of RAM alongside a 20-27B model.
   services.ollama = {
     enable = true;
     package = unstable.ollama;
