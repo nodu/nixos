@@ -147,6 +147,8 @@ in
     ./shared/ghostty.nix
     ./shared/tmux.nix
     ./shared/ssh.nix
+    ./shared/claude.nix
+    ./shared/opencode.nix
     ./sway/sway.nix
     ./i3/i3.nix
     # ./hyprland/hyprland.nix
@@ -416,6 +418,32 @@ in
 
   # Override pinentry to GTK for desktop environment
   services.gpg-agent.pinentry.package = lib.mkForce pkgs.pinentry-gtk2;
+
+  # models live in ~/.ollama/models
+
+  # CPU inference, deliberately. The Radeon 780M iGPU was tried (ollama-rocm +
+  # HSA_OVERRIDE_GFX_VERSION=11.0.0 + OLLAMA_IGPU_ENABLE=1 + HSA_ENABLE_SDMA=0)
+  # and rejected: it shares the CPU's LPDDR5 bus (~100 GB/s), so token
+  # generation -- which is purely memory-bandwidth bound -- was no faster than
+  # CPU, and gfx110x ROCm hard-hangs ("HW Exception ... GPU Hang") on 8-12B
+  # models regardless of workarounds. To retry: package = unstable.ollama-rocm
+  # with those three env vars.
+  #
+  # Context window: Ollama defaults to OLLAMA_CONTEXT_LENGTH=4096, which silently
+  # truncates anything larger (opencode's system prompt + MCP tool schemas + a
+  # pasted doc blow past it in one message, and the model ends up blind to its
+  # own instructions). Bump to 32k to match the per-model `limit.context` in
+  # opencode.json. KV cache grows with this, so pin one loaded model at a time
+  # to stay inside the 30 GB of RAM alongside a 20-27B model.
+  services.ollama = {
+    enable = true;
+    package = unstable.ollama;
+    environmentVariables = {
+      OLLAMA_CONTEXT_LENGTH = "32768";
+      OLLAMA_MAX_LOADED_MODELS = "1";
+      OLLAMA_KEEP_ALIVE = "30m";
+    };
+  };
 
   # Baremetal-specific direnv whitelisted directories
   programs.direnv.config = {
