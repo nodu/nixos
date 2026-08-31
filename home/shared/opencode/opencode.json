@@ -62,6 +62,19 @@
             "output": 8192
           }
         },
+        "qwen3.6:35b-a3b": {
+          "name": "Qwen3.6 35B-A3B — MoE agent trial",
+          "tools": true,
+          "reasoning": true,
+          "attachment": true,
+          "options": {
+            "num_ctx": 32768
+          },
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
+        },
         "gemma4:12b": {
           "name": "Gemma 4 12B — prose / vision / audio",
           "tools": true,

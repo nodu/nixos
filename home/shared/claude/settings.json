@@ -20,13 +20,13 @@
       "Bash(gh api user)",
       "Bash(gh api user *)",
       "Bash(gh api repos/10four-ai/10four-app/pulls/*)",
-      "Bash(gh api graphql --input /Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/.scratch/*)",
+      "Bash(gh api graphql --input ~/repos/raiz/10four-app-worktrees-pr-reviews/.scratch/*)",
       "Bash(git fetch origin *)",
       "Bash(git worktree list)",
-      "Bash(git worktree add --detach /Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/pr-*)",
-      "Bash(git -C /Users/matt/repos/raiz/10four-app worktree list)",
-      "Bash(git -C /Users/matt/repos/raiz/10four-app fetch origin *)",
-      "Bash(git -C /Users/matt/repos/raiz/10four-app worktree add --detach /Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/pr-*)",
+      "Bash(git worktree add --detach ~/repos/raiz/10four-app-worktrees-pr-reviews/pr-*)",
+      "Bash(git -C ~/repos/raiz/10four-app worktree list)",
+      "Bash(git -C ~/repos/raiz/10four-app fetch origin *)",
+      "Bash(git -C ~/repos/raiz/10four-app worktree add --detach ~/repos/raiz/10four-app-worktrees-pr-reviews/pr-*)",
       "Bash(git checkout --detach FETCH_HEAD)",
       "Bash(echo *)",
       "Bash(git status)",
@@ -45,7 +45,7 @@
       "Bash(jq *)",
       "Bash(date)",
       "Bash(date *)",
-      "Bash(mkdir -p /Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/*)",
+      "Bash(mkdir -p ~/repos/raiz/10four-app-worktrees-pr-reviews/*)",
       "Bash(python3 -m json.tool *)",
       "Bash(npm test)",
       "Bash(npm test *)",
@@ -89,7 +89,7 @@
       "Bash(tmux list-windows *)",
       "Bash(tmux show-options *)",
       "Bash(tmux display *)",
-      "Edit(//Users/matt/repos/raiz/10four-app-worktrees-pr-reviews/**)",
+      "Edit(~/repos/raiz/10four-app-worktrees-pr-reviews/**)",
       "mcp__claude_ai_Linear__get_issue",
       "mcp__claude_ai_Linear__list_teams",
       "mcp__claude_ai_Linear__list_issues",
@@ -102,21 +102,21 @@
       "mcp__claude_ai_Linear__list_releases",
       "mcp__claude_ai_Linear__get_project",
       "mcp__claude_ai_Linear__list_issue_labels",
-      "Read(//Users/matt/repos/**)",
-      "Read(//Users/matt/.config/**)",
-      "Read(//Users/matt/.claude/**)",
+      "Read(~/repos/**)",
+      "Read(~/.config/**)",
+      "Read(~/.claude/**)",
       "Read(//nix/**)",
       "Read(//etc/nix/**)"
     ],
     "deny": [
-      "Read(//Users/matt/.config/gcloud/**)",
-      "Read(//Users/matt/.config/1Password/**)",
-      "Read(//Users/matt/repos/**/.env)",
-      "Read(//Users/matt/repos/**/.env.*)",
-      "Read(//Users/matt/repos/**/.envrc)",
-      "Read(//Users/matt/repos/**/*.pem)",
-      "Read(//Users/matt/repos/**/*.tfstate)",
-      "Read(//Users/matt/.claude/.credentials.json)",
+      "Read(~/.config/gcloud/**)",
+      "Read(~/.config/1Password/**)",
+      "Read(~/repos/**/.env)",
+      "Read(~/repos/**/.env.*)",
+      "Read(~/repos/**/.envrc)",
+      "Read(~/repos/**/*.pem)",
+      "Read(~/repos/**/*.tfstate)",
+      "Read(~/.claude/.credentials.json)",
       "Bash(gh pr review *)",
       "Bash(gh pr merge *)",
       "Bash(gh pr close *)",
@@ -128,12 +128,12 @@
     ],
     "defaultMode": "default",
     "additionalDirectories": [
-      "/Users/matt/repos/raiz"
+      "~/repos/raiz"
     ]
   },
   "statusLine": {
     "type": "command",
-    "command": "/Users/matt/.claude/statusline.sh"
+    "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": true,
@@ -177,11 +177,11 @@
     },
     "filesystem": {
       "allowWrite": [
-        "/Users/matt/.cache/nix"
+        "~/.cache/nix"
       ],
       "allowRead": [
-        "/Users/matt/repos/**/.env.example",
-        "/Users/matt/repos/**/.env.example.*"
+        "~/repos/**/.env.example",
+        "~/repos/**/.env.example.*"
       ]
     },
     "enableWeakerNetworkIsolation": true,
@@ -194,7 +194,9 @@
       "helm",
       "darwin-rebuild",
       "darwin-rebuild *",
-      "sudo darwin-rebuild *"
+      "sudo darwin-rebuild *",
+      "nixos-rebuild *",
+      "sudo nixos-rebuild *"
     ]
   },
   "tui": "fullscreen"
