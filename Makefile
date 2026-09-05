@@ -40,6 +40,7 @@ help:
 	@echo "  make vm/secrets          - Copy secrets to VM"
 	@echo ""
 	@echo "Updates:"
+	@echo "  make update-flakes       - Update all flake inputs"
 	@echo "  make update-nordvpn      - Update pinned NordVPN version"
 	@echo ""
 	@echo "macOS (nix-darwin):"
@@ -85,10 +86,18 @@ NIXNAME ?= baremetal
 SSH_OPTIONS=-o PubkeyAuthentication=no -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
 
 switch:
+ifeq ($(UNAME), Darwin)
+	sudo darwin-rebuild switch --flake ".#mac"
+else
 	sudo NIXPKGS_ALLOW_UNFREE=1 NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nixos-rebuild switch --flake ".#${NIXNAME}"
+endif
 
 switch-logs:
+ifeq ($(UNAME), Darwin)
+	sudo darwin-rebuild switch --flake ".#mac" --print-build-logs
+else
 	sudo NIXPKGS_ALLOW_UNFREE=1 NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nixos-rebuild switch --flake ".#${NIXNAME}" --print-build-logs
+endif
 
 test:
 ifeq ($(shell uname), Darwin)
@@ -115,6 +124,9 @@ clean-boot-partition:
 
 set-current:
 	sudo nix-env -p /nix/var/nix/profiles/system --switch-generation $(gen)
+
+update-flakes:
+	nix flake update
 
 update-nordvpn:
 	$(MAKEFILE_DIR)/scripts/update-nordvpn.sh
