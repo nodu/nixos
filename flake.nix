@@ -43,6 +43,10 @@
       url = "github:anomalyco/homebrew-tap";
       flake = false;
     };
+    homebrew-orca = {
+      url = "github:stablyai/homebrew-orca";
+      flake = false;
+    };
 
     # Fix Nix apps in macOS Spotlight/Dock
     mac-app-util = {
@@ -77,7 +81,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-2505, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-core, homebrew-cask, homebrew-opencode, mac-app-util, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, nixpkgs-2505, nixos-hardware, home-manager, darwin, nix-homebrew, homebrew-core, homebrew-cask, homebrew-opencode, homebrew-orca, mac-app-util, ... }@inputs:
     let
       home-manager-modules = inputs.home-manager.nixosModules;
 
@@ -132,11 +136,12 @@
                   "homebrew/homebrew-core" = homebrew-core;
                   "homebrew/homebrew-cask" = homebrew-cask;
                   "anomalyco/homebrew-tap" = homebrew-opencode;
+                  "stablyai/homebrew-orca" = homebrew-orca;
                 };
                 mutableTaps = false;
                 autoMigrate = true;
                 trust = {
-                  taps = [ "anomalyco/tap" ];
+                  taps = [ "anomalyco/tap" "stablyai/orca" ];
                 };
               };
             }

@@ -106,8 +106,18 @@ in
 
   #----- Claude wrapper apps -----
   # Lightweight .app wrappers that launch Claude with separate data directories.
-  # Both use --user-data-dir so the instances are fully isolated.
-  # Uses pgrep -of to focus the existing instance if already running.
+  # Both use --user-data-dir so the desktop instances are fully isolated.
+  # Focuses the existing instance via a recorded pidfile if already running.
+  #
+  # The desktop split (--user-data-dir, Electron cookies) and the CLI split
+  # (CLAUDE_CONFIG_DIR, Keychain) are independent mechanisms. These launchers
+  # exec the Claude binary directly rather than going through `open`, so the
+  # environment set here is inherited by Electron and by the Claude Code it
+  # embeds — which is what lets the two splits line up.
+  #
+  # Only Personal exports CLAUDE_CONFIG_DIR. Work deliberately leaves it unset:
+  # see home/shared/claude.nix for why naming its own default would still move
+  # the Keychain entry and force a re-login.
   home.activation.claudeApps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 
@@ -178,6 +188,8 @@ in
         osascript -e "tell application \"System Events\" to set frontmost of (first process whose unix id is $PID) to true"
     else
         mkdir -p "$HOME/.local/state"
+        # Routes this instance's embedded Claude Code to the personal profile.
+        export CLAUDE_CONFIG_DIR="$HOME/.claude-personal"
         /Applications/Claude.app/Contents/MacOS/Claude --user-data-dir="$HOME/Library/Application Support/Claude" &
         echo $! > "$PIDFILE"
     fi

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Arrange workspace 4 as a 2x2 comms grid, launching anything not running:
 #
-#   Slack    | Calendar (10Four PWA)
+#   Slack    | Overroute Calendar
 #   Teams    | Gmail Work
 #
 # Gmail Work is a chrome --app window, so it reports plain com.google.Chrome
@@ -43,7 +43,7 @@ launch() {
   case "$1" in
     slack) open -a 'Slack' ;;
     teams) open -a 'Microsoft Teams' ;;
-    cal)   open -a "$HOME/Applications/Chrome Apps.localized/10Four - Google Calendar.app" ;;
+    cal)   open -a "$HOME/Applications/Chrome Apps.localized/Overroute Calendar.app" ;;
     gmail) open -a "$HOME/Applications/Gmail Work.app" ;;
   esac
 }

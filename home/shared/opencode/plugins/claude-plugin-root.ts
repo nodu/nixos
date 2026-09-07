@@ -1,6 +1,6 @@
 // Expose the Claude Code plugin cache to opencode's bash tool.
 //
-// The Overroute skills (loaded via `skills.paths` in opencode.json) reference
+// The Overroute skills (loaded via `skills.paths` in opencode.base.json) reference
 // `${CLAUDE_PLUGIN_ROOT}` in their shell snippets to reach `_shared/` canon and
 // scripts. Claude Code sets that var per-plugin at runtime; opencode has no
 // plugin-marketplace equivalent, so we point it at the stable

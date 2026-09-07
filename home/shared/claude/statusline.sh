@@ -15,10 +15,12 @@ mapfile -t F < <(
     ( .context_window.context_window_size  | if . == null then "" else . end ),
     ( .cost.total_cost_usd                 | if . == null then "" else . end ),
     ( .session_id                          | if . == null then "" else . end ),
-    ( .session_name                        | if . == null then "" else . end )'
+    ( .session_name                        | if . == null then "" else . end ),
+    ( .transcript_path                     | if . == null then "" else . end )'
 )
 model=${F[0]}; dir=${F[1]}; used_pct=${F[2]}; remain_pct=${F[3]}
 used_tok=${F[4]}; ctx_size=${F[5]}; cost=${F[6]}; sid=${F[7]}; sname=${F[8]}
+tpath=${F[9]}
 
 dir_name=$(basename "$dir")
 
@@ -31,10 +33,22 @@ fmt_tokens() { awk -v n="$1" 'BEGIN{
 }'; }
 
 # ANSI colors
-DIM='\033[2m'; RESET='\033[0m'
-CYAN='\033[36m'; BLUE='\033[34m'
+DIM='\033[2m'; RESET='\033[0m'; BOLD='\033[1m'
+CYAN='\033[36m'; BLUE='\033[34m'; MAGENTA='\033[35m'
 GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'
 SEP="${DIM} · ${RESET}"
+
+# --- profile segment (work vs personal) ---
+# Work is the ABSENCE of CLAUDE_CONFIG_DIR, so "no signal" must mean work — see
+# home/shared/claude.nix. Two signals because each has a blind spot: the env var
+# is definitive but relies on inheritance through the launcher, while
+# transcript_path lives under the config dir and so survives even if the env is
+# scrubbed, but is absent very early in a session. Either one naming the
+# personal dir is enough.
+case "${CLAUDE_CONFIG_DIR:-}${tpath}" in
+  *.claude-personal*) profile_seg="${BOLD}${MAGENTA}personal${RESET}" ;;
+  *)                  profile_seg="${DIM}work${RESET}" ;;
+esac
 
 # --- context segment ---
 ctx_seg=""
@@ -60,8 +74,8 @@ if [ -n "$cost" ]; then
   cost_seg="${SEP}${DIM}\$$(printf '%.2f' "$cost")${RESET}"
 fi
 
-printf "${CYAN}%s${RESET}${SEP}${BLUE}%s${RESET}${SEP}%b${cost_seg}\n" \
-  "$model" "$dir_name" "$ctx_seg"
+printf "%b${SEP}${CYAN}%s${RESET}${SEP}${BLUE}%s${RESET}${SEP}%b${cost_seg}\n" \
+  "$profile_seg" "$model" "$dir_name" "$ctx_seg"
 
 # --- resume command on its own row: the full copy-pasteable command, so a
 # pane restored after a crash can be relaunched (tmux resurrect keeps cwd but

@@ -10,7 +10,8 @@
 // Dependency-free: opencode's Bun runtime transpiles this .tsx and configures
 // the @opentui/solid runtime for plugin modules, so no package.json or
 // node_modules is needed. This plugin is declared in tui.json (not
-// opencode.json) so only the TUI pass loads it — the server pass never sees it.
+// opencode.base.json) so only the TUI pass loads it — the server pass never
+// sees it.
 
 const tui = async (api) => {
   api.slots.register({

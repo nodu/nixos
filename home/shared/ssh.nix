@@ -62,6 +62,12 @@ in
         user = "matt";
         hostname = "baremetal";
         identityFile = identityFile;
+      };
+
+      "baremetal-tunnel" = {
+        user = "matt";
+        hostname = "baremetal";
+        identityFile = identityFile;
         localForwards = [{
           bind.port = 3389;
           host.address = "localhost";
@@ -69,7 +75,6 @@ in
         }];
       };
 
-      # Fallback for when meshnet nickname resolution is flaky
       "baremetal-mesh-ip" = {
         user = "matt";
         hostname = "100.125.97.192";

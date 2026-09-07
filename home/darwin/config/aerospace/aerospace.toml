@@ -194,6 +194,11 @@ alt-shift-semicolon = 'mode service'
 alt-shift-c = 'reload-config'
 
 alt-r = 'mode resize'
+
+# Release every AeroSpace binding so alt-* reaches the focused app.
+# Needed when driving baremetal's i3 over xrdp -- both use alt as the
+# modifier, so AeroSpace would otherwise swallow the shortcuts here.
+alt-shift-backtick = 'mode passthrough'
 alt-shift-r = 'flatten-workspace-tree' # reset layout
 alt-space = 'layout floating tiling'
 
@@ -222,6 +227,12 @@ alt-shift-l = ['join-with right', 'mode main']
 down = 'volume down'
 up = 'volume up'
 shift-down = ['volume set 0', 'mode main']
+
+# Passthrough: intentionally has exactly ONE binding. Everything else falls
+# through to the focused window (i.e. the xrdp session). alt-shift-backtick is free
+# in both AeroSpace and baremetal's i3, so it stays available to toggle back.
+[mode.passthrough.binding]
+alt-shift-backtick = 'mode main'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.fmgjjmmmlfnkbppncabfkddbjimcfncm'
