@@ -199,7 +199,7 @@ alt-r = 'mode resize'
 # Needed when driving baremetal's i3 over xrdp -- both use alt as the
 # modifier, so AeroSpace would otherwise swallow the shortcuts here.
 alt-shift-backtick = 'mode passthrough'
-alt-shift-r = 'flatten-workspace-tree' # reset layout
+alt-shift-r = 'flatten-workspace-tree'  # reset layout
 alt-space = 'layout floating tiling'
 
 
@@ -234,6 +234,7 @@ shift-down = ['volume set 0', 'mode main']
 [mode.passthrough.binding]
 alt-shift-backtick = 'mode main'
 
+# Gmail
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.fmgjjmmmlfnkbppncabfkddbjimcfncm'
 run = "move-node-to-workspace 4"
@@ -242,12 +243,18 @@ run = "move-node-to-workspace 4"
 if.app-id = "com.tinyspeck.slackmacgap"
 run = "move-node-to-workspace 4"
 
+# Calendar
 [[on-window-detected]]
 if.app-id = "com.google.Chrome.app.kjbdgfilnfhdoflbpgamdcdgpehopbep"
 run = "move-node-to-workspace 4"
 
 [[on-window-detected]]
 if.app-id = "us.zoom.xos"
+run = "move-node-to-workspace 3"
+
+# Google Meet
+[[on-window-detected]]
+if.app-id = "com.google.Chrome.app.kjgfgldnnfoeklkmfkjfagphfepbbdan"
 run = "move-node-to-workspace 3"
 
 [[on-window-detected]]
@@ -258,10 +265,12 @@ run = "move-node-to-workspace 5"
 if.app-id = "com.microsoft.teams2"
 run = "move-node-to-workspace 4"
 
+# WhatsApp Web
 [[on-window-detected]]
 if.app-id = "com.google.Chrome.app.hnpfjngllnobngcgfapefoaidbinmjnm"
 run = "move-node-to-workspace 4"
 
+# Messages
 [[on-window-detected]]
 if.app-id = "com.google.Chrome.app.hpfldicfbfomlpcikngkocigghgafkph"
 run = "move-node-to-workspace 4"
