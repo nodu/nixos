@@ -423,11 +423,49 @@ in
 
   # CPU inference, deliberately. The Radeon 780M iGPU was tried (ollama-rocm +
   # HSA_OVERRIDE_GFX_VERSION=11.0.0 + OLLAMA_IGPU_ENABLE=1 + HSA_ENABLE_SDMA=0)
-  # and rejected: it shares the CPU's LPDDR5 bus (~100 GB/s), so token
-  # generation -- which is purely memory-bandwidth bound -- was no faster than
-  # CPU, and gfx110x ROCm hard-hangs ("HW Exception ... GPU Hang") on 8-12B
-  # models regardless of workarounds. To retry: package = unstable.ollama-rocm
-  # with those three env vars.
+  # and rejected. Re-verified 2026-09-08 against ROCm 7.2.3: one of the two
+  # original reasons is now stale, the other is not, and a third has appeared.
+  #
+  # 1. STALE -- 'gfx110x ROCm hard-hangs ("HW Exception ... GPU Hang")'. ROCm
+  #    has since made gfx1103 a native build target: nixpkgs-unstable builds
+  #    both rocblas and ollama-rocm with gfx1103 in the target list, and the
+  #    kernel reports the arch honestly --
+  #      /sys/class/kfd/kfd/topology/nodes/1/properties -> gfx_target_version
+  #      = 110003
+  #    So do NOT restore HSA_OVERRIDE_GFX_VERSION=11.0.0 on a retry. Forcing
+  #    the gfx1100 code path onto gfx1103 silicon is the likely cause of those
+  #    hangs, and re-setting it would reproduce them and look like proof that
+  #    nothing improved. OLLAMA_IGPU_ENABLE=1 is still needed (ollama skips
+  #    iGPUs by default); HSA_ENABLE_SDMA=0 was a hang workaround, so retry
+  #    without it first.
+  #
+  # 2. STILL TRUE -- the 780M has no dedicated memory. It reads weights over
+  #    the same LPDDR5 bus as the CPU (~100 GB/s on a 7840U) and token
+  #    generation is memory-bandwidth bound, so decode cannot beat CPU however
+  #    good the driver gets. ROCm support does not add bandwidth. Prefill is
+  #    compute-bound and would genuinely speed up -- that, and only that, is
+  #    the argument for retrying.
+  #
+  # 3. NEW BLOCKER -- ROCm sees a single 15.33 GiB heap on this box. KFD
+  #    reports the GTT pool as HEAP_TYPE_FB_PUBLIC; the 512M VRAM carveout is
+  #    display-side and adds no compute-addressable room, so the two do not
+  #    sum. qwen3.8:27b is 15.66 GiB of weights + 0.87 GiB projector before any
+  #    KV cache, so it cannot fully offload. Its KV cache is also fat: 65
+  #    layers x 4 KV heads x (256+256) x 2 B = 260 KiB/token, i.e. 8.12 GiB at
+  #    our 32k context. Full offload would need amdgpu.gttsize (megabytes,
+  #    default -1 = auto = half of RAM):
+  #      32k / f16 KV  -> 25.1 GiB  gttsize=26624
+  #      32k / q8_0 KV -> 21.1 GiB  gttsize=22528
+  #      4k  / q8_0 KV -> 17.5 GiB  gttsize=18432   (absolute floor, and 4k is
+  #                                                  the truncation trap below)
+  #    gttsize is a ceiling on pinnable system RAM rather than a boot-time
+  #    carve-out, but once the model loads those pages really are pinned, and
+  #    surrendering 22-26 GiB of 30 GiB to win prefill on a bandwidth-bound
+  #    decode is a bad trade. Leave it at auto.
+  #
+  # To retry meaningfully: pull an 8-14B model that fits under 15.33 GiB with
+  # its KV cache, set package = unstable.ollama-rocm, leave gttsize alone, and
+  # measure time-to-first-token rather than tok/s -- decode is not the win.
   #
   # Context window: pin it explicitly, because the default has been wrong in
   # both directions and neither failure is loud.
@@ -459,6 +497,61 @@ in
       OLLAMA_MAX_LOADED_MODELS = "1";
       OLLAMA_KEEP_ALIVE = "30m";
     };
+  };
+
+  # T3 Code: GUI/control plane over the agent CLIs (claude, codex, opencode),
+  # reachable from the Pixel and maemac over NordVPN Meshnet. Meshnet has no
+  # equivalent of `tailscale serve`, so this is plain HTTP -- fine for the
+  # native mobile and desktop apps, which pair to a bare IP. It rules out
+  # app.t3.codes, which is HTTPS-only and cannot call an HTTP backend.
+  #
+  # Binds 0.0.0.0 rather than the nordlynx IP so the unit still starts when
+  # Meshnet is down; exposure is fenced by the interface-scoped firewall rule
+  # in hosts/baremetal/configuration.nix, which opens 3773 on nordlynx only.
+  #
+  # Deliberately NOT named t3code.service: the t3 CLI's own `t3 service`
+  # manager claims that exact name, and would collide with this read-only
+  # nix-store symlink. Keeping them distinct leaves `t3 service` usable.
+  #
+  # This owns port 3773. Do not also configure a desktop-managed SSH
+  # environment pointing at this host -- that launches a second, competing
+  # server on 127.0.0.1:3773 and the two fight over the port.
+  #
+  # Likewise prefer the browser at http://localhost:3773 over the T3 Code
+  # desktop app on this host. The desktop app attaches to this server fine,
+  # but on quit it deletes ~/.t3/userdata/server-runtime.json, which it did
+  # not create. The server keeps running and already-connected clients stay
+  # up, but `t3 pair` discovers the server through that file and starts
+  # failing with NoRunningServerError. Fix: restart this unit.
+  systemd.user.services.t3code-server = {
+    Unit = {
+      Description = "T3 Code agent control plane";
+      After = [ "network-online.target" ];
+      Wants = [ "network-online.target" ];
+      # Give up after 5 failures in 5min rather than restarting forever. Without
+      # this, a port conflict just loops silently -- an earlier version of this
+      # unit logged 4095 restarts against EADDRINUSE instead of failing loudly.
+      StartLimitIntervalSec = 300;
+      StartLimitBurst = 5;
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${unstable.t3code}/bin/t3 serve --host 0.0.0.0 --port 3773";
+      # t3 resolves provider CLIs by probing the login shell at runtime, so this
+      # is a safety net rather than load-bearing.
+      Environment = [
+        "PATH=/run/wrappers/bin:${config.home.homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/matt/bin:/run/current-system/sw/bin"
+        "T3CODE_HOME=${config.home.homeDirectory}/.t3"
+      ];
+      WorkingDirectory = config.home.homeDirectory;
+      # Tear down the whole node process tree; survive the OOM killer taking a
+      # child. Both mirror what `t3 service install` generates.
+      KillMode = "mixed";
+      OOMPolicy = "continue";
+      Restart = "always";
+      RestartSec = 5;
+    };
+    Install.WantedBy = [ "default.target" ];
   };
 
   # Baremetal-specific direnv whitelisted directories

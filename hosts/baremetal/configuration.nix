@@ -394,6 +394,10 @@
       ];
 
     };
+  # T3 Code (home-manager user service) listens on 0.0.0.0:3773, but is only
+  # reachable over the NordVPN Meshnet interface -- never over wifi.
+  networking.firewall.interfaces.nordlynx.allowedTCPPorts = [ 3773 ];
+
   networking.firewall.checkReversePath = "loose"; #nordvpn + tailscale
   networking.enableIPv6 = true;
   networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
