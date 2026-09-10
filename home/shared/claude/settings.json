@@ -343,5 +343,6 @@
   },
   "tui": "fullscreen",
   "theme": "dark",
-  "agentPushNotifEnabled": false
+  "agentPushNotifEnabled": false,
+  "model": "sonnet"
 }

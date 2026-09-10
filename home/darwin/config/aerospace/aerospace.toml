@@ -79,6 +79,7 @@ outer.top = [{ monitor."Built-in" = 4 }, { monitor."Dell" = 4 }, 4]
 [workspace-to-monitor-force-assignment]
 5 = ['Built-in']
 6 = ['Built-in']
+7 = ['Built-in']
 8 = ['Built-in']
 9 = ['Built-in']
 
