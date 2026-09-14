@@ -40,12 +40,32 @@ Context is capped per engine, because the two allocate KV cache differently:
                    Pro: qwen3.6:35b-a3b-nvfp4 completed a real 227k-token
                    prompt with no OOM. Costs nothing to set high.
 
-The MLX cap is deliberately below the models' native 262144 anyway, because
-opencode uses limit.context to decide when to compact, and throughput falls
-off at the top of the window (measured, same model: 87.8 tok/s generation and
-1328 tok/s prefill on a short context, versus 26.5 and 635 at ~227k -- a 6
-minute prefill). 128k stays clear of that cliff while being far larger than
-any single turn.
+The MLX cap is the models' native 262144. It was 131072, to stay off the
+throughput cliff at the top of the window (measured, qwen3.6:35b-a3b-nvfp4:
+87.8 tok/s generation and 1328 tok/s prefill on a short context, versus 26.5
+and 635 at ~227k). That cliff turns out to be front-loaded -- the same model
+prefills at ~680 tok/s at 113k depth, so 131072 was paying nearly all of the
+slowdown while buying back only half the window. Compaction costs more than
+the remaining margin: opencode uses limit.context to decide when to compact,
+and dropping history mid-task is a worse failure than a slow turn. Pass
+--max-ctx-mlx to trade back if a session spends more time in prefill than a
+compaction would have cost.
+
+KV cache is not what bounds this, for either MLX model here. Both are hybrid
+attention (qwen3_5's full_attention_interval = 4), so only a quarter of the
+layers hold a cache that grows with the sequence; the rest are linear
+attention with constant-size state. From each model's shipped config.json
+(ollama blob store -- /api/show does not expose head counts for safetensors),
+at 2 B/value f16 cache:
+
+  qwen3.6:35b-a3b  10 of 40 full-attn layers x 2 KV heads x 256 head_dim
+                   -> 20 KiB/token ->  5 GiB at 262144
+  qwen3.8:27b      16 of 64 full-attn layers x 4 KV heads x 256 head_dim
+                   -> 64 KiB/token -> 16 GiB at 262144
+
+Measured peak process memory on the 64 GB M5 Pro stays ~31-37 GiB across
+requests from 0 to 140k tokens of context, against 35 GB of resident weights
+-- i.e. flat in context length, which is what the table above predicts.
 """
 
 from __future__ import annotations
@@ -65,7 +85,7 @@ CONFIG_DIR = os.path.join(
 DEFAULT_BASE = os.path.join(CONFIG_DIR, "opencode.base.json")
 DEFAULT_OUT = os.path.join(CONFIG_DIR, "opencode.json")
 DEFAULT_MAX_CTX_GGML = 32768
-DEFAULT_MAX_CTX_MLX = 131072
+DEFAULT_MAX_CTX_MLX = 262144
 DEFAULT_MAX_OUTPUT = 8192
 
 SCHEMA_URL = "https://opencode.ai/config.json"
