@@ -135,6 +135,7 @@
       "~/repos/raiz"
     ]
   },
+  "model": "sonnet",
   "hooks": {
     "SessionStart": [
       {
@@ -297,7 +298,7 @@
     }
   },
   "sandbox": {
-    "enabled": true,
+    "enabled": false,
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": true,
     "network": {
@@ -343,6 +344,5 @@
   },
   "tui": "fullscreen",
   "theme": "dark",
-  "agentPushNotifEnabled": false,
-  "model": "sonnet"
+  "agentPushNotifEnabled": false
 }

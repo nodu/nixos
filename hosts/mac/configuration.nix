@@ -71,10 +71,12 @@ in
   # stay conservative because it applies before the engine is known, and the
   # two engines differ: ggml pre-allocates the whole window at load (hence the
   # OOM above), while MLX allocates lazily, so num_ctx is only a ceiling there.
-  # Clients that know the model override it per request -- opencode gets
-  # 131072 for MLX models from nx-opencode-ollama-sync, measured safe here on a
-  # real 227k-token prompt. Anything that does *not* override lands on 32k,
-  # which is the point.
+  # Clients that know the model override it per request -- opencode gets the
+  # full native 262144 for MLX models from nx-opencode-ollama-sync: those are
+  # hybrid-attention qwen3_5 builds that keep a growing KV cache on only a
+  # quarter of their layers (5 GiB at 262144 for the 35b-a3b), and a real
+  # 227k-token prompt ran here without OOM. Anything that does *not* override
+  # lands on 32k, which is the point.
   launchd.user.envVariables = {
     OLLAMA_CONTEXT_LENGTH = "32768";
     OLLAMA_MAX_LOADED_MODELS = "1";

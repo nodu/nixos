@@ -256,7 +256,7 @@ run = "move-node-to-workspace 3"
 # Google Meet
 [[on-window-detected]]
 if.app-id = "com.google.Chrome.app.kjgfgldnnfoeklkmfkjfagphfepbbdan"
-run = "move-node-to-workspace 3"
+run = "move-node-to-workspace 7"
 
 [[on-window-detected]]
 if.app-id = "com.spotify.client"
