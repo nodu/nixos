@@ -47,6 +47,9 @@
       "Bash(date *)",
       "Bash(mkdir -p ~/repos/raiz/10four-app-worktrees-pr-reviews/*)",
       "Bash(python3 -m json.tool *)",
+      "Bash(.venv/bin/python /Users/matt/.claude/plugins/*/or-prompt-coach/grade_traces.py *)",
+      "Bash(.venv/bin/python /home/matt/.claude/plugins/*/or-prompt-coach/grade_traces.py *)",
+      "Bash(.venv/bin/python scripts/langsmith_traces.py *)",
       "Bash(npm test)",
       "Bash(npm test *)",
       "Bash(npm run test *)",
@@ -97,6 +100,7 @@
       "mcp__claude_ai_Linear__get_release",
       "mcp__claude_ai_Notion__notion-fetch",
       "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-create-pages",
       "mcp__claude_ai_Linear__list_comments",
       "mcp__claude_ai_Linear__list_projects",
       "mcp__claude_ai_Linear__list_releases",
@@ -127,13 +131,9 @@
       "Bash(git stage)",
       "Bash(git stage *)"
     ],
-    "ask": [
-      "Bash(dangerouslyDisableSandbox:true)"
-    ],
+    "ask": ["Bash(dangerouslyDisableSandbox:true)"],
     "defaultMode": "auto",
-    "additionalDirectories": [
-      "~/repos/raiz"
-    ]
+    "additionalDirectories": ["~/repos/raiz"]
   },
   "model": "sonnet",
   "hooks": {
@@ -313,19 +313,12 @@
         "registry.npmjs.org",
         "api.smith.langchain.com"
       ],
-      "allowUnixSockets": [
-        "/nix/var/nix/daemon-socket/socket"
-      ],
+      "allowUnixSockets": ["/nix/var/nix/daemon-socket/socket"],
       "allowLocalBinding": true
     },
     "filesystem": {
-      "allowWrite": [
-        "~/.cache/nix"
-      ],
-      "allowRead": [
-        "~/repos/**/.env.example",
-        "~/repos/**/.env.example.*"
-      ]
+      "allowWrite": ["~/.cache/nix"],
+      "allowRead": ["~/repos/**/.env.example", "~/repos/**/.env.example.*"]
     },
     "enableWeakerNetworkIsolation": true,
     "excludedCommands": [

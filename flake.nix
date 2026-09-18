@@ -75,9 +75,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Deliberately NOT following nixpkgs-unstable. opencode's node_modules is a
+    # fixed-output derivation whose hash (nix/hashes.json upstream) is computed
+    # against the bun in opencode's own nixpkgs pin. Pointing it at our unstable
+    # gives it a different bun (1.4.x vs 1.3.x), which lays out node_modules
+    # differently and fails the FOD hash check. Let it use its own pin.
     opencode = {
       url = "github:anomalyco/opencode/dev";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
 
