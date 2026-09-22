@@ -4,6 +4,21 @@
 let
   # Use the same key name across hosts; secrets/restore puts the key in place
   identityFile = if pkgs.stdenv.isDarwin then "~/.ssh/mac" else "~/.ssh/baremetal";
+
+  # Meshnet addresses live in one place so the ssh blocks below and the mac's
+  # /etc/hosts block cannot drift apart.
+  meshPeers = import ../../modules/mesh-peers.nix;
+
+  # "<name>-mesh-ip" escape hatches: address a peer by its Meshnet IP directly,
+  # bypassing name resolution entirely. Useful when DNS is the thing that's
+  # broken -- which is exactly the failure the /etc/hosts block guards against.
+  meshMatchBlocks = lib.mapAttrs'
+    (name: addr: lib.nameValuePair "${name}-mesh-ip" {
+      user = "matt";
+      hostname = addr;
+      identityFile = identityFile;
+    })
+    meshPeers;
 in
 {
   programs.ssh = {
@@ -52,12 +67,6 @@ in
         identityFile = identityFile;
       };
 
-      "bau-mesh-ip" = {
-        user = "matt";
-        hostname = "100.69.158.138";
-        identityFile = identityFile;
-      };
-
       "baremetal" = {
         user = "matt";
         hostname = "baremetal";
@@ -73,12 +82,6 @@ in
           host.address = "localhost";
           host.port = 3389;
         }];
-      };
-
-      "baremetal-mesh-ip" = {
-        user = "matt";
-        hostname = "100.125.97.192";
-        identityFile = identityFile;
       };
 
       "rpi3" = {
@@ -100,7 +103,7 @@ in
       "*" = {
         extraOptions.IdentitiesOnly = "yes";
       };
-    };
+    } // meshMatchBlocks;
   };
 }
 

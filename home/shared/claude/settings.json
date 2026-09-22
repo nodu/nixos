@@ -131,9 +131,13 @@
       "Bash(git stage)",
       "Bash(git stage *)"
     ],
-    "ask": ["Bash(dangerouslyDisableSandbox:true)"],
+    "ask": [
+      "Bash(dangerouslyDisableSandbox:true)"
+    ],
     "defaultMode": "auto",
-    "additionalDirectories": ["~/repos/raiz"]
+    "additionalDirectories": [
+      "~/repos/raiz"
+    ]
   },
   "model": "sonnet",
   "hooks": {
@@ -313,12 +317,19 @@
         "registry.npmjs.org",
         "api.smith.langchain.com"
       ],
-      "allowUnixSockets": ["/nix/var/nix/daemon-socket/socket"],
+      "allowUnixSockets": [
+        "/nix/var/nix/daemon-socket/socket"
+      ],
       "allowLocalBinding": true
     },
     "filesystem": {
-      "allowWrite": ["~/.cache/nix"],
-      "allowRead": ["~/repos/**/.env.example", "~/repos/**/.env.example.*"]
+      "allowWrite": [
+        "~/.cache/nix"
+      ],
+      "allowRead": [
+        "~/repos/**/.env.example",
+        "~/repos/**/.env.example.*"
+      ]
     },
     "enableWeakerNetworkIsolation": true,
     "excludedCommands": [

@@ -1,5 +1,5 @@
 # Shared CLI utilities
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, unstable, ... }:
 
 {
   options.cli = {
@@ -35,7 +35,7 @@
     pkgs.lazygit
     pkgs.difftastic
     pkgs.dust
-    pkgs.yt-dlp
+    unstable.yt-dlp
   ] ++ lib.optionals config.cli.enableHeavyPackages [
     pkgs.neofetch
     pkgs.imagemagick

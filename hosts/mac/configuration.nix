@@ -3,6 +3,16 @@
 
 let
   user = "matt";
+
+  # Shared with home/shared/ssh.nix so the two cannot drift apart.
+  meshPeers = import ../../modules/mesh-peers.nix;
+
+  # Only the bare labels go in /etc/hosts. The ".nord" FQDNs are left to Meshnet
+  # DNS on purpose: those already resolve in every mode, and leaving them dynamic
+  # means a re-registered peer self-heals there instead of silently serving a
+  # stale address from a file.
+  meshHostsBlock = lib.concatStringsSep "\n"
+    (lib.mapAttrsToList (name: addr: "${addr}\t${name}") meshPeers);
 in
 {
   #----- Nix Settings -----
@@ -177,6 +187,39 @@ in
       };
     };
   };
+
+  #----- Networking -----
+  # Make Meshnet peers resolvable by bare hostname system-wide.
+  #
+  # Meshnet alone resolves bare peer names fine. But when NordVPN is *also*
+  # connected to a VPN server, that server's resolver becomes primary: it answers
+  # "<name>.nord" and NXDOMAINs the bare label. A DNS search domain can't paper
+  # over this, because macOS builds its search list from the primary service --
+  # setting one on Wi-Fi only ever applies to en0-scoped queries. /etc/hosts is
+  # the one lookup path that wins regardless of which resolver is primary, so it
+  # keeps bare names working for ssh and every other client, VPN up or down.
+  #
+  # This runs in postActivation rather than via environment.etc because
+  # nix-darwin's own `networking` activation restores /etc/hosts from
+  # /etc/hosts.before-nix-darwin, and postActivation is sequenced after it.
+  # The awk pass makes this idempotent and leaves anything outside the markers
+  # (including Apple's stock entries) untouched.
+  system.activationScripts.postActivation.text = ''
+    echo "syncing Meshnet peers into /etc/hosts..." >&2
+    meshHostsTmp=$(mktemp)
+    ${pkgs.gawk}/bin/awk '
+      /^# BEGIN meshnet peers \(nix-darwin\)$/ { skip = 1 }
+      !skip                                    { print }
+      /^# END meshnet peers \(nix-darwin\)$/   { skip = 0 }
+    ' /etc/hosts > "$meshHostsTmp"
+    cat >> "$meshHostsTmp" <<'MESHEOF'
+# BEGIN meshnet peers (nix-darwin)
+${meshHostsBlock}
+# END meshnet peers (nix-darwin)
+MESHEOF
+    cat "$meshHostsTmp" > /etc/hosts
+    rm -f "$meshHostsTmp"
+  '';
 
   #----- Power -----
   power.sleep.computer = "never";
