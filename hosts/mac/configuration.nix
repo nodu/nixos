@@ -246,12 +246,12 @@ MESHEOF
     enable = true;
     onActivation =
       {
-        cleanup = "uninstall";
+        # nix-darwin 25.11 still translates cleanup = "uninstall" to the
+        # removed `brew bundle --cleanup` flag. Pass Homebrew 6's replacement
+        # explicitly until the compatibility fix reaches the stable branch.
+        cleanup = "none";
         upgrade = true;
-        # Pass --force to `brew bundle` so cleanup runs non-interactively during
-        # `make mac/switch` (otherwise Homebrew prompts `Do you want to proceed
-        # with the cleanup? [y/n]`).
-        extraFlags = [ "--force" ];
+        extraFlags = [ "--force-cleanup" ];
       };
 
     # Declare the baseline Homebrew taps so cleanup does not try (and fail) to
