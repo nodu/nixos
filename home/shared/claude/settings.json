@@ -139,7 +139,7 @@
       "~/repos/raiz"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {

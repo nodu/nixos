@@ -163,6 +163,19 @@
       # handy is x86_64-only
       handy = inputs.handy.packages."x86_64-linux".default;
 
+      # TODO: drop once upstream adds ../script to the fileset in nix/node_modules.nix.
+      # packages/cli/script/build.ts imports script/native-arch.ts, which the src filter leaves out.
+      opencodePackages = system:
+        let upstream = inputs.opencode.packages.${system};
+        in upstream // {
+          opencode = upstream.opencode.overrideAttrs (old: {
+            postPatch = (old.postPatch or "") + ''
+              mkdir -p script
+              cp ${inputs.opencode}/script/native-arch.ts script/
+            '';
+          });
+        };
+
       overlays = [
         #(import ./overlays/sddm.nix)
       ];
@@ -177,7 +190,7 @@
         ];
         extraSpecialArgs = {
           inherit handy;
-          opencode-packages = inputs.opencode.packages."x86_64-linux";
+          opencode-packages = opencodePackages "x86_64-linux";
         };
         extraModules = [
           { nixpkgs.overlays = overlays; }
@@ -185,6 +198,7 @@
             nixpkgs.config.packageOverrides = pkgs: {
               nordvpn = (pkgs.callPackage ./modules/vpn.nix { });
               sunsama = (pkgs.callPackage ./modules/sunsama.nix { });
+              magnitude = (pkgs.callPackage ./modules/magnitude.nix { });
             };
           }
         ];
@@ -216,7 +230,7 @@
           nixos-hardware.nixosModules.raspberry-pi-4
         ];
         extraSpecialArgs = {
-          opencode-packages = inputs.opencode.packages."aarch64-linux";
+          opencode-packages = opencodePackages "aarch64-linux";
         };
         extraModules = [
           {

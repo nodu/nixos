@@ -73,6 +73,11 @@
   boot.kernel.sysctl = {
     "kernel.panic" = 30;
     "kernel.panic_on_oops" = 1;
+    # Wired and wifi share 192.168.0.0/24. By default wifi also answers ARP for
+    # the wired IP, so LAN traffic to it arrives on wlp1s0 and the wired-only
+    # firewall rules drop it. Answer ARP only on the NIC that owns the address.
+    "net.ipv4.conf.all.arp_ignore" = 1;
+    "net.ipv4.conf.all.arp_announce" = 2;
   };
 
   systemd.settings.Manager = {
@@ -192,6 +197,12 @@
   # Enable networking
   networking.networkmanager.enable = true;
   networking.networkmanager.wifi.powersave = false;
+
+  # 0 = retry forever. The default of 4 ran out on 2026-09-24 and NM blocked
+  # the wifi profile, taking the box offline for ten days until a reboot.
+  networking.networkmanager.settings = {
+    connection."connection.autoconnect-retries" = 0;
+  };
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
@@ -325,6 +336,13 @@
       '';
   };
 
+  # Magnitude (pkgs.magnitude) needs the root-owned, read-only lock its .deb
+  # postinst creates, and `magnitude app open` execs /usr/bin/magnitude-desktop.
+  systemd.tmpfiles.rules = [
+    "d /var/lib/magnitude-desktop 0755 root root -"
+    "f /var/lib/magnitude-desktop/installation.lock 0444 root root -"
+    "L+ /usr/bin/magnitude-desktop - - - - ${pkgs.magnitude}/bin/magnitude-desktop"
+  ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -366,16 +384,25 @@
   services.openssh.settings.KbdInteractiveAuthentication = false;
   services.openssh.settings.PermitRootLogin = "no";
 
-  # Remote desktop. xrdp spawns its own i3 session on connect, so it does not
-  # depend on anyone being logged in physically -- which matters because this
-  # host runs headless with the lid shut and GDM otherwise sits at the greeter.
-  # Deliberately NOT exposed on the network: reach it through the SSH tunnel
-  # declared in home/shared/ssh.nix (`ssh baremetal` forwards localhost:3389).
+  # Remote desktop. xrdp spawns its own i3 session on connect, separate from the
+  # physical one. Open to the wired LAN only (rule below); elsewhere, use the SSH
+  # tunnel in home/shared/ssh.nix (`ssh baremetal-tunnel` forwards localhost:3389).
   services.xrdp = {
     enable = true;
     defaultWindowManager = "i3";
     openFirewall = false;
   };
+  # nixpkgs builds xrdp without H.264, so clients fall back to slow RFX/bitmaps.
+  # Overlay rather than services.xrdp.package: the module's ExecStart hardcodes
+  # pkgs.xrdp.
+  nixpkgs.overlays = [
+    (final: prev: {
+      xrdp = prev.xrdp.overrideAttrs (old: {
+        buildInputs = old.buildInputs ++ [ prev.x264 ];
+        configureFlags = old.configureFlags ++ [ "--enable-x264" ];
+      });
+    })
+  ];
 
   services.fstrim.enable = true;
 
@@ -394,9 +421,14 @@
       ];
 
     };
-  # T3 Code (home-manager user service) listens on 0.0.0.0:3773, but is only
-  # reachable over the NordVPN Meshnet interface -- never over wifi.
-  networking.firewall.interfaces.nordlynx.allowedTCPPorts = [ 3773 ];
+  # T3 Code (home-manager user service) listens on 0.0.0.0:3773. Reachable over
+  # Meshnet, and from the home LAN via the wired USB NIC only (never wifi).
+  # 8787 homebase receiver, 2586 homebase ntfy: Meshnet only.
+  networking.firewall.interfaces.nordlynx.allowedTCPPorts = [ 3773 8787 2586 ];
+  networking.firewall.extraCommands = ''
+    iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 3773 -s 192.168.0.0/24 -j nixos-fw-accept
+    iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 3389 -s 192.168.0.0/24 -j nixos-fw-accept
+  '';
 
   networking.firewall.checkReversePath = "loose"; #nordvpn + tailscale
   networking.enableIPv6 = true;

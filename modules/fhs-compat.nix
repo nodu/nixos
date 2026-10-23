@@ -36,6 +36,7 @@
       libxkbcommon
       pango
       mesa
+      libgbm
       libdrm
       libglvnd
       libpulseaudio
