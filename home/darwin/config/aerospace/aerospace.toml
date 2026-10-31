@@ -256,15 +256,22 @@ run = "move-node-to-workspace 3"
 # Google Meet
 [[on-window-detected]]
 if.app-id = "com.google.Chrome.app.kjgfgldnnfoeklkmfkjfagphfepbbdan"
-run = "move-node-to-workspace 7"
+run = "move-node-to-workspace 3"
+
+[[on-window-detected]]
+if.app-id = "com.linear"
+run = "move-node-to-workspace 3"
 
 [[on-window-detected]]
 if.app-id = "com.spotify.client"
 run = "move-node-to-workspace 5"
 
+# Teams: everything lands on the comms workspace, then teams-meeting.sh moves
+# live meeting windows to 3 once Teams has given them a title (it hasn't at
+# detection, so a title rule here can't tell a meeting from the main window).
 [[on-window-detected]]
 if.app-id = "com.microsoft.teams2"
-run = "move-node-to-workspace 4"
+run = ["move-node-to-workspace 4", "exec-and-forget ~/.config/aerospace/teams-meeting.sh"]
 
 # WhatsApp Web
 [[on-window-detected]]

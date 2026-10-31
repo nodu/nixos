@@ -31,7 +31,11 @@ scan() {
   list=$(aerospace list-windows --all --format \
     '%{window-id}|%{app-bundle-id}|%{workspace}|%{window-parent-container-layout}|%{workspace-root-container-layout}|%{window-title}')
   slack=$(awk -F'|' -v id="$SLACK_ID" '$2==id{print $1; exit}' <<<"$list")
-  teams=$(awk -F'|' -v id="$TEAMS_ID" '$2==id{print $1; exit}' <<<"$list")
+  # Main window only: a live meeting window ("<meeting> | Microsoft Teams")
+  # belongs on workspace 3, not in the grid. Section names match the
+  # main-window rule in aerospace.toml.
+  teams=$(awk -F'|' -v id="$TEAMS_ID" \
+    '$2==id && $6 ~ /^(Activity|Chat|Teams|Calendar|Calling|Calls|OneDrive|Apps|Copilot|Communities|Files|Search) *$/{print $1; exit}' <<<"$list")
   cal=$(awk -F'|' -v id="$CAL_ID"   '$2==id{print $1; exit}' <<<"$list")
   gmail=$(awk -F'|' \
     '$2=="com.google.Chrome" && $0 ~ /10Four Mail/ && $0 !~ /Google Chrome/{print $1; exit}' <<<"$list")
