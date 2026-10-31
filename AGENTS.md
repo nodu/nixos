@@ -292,7 +292,7 @@ in
 
 ## Stable vs Unstable Packages
 
-- Default: `pkgs` (nixpkgs 25.11, stable)
+- Default: `pkgs` (nixpkgs 26.05, stable)
 - Unstable: `unstable` (nixpkgs-unstable), passed via `specialArgs`
 - Use `unstable.` only when a newer version is specifically needed
 - Version pinning: specific nixpkgs commit via `builtins.fetchTarball` with SHA256
@@ -336,7 +336,7 @@ in
 
 - Use `nx-update-flakes()` to update all inputs
 - Use `nx-update-input <input>` for targeted updates
-- Check nixpkgs versions in flake.nix - system uses 25.11, some packages from unstable
+- Check nixpkgs versions in flake.nix - system uses 26.05, some packages from unstable
 
 ### Package Discovery
 

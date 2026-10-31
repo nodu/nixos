@@ -57,6 +57,8 @@
 
   programs.zsh = {
     enable = true;
+    # Keep .zshrc in $HOME rather than the future XDG default
+    dotDir = config.home.homeDirectory;
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;

@@ -240,7 +240,7 @@ in
     pkgs.zenity
 
     # Sound
-    pkgs.helvum
+    pkgs.crosspipe
     pkgs.qpwgraph
     pkgs.pwvucontrol
     pkgs.coppwr
@@ -265,7 +265,6 @@ in
     pkgs.atomix
     pkgs.gnome-sudoku
     pkgs.iagno
-    pkgs.gnomeExtensions.power-profile-switcher
     pkgs.gnomeExtensions.grand-theft-focus
     pkgs.gnomeExtensions.gnordvpn-local
     pkgs.gnomeExtensions.nordvpn-quick-toggle
@@ -316,8 +315,8 @@ in
     # pkgs.marksman  # TODO: Re-enable when dotnet build issue is fixed (nixpkgs#XXXXX)
     pkgs.lua-language-server
     pkgs.vtsls
-    pkgs.nodePackages.vscode-langservers-extracted
-    pkgs.nodePackages.typescript-language-server
+    pkgs.vscode-langservers-extracted
+    pkgs.typescript-language-server
     pkgs.pyright
     pkgs.dockerfile-language-server
     pkgs.tailwindcss-language-server
@@ -327,7 +326,7 @@ in
     pkgs.docker-compose-language-service
     pkgs.stylua
     pkgs.markdownlint-cli2
-    pkgs.nodePackages.prettier
+    pkgs.prettier
   ];
 
   fonts.fontconfig.enable = true;
@@ -688,6 +687,9 @@ in
     gtk3.extraConfig = {
       gtk-application-prefer-dark-theme = 1;
     };
+    # 26.05 default. A GTK4 theme in settings.ini fights libadwaita; dark
+    # comes from prefer-dark below and the dconf color-scheme instead.
+    gtk4.theme = null;
     gtk4.extraConfig = {
       gtk-application-prefer-dark-theme = 1;
     };

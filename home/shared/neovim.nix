@@ -20,6 +20,9 @@
       viAlias = true;
       vimAlias = true;
       vimdiffAlias = true;
+      # LazyVim doesn't use the remote-plugin providers; 26.05 default
+      withRuby = false;
+      withPython3 = false;
 
       plugins = [
       ];
@@ -50,7 +53,7 @@
 
       # Minimal LSPs for Nix/shell config editing (shared across all hosts)
       pkgs.nil
-      pkgs.nodePackages.bash-language-server
+      pkgs.bash-language-server
       pkgs.shellcheck
       pkgs.nixpkgs-fmt
       pkgs.shfmt

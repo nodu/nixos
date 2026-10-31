@@ -34,7 +34,7 @@
   home.packages = with pkgs; [
     # Wayland tools
     wl-clipboard
-    xorg.xeyes #use to check if running wayland on app
+    xeyes #use to check if running wayland on app
     wlr-randr
     grim
     slurp
@@ -44,7 +44,7 @@
 
     # Equivalent i3 packages for Sway
     pkgs.playerctl
-    pkgs.light  # brightness control
+    pkgs.brightnessctl # brightness control
     pkgs.libnotify
 
     # Mouse control for Wayland (replaces xdotool)

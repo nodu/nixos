@@ -5,7 +5,7 @@
     # Pin our primary nixpkgs repository. This is the main nixpkgs repository
     # we'll use for our configurations. Be very careful changing this because
     # it'll impact your entire system.
-    nixpkgs.url = "github:nixos/nixpkgs/release-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/release-26.05";
 
     # We use the unstable nixpkgs repo for some packages.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -16,20 +16,27 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       # We want home-manager to use the same set of nixpkgs as our system.
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # macOS system management (nix-darwin)
     darwin = {
-      url = "github:LnL7/nix-darwin/nix-darwin-25.11";
+      url = "github:LnL7/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Declarative Homebrew management
     nix-homebrew = {
       url = "github:zhaofengli/nix-homebrew";
+      inputs.brew-src.follows = "brew-src";
+    };
+    # Track Homebrew's main branch instead of nix-homebrew's pinned release, so
+    # brew and homebrew-core move together on `nix flake update`
+    brew-src = {
+      url = "github:Homebrew/brew";
+      flake = false;
     };
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
@@ -66,7 +73,9 @@
       # declares -- including x86_64-darwin. nixpkgs-unstable is 26.11, which
       # dropped x86_64-darwin, so that throws while evaluating ANY config with
       # handy in home.packages (reached via fonts.fontconfig -> home.path).
-      # Pin only the bun2nix tooling to 25.11; handy itself stays on unstable.
+      # Pin only the bun2nix tooling to stable; handy itself stays on unstable.
+      # 26.05 is the last stable with x86_64-darwin (it prints a deprecation
+      # warning on every eval), so this workaround stops working at 26.11.
       inputs.bun2nix.inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -6,7 +6,7 @@
     enableHeavyPackages = lib.mkOption {
       type = lib.types.bool;
       default = true;
-      description = "Include heavy CLI packages (neofetch, imagemagick). Disable on constrained devices.";
+      description = "Include heavy CLI packages (fastfetch, imagemagick). Disable on constrained devices.";
     };
   };
 
@@ -37,7 +37,7 @@
     pkgs.dust
     unstable.yt-dlp
   ] ++ lib.optionals config.cli.enableHeavyPackages [
-    pkgs.neofetch
+    pkgs.fastfetch
     pkgs.imagemagick
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     pkgs.lshw # Linux only

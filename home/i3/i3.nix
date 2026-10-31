@@ -25,7 +25,7 @@
       pkgs.xclip
       pkgs.networkmanagerapplet
       pkgs.dunst
-      pkgs.xorg.xhost
+      pkgs.xhost
       pkgs.feh
       pkgs.i3blocks
       pkgs.i3lock-color

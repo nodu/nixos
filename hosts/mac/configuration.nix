@@ -205,20 +205,20 @@ in
   # The awk pass makes this idempotent and leaves anything outside the markers
   # (including Apple's stock entries) untouched.
   system.activationScripts.postActivation.text = ''
-    echo "syncing Meshnet peers into /etc/hosts..." >&2
-    meshHostsTmp=$(mktemp)
-    ${pkgs.gawk}/bin/awk '
-      /^# BEGIN meshnet peers \(nix-darwin\)$/ { skip = 1 }
-      !skip                                    { print }
-      /^# END meshnet peers \(nix-darwin\)$/   { skip = 0 }
-    ' /etc/hosts > "$meshHostsTmp"
-    cat >> "$meshHostsTmp" <<'MESHEOF'
-# BEGIN meshnet peers (nix-darwin)
-${meshHostsBlock}
-# END meshnet peers (nix-darwin)
-MESHEOF
-    cat "$meshHostsTmp" > /etc/hosts
-    rm -f "$meshHostsTmp"
+        echo "syncing Meshnet peers into /etc/hosts..." >&2
+        meshHostsTmp=$(mktemp)
+        ${pkgs.gawk}/bin/awk '
+          /^# BEGIN meshnet peers \(nix-darwin\)$/ { skip = 1 }
+          !skip                                    { print }
+          /^# END meshnet peers \(nix-darwin\)$/   { skip = 0 }
+        ' /etc/hosts > "$meshHostsTmp"
+        cat >> "$meshHostsTmp" <<'MESHEOF'
+    # BEGIN meshnet peers (nix-darwin)
+    ${meshHostsBlock}
+    # END meshnet peers (nix-darwin)
+    MESHEOF
+        cat "$meshHostsTmp" > /etc/hosts
+        rm -f "$meshHostsTmp"
   '';
 
   #----- Power -----
@@ -244,15 +244,10 @@ MESHEOF
   #----- Homebrew -----
   homebrew = {
     enable = true;
-    onActivation =
-      {
-        # nix-darwin 25.11 still translates cleanup = "uninstall" to the
-        # removed `brew bundle --cleanup` flag. Pass Homebrew 6's replacement
-        # explicitly until the compatibility fix reaches the stable branch.
-        cleanup = "none";
-        upgrade = true;
-        extraFlags = [ "--force-cleanup" ];
-      };
+    onActivation = {
+      cleanup = "uninstall";
+      upgrade = true;
+    };
 
     # Declare the baseline Homebrew taps so cleanup does not try (and fail) to
     # untap them. `homebrew/cask` is required by the casks below. Without this

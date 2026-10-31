@@ -261,7 +261,6 @@
 
   # Enable the GNOME Desktop Environment.
   services.displayManager.gdm.enable = true;
-  services.displayManager.gdm.wayland = true;
   services.desktopManager.gnome.enable = true;
   # Disable heavy GNOME background services not needed for i3 workflow
   services.gnome.gnome-online-accounts.enable = false;
@@ -306,15 +305,12 @@
   services.libinput.touchpad.disableWhileTyping = true;
   services.libinput.mouse.disableWhileTyping = true;
 
-  # Android
-  programs.adb.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.matt = {
     isNormalUser = true;
     home = "/home/matt";
     description = "Matt N";
-    extraGroups = [ "nordvpn" "docker" "networkmanager" "wheel" "adbusers" "dialout" "input" ];
+    extraGroups = [ "nordvpn" "docker" "networkmanager" "wheel" "dialout" "input" ];
     openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDsX9th55Gnh54WPClEHrylw7Uw7Uu4MfF2lR2Ugi6Jfk2p0/nSdc0eGea8+hulccGgP7UxsZdOnA83ugZ7K+6SdDbc7qdTOst/amfGPYZoJVrAbDhRwfV9JBytjru+MADHPGCp2VBP+5/ko83SWreZZWIhRQypOMCbtvLCLByEk6HxVO19v5RrsQcals19tcwYn9tyCYHYcJxgbY3Y0sH3CrDXLMcy447Yeix7ljTpDDvAV+bW6cyBqUMC1upJ7jNPE4e/r5RudlEytr4JPAGQQPrxLPoBojvz1QE3qOtHdEy151Cz765WdZj23mKNnReWMV4eNm7XWGmQPsvEkWmAeCbYBw6PYNBvMrQSh45+TtJFPC3M+IXdHZhX4GxIPDKp1V0ohG56awp94WTqVvwOaiEO4S8fkVbv/zVzqWfawDKc7p1nFtc1A7Dn8LOxmMUEPn2FkoQjBNoWAxkb5Pch8jV2vRcGrkNP5A5++y/m0AcMR9eomeSn1JLKINGrDIM= matt@nixos" ];
     shell = pkgs.zsh;
 
@@ -350,6 +346,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = [
+    pkgs.android-tools # adb; systemd 258 uaccess replaces programs.adb + adbusers
     pkgs.gnumake
     pkgs.gh
     pkgs.vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
