@@ -28,7 +28,8 @@
                   {
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
-                      "^com\\.microsoft\\.rdc\\.macos$"
+                      "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
                 ]
@@ -57,7 +58,8 @@
                   {
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
-                      "^com\\.microsoft\\.rdc\\.macos$"
+                      "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
                 ]
@@ -74,6 +76,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -101,9 +104,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^tv\\.parsec\\.www$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -155,7 +162,8 @@
                   {
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
-                      "^com\\.microsoft\\.rdc\\.macos$"
+                      "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
                 ]
@@ -172,6 +180,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -199,9 +208,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^tv\\.parsec\\.www$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -237,6 +250,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -264,9 +278,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^tv\\.parsec\\.www$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -302,6 +320,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -332,9 +351,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -361,15 +384,16 @@
             ]
           },
           {
-            "description": "Use Control + Number to Switch Tabs in Chrome, Brave & Firefox",
+            "description": "Use Control + Number to Switch Tabs in Chrome, Brave & Firefox (threads in T3 Code)",
             "manipulators": [
               {
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -399,9 +423,10 @@
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -431,9 +456,10 @@
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -463,9 +489,10 @@
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -495,9 +522,10 @@
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -527,10 +555,11 @@
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -560,9 +589,10 @@
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -592,9 +622,10 @@
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -624,9 +655,10 @@
                 "conditions": [
                   {
                     "bundle_identifiers": [
-                      "^com.google.Chrome",
+                      "^com\\.google\\.Chrome$",
                       "^com.brave.Browser",
-                      "^org.mozilla.firefox"
+                      "^org.mozilla.firefox",
+                      "^com\\.t3tools\\.t3code$"
                     ],
                     "type": "frontmost_application_if"
                   }
@@ -824,6 +856,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$",
                       "^io\\.alacritty$",
                       "^org\\.alacritty$",
@@ -864,6 +897,7 @@
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -932,6 +966,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -962,9 +997,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -995,6 +1034,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1025,9 +1065,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1058,6 +1102,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1088,9 +1133,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1134,6 +1183,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1164,9 +1214,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1205,6 +1259,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1235,9 +1290,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1281,6 +1340,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1311,9 +1371,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1353,6 +1417,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1383,9 +1448,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1422,6 +1491,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1452,9 +1522,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1490,6 +1564,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1520,9 +1595,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1558,6 +1637,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1588,9 +1668,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1621,6 +1705,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1651,9 +1736,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1689,6 +1778,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1719,9 +1809,13 @@
                       "^org\\.alacritty$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.github\\.wez\\.wezterm$",
-                      "^com\\.mitchellh\\.ghostty$"
+                      "^com\\.mitchellh\\.ghostty$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1757,6 +1851,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -1777,9 +1872,13 @@
                       "^com\\.citrix\\.XenAppViewer$",
                       "^com\\.vmware\\.proxyApp\\.",
                       "^com\\.parallels\\.winapp\\.",
-                      "^tv\\.parsec\\.www$"
+                      "^tv\\.parsec\\.www$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -1815,6 +1914,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
                     "type": "frontmost_application_unless"
@@ -1848,6 +1948,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
                     "type": "frontmost_application_unless"
@@ -1887,6 +1988,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
                     "type": "frontmost_application_unless"
@@ -1928,6 +2030,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
                     "type": "frontmost_application_unless"
@@ -1961,6 +2064,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
                     "type": "frontmost_application_unless"
@@ -2000,6 +2104,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
                     "type": "frontmost_application_unless"
@@ -2041,6 +2146,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$",
                       "^io\\.alacritty$",
                       "^org\\.alacritty$",
@@ -2085,6 +2191,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
                     "type": "frontmost_application_unless"
@@ -2223,7 +2330,8 @@
                   {
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
-                      "^com\\.microsoft\\.rdc\\.macos$"
+                      "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
                 ]
@@ -2255,7 +2363,8 @@
                   {
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
-                      "^com\\.microsoft\\.rdc\\.macos$"
+                      "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
                 ]
@@ -2291,7 +2400,8 @@
                   {
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
-                      "^com\\.microsoft\\.rdc\\.macos$"
+                      "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
                 ]
@@ -2308,6 +2418,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -2335,9 +2446,13 @@
                       "^co\\.zeit\\.hyperterm$",
                       "^co\\.zeit\\.hyper$",
                       "^net\\.kovidgoyal\\.kitty$",
-                      "^com\\.github\\.wez\\.wezterm$"
+                      "^com\\.github\\.wez\\.wezterm$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -2368,6 +2483,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -2395,9 +2511,13 @@
                       "^co\\.zeit\\.hyperterm$",
                       "^co\\.zeit\\.hyper$",
                       "^net\\.kovidgoyal\\.kitty$",
-                      "^com\\.github\\.wez\\.wezterm$"
+                      "^com\\.github\\.wez\\.wezterm$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -2465,6 +2585,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -2492,9 +2613,13 @@
                       "^co\\.zeit\\.hyperterm$",
                       "^co\\.zeit\\.hyper$",
                       "^net\\.kovidgoyal\\.kitty$",
-                      "^com\\.github\\.wez\\.wezterm$"
+                      "^com\\.github\\.wez\\.wezterm$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -2522,6 +2647,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -2549,9 +2675,13 @@
                       "^co\\.zeit\\.hyperterm$",
                       "^co\\.zeit\\.hyper$",
                       "^net\\.kovidgoyal\\.kitty$",
-                      "^com\\.github\\.wez\\.wezterm$"
+                      "^com\\.github\\.wez\\.wezterm$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -2585,6 +2715,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -2612,9 +2743,13 @@
                       "^co\\.zeit\\.hyperterm$",
                       "^co\\.zeit\\.hyper$",
                       "^net\\.kovidgoyal\\.kitty$",
-                      "^com\\.github\\.wez\\.wezterm$"
+                      "^com\\.github\\.wez\\.wezterm$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -2666,7 +2801,8 @@
                   {
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
-                      "^com\\.microsoft\\.rdc\\.macos$"
+                      "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
                 ]
@@ -2683,6 +2819,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -2703,9 +2840,13 @@
                       "^com\\.citrix\\.XenAppViewer$",
                       "^com\\.vmware\\.proxyApp\\.",
                       "^com\\.parallels\\.winapp\\.",
-                      "^tv\\.parsec\\.www$"
+                      "^tv\\.parsec\\.www$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -2736,6 +2877,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
                       "^com\\.thinomenon\\.RemoteDesktopConnection$",
@@ -2756,9 +2898,13 @@
                       "^com\\.citrix\\.XenAppViewer$",
                       "^com\\.vmware\\.proxyApp\\.",
                       "^com\\.parallels\\.winapp\\.",
-                      "^tv\\.parsec\\.www$"
+                      "^tv\\.parsec\\.www$",
+                      "^com\\.custom\\.scrcpy$"
                     ],
-                    "type": "frontmost_application_unless"
+                    "type": "frontmost_application_unless",
+                    "file_paths": [
+                      "/scrcpy$"
+                    ]
                   }
                 ],
                 "from": {
@@ -2969,7 +3115,8 @@
                   {
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
-                      "^com\\.microsoft\\.rdc\\.macos$"
+                      "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
                 ]
