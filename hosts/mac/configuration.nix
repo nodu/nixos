@@ -233,7 +233,6 @@ in
     # or activation would try to re-tap the archived, incompatible repo.)
     taps = [
       "homebrew/cask"
-      "stablyai/orca"
     ];
 
     casks = [
