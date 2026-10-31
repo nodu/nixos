@@ -154,6 +154,10 @@ in
             "64" = { enabled = false; };
             # 65 = Finder Search Window (Cmd+Option+Space)
             "65" = { enabled = false; };
+            # 60 = Select previous input source (Ctrl+Space) — frees it for nvim
+            "60" = { enabled = false; };
+            # 61 = Select next input source (Ctrl+Option+Space)
+            "61" = { enabled = false; };
           };
         };
       };
@@ -241,7 +245,7 @@ in
       "spotify"
       "karabiner-elements"
       "claude"
-      "claude-code"
+      "claude-code@latest"
       "opencode-desktop"
       "chatgpt"
       "codex"
@@ -259,7 +263,6 @@ in
       "loom"
       "steam"
       "raycast"
-      #"flameshot" MacOS Gatekeeper fails
       "discord"
       "audacity"
       "redis-insight"
@@ -276,7 +279,7 @@ in
       "t3-code"
       "unsloth"
       "android-platform-tools"
-      "stablyai/orca/orca"
+      "signal"
     ];
 
     brews = [
