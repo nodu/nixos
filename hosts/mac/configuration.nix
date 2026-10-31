@@ -59,39 +59,11 @@ in
     RunAtLoad = lib.mkForce false;
   };
 
-  # Ollama here is the `ollama-app` cask (see homebrew.casks below), started by
-  # the GUI rather than a shell, so `environment.variables` never reaches it --
-  # launchd's user session is the only channel a menu-bar app inherits from.
-  #
-  # Pinning the context is not a tuning preference, it avoids a hard failure.
-  # Ollama >= 0.33 sizes its default context from reported VRAM instead of the
-  # old flat 4096: on this 64 GB M5 Pro it sees 51.8 GiB "available" Metal
-  # memory and picks a model's full 262144-token window, which costs ~17 GB of
-  # KV cache on a 27B. It then validates that ~36 GB projection against the
-  # Metal budget rather than free system RAM, so with ~22 GB actually free it
-  # commits anyway and the backend OOMs mid-decode:
-  #   error: Insufficient Memory (kIOGPUCommandBufferCallbackErrorOutOfMemory)
-  #   ggml_metal_graph_compute: backend is in error state from a previous
-  #                             command buffer failure - recreate to recover
-  # ggml never recreates the backend, so once wedged *every* model returns an
-  # empty 200 response until the server is restarted -- it does not degrade,
-  # it silently stops working. 32k holds KV cache near 2 GB.
-  #
-  # This is a floor for whatever asks first, not a per-model setting. It has to
-  # stay conservative because it applies before the engine is known, and the
-  # two engines differ: ggml pre-allocates the whole window at load (hence the
-  # OOM above), while MLX allocates lazily, so num_ctx is only a ceiling there.
-  # Clients that know the model override it per request -- opencode gets the
-  # full native 262144 for MLX models from nx-opencode-ollama-sync: those are
-  # hybrid-attention qwen3_5 builds that keep a growing KV cache on only a
-  # quarter of their layers (5 GiB at 262144 for the 35b-a3b), and a real
-  # 227k-token prompt ran here without OOM. Anything that does *not* override
-  # lands on 32k, which is the point.
-  launchd.user.envVariables = {
-    OLLAMA_CONTEXT_LENGTH = "32768";
-    OLLAMA_MAX_LOADED_MODELS = "1";
-    OLLAMA_KEEP_ALIVE = "30m";
-  };
+  # Local models are served by Unsloth Studio (the `unsloth` cask below) on
+  # http://127.0.0.1:8888/v1. Its settings live in the app, not here: Settings >
+  # API > "Keyless API access" = full and "Model auto-switch" on, which is what
+  # lets opencode (home/scripts/opencode-models.py) and other local clients
+  # reach it without a key and load models by name.
 
   #----- nixpkgs -----
   nixpkgs.config = {
@@ -285,7 +257,6 @@ in
       "bitwarden"
       "linear"
       "loom"
-      "ollama-app"
       "steam"
       "raycast"
       #"flameshot" MacOS Gatekeeper fails
@@ -303,6 +274,7 @@ in
       "libreoffice"
       "fathom"
       "t3-code"
+      "unsloth"
       "stablyai/orca/orca"
     ];
 

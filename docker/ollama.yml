@@ -1,6 +1,14 @@
-# Open WebUI - ChatGPT-like interface for Ollama
-# Connects to Ollama running on the host (installed via Homebrew cask on macOS,
-# or services.ollama on NixOS).
+# Open WebUI - ChatGPT-like interface for local models
+# Connects to whichever model server runs on the host: Unsloth Studio on macOS
+# (OpenAI-compatible, :8888) or services.ollama on NixOS (:11434). Open WebUI
+# lists models from both and ignores the one that is not there.
+#
+# Studio's keyless access is loopback-only and requests from a container are
+# not loopback, so Studio needs a real key: create one in Unsloth Studio
+# (Settings > API) and export UNSLOTH_API_KEY before `up`.
+#
+# RAG_EMBEDDING_ENGINE=ollama only works on the NixOS host; on macOS, switch
+# document embeddings to Studio in Open WebUI's admin settings.
 #
 # Usage:
 #   docker compose -f docker/ollama.yml up -d    # start
@@ -19,6 +27,8 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OPENAI_API_BASE_URL=http://host.docker.internal:8888/v1
+      - OPENAI_API_KEY=${UNSLOTH_API_KEY:-}
       - WEBUI_AUTH=false
       - RAG_EMBEDDING_ENGINE=ollama
       - RAG_EMBEDDING_MODEL_AUTO_UPDATE=false

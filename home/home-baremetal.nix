@@ -511,7 +511,7 @@ in
   # empty response (see hosts/mac/configuration.nix); here it just means
   # allocating far more than a 30 GB box has.
   #
-  # 32k is also what nx-opencode-ollama-sync emits for gguf models, which is
+  # 32k is also what nx-opencode-models-sync emits for gguf models, which is
   # every model here -- this box runs ggml on CPU, and ggml pre-allocates the
   # whole window at load, so the cap is a real reservation rather than a
   # ceiling. (The sync script raises it for MLX models, which allocate lazily,

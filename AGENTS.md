@@ -107,11 +107,38 @@ id) can be relaunched, both agent TUIs show the copy-pasteable resume command:
 - **opencode**: a TUI slot plugin renders `opencode -s <session-id>` on the
   prompt row. Source: [`home/shared/opencode/plugins/session-id/index.tsx`](home/shared/opencode/plugins/session-id/index.tsx),
   declared in [`home/shared/opencode/tui.json`](home/shared/opencode/tui.json)
-  (`plugin` array). TUI-only plugins go in `tui.json`, **not** `opencode.json` —
+  (`plugin` array). TUI-only plugins go in `tui.json`, **not** `opencode.base.json` —
   the server plugin pass rejects a module that has no `server()` export.
 
 `nx-save-sessions` (`home/scripts/agent-sessions.py`) remains the batch
 save/restore path; the on-screen IDs complement it for single-pane recovery.
+
+## opencode Config (local models)
+
+`~/.config/opencode/opencode.json` is **generated** — do not edit it, and do not
+add a home-manager `xdg.configFile` entry for that path. It is written by
+`nx-opencode-models-sync` (`home/scripts/opencode-models.py`) from two
+sources:
+
+- [`home/shared/opencode/opencode.base.json`](home/shared/opencode/opencode.base.json) —
+  shared, hand-written settings (`mcp`, `default_agent`, `agent`, `skills`),
+  symlinked out-of-store to `~/.config/opencode/opencode.base.json`. **Edit this one.**
+- the local model servers — host-specific, since the installed models and their
+  safe context caps differ per host: Unsloth Studio on the Mac
+  (`127.0.0.1:8888`, MLX), ollama on baremetal (`127.0.0.1:11434`, gguf). Each
+  server that answers gets its own provider block.
+
+The merge is done by the script rather than by opencode's own config layering
+(`global -> OPENCODE_CONFIG -> project`), because that layering needs
+`OPENCODE_CONFIG` in the environment and GUI-launched clients only import a
+fixed allowlist of variables from a login shell — T3 Code drops it, so its
+opencode server never saw the local models. See the comment in
+[`home/shared/opencode.nix`](home/shared/opencode.nix).
+
+The sync runs on every home-manager activation, so base edits and a `git pull`
+propagate on rebuild. **Rerun it by hand after downloading or removing a model** —
+a rebuild does not notice a changed model set. If no model server is reachable
+the base settings are still written, minus the provider blocks.
 
 ## Desktop & Development Environment
 
