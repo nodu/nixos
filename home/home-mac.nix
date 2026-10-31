@@ -45,6 +45,7 @@ in
     ./shared/git.nix
     ./shared/cli.nix
     ./shared/devops.nix
+    ./shared/ds.nix
     ./shared/gpg.nix
     ./shared/ssh.nix
     ./shared/tmux.nix
