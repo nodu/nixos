@@ -154,31 +154,64 @@ the base settings are still written, minus the provider blocks.
 
 ## Power Management (baremetal)
 
-The Framework 13 AMD uses **s2idle** (S0ix) for suspend -- not S3 deep sleep. s2idle drains more power than S3, so suspend-then-hibernate is configured to prevent battery death during suspend. Hibernation resume is auto-detected via the systemd initrd.
+**baremetal runs as an always-on server**, lid closed and on AC. Nothing may suspend it
+automatically. The Framework 13 AMD uses s2idle (S0ix) rather than S3 deep sleep, so an
+accidental suspend also drains the battery fast -- another reason the automatic triggers
+are all off. Manual `systemctl suspend` and `systemctl hibernate` still work if the
+laptop travels; only the automatic paths are disabled.
 
 ### Behavior
 
 | Trigger | What happens |
 |---|---|
-| **Idle 5 min** | Screen locks via xss-lock/i3lock ([`home/i3/i3.config:61`](home/i3/i3.config)) |
-| **Idle 5.5 min** | Display off via DPMS ([`home/i3/i3.config:60`](home/i3/i3.config)) |
-| **Idle 10 min** | Suspend-then-hibernate via logind IdleAction ([`hosts/baremetal/configuration.nix:39-42`](hosts/baremetal/configuration.nix)) |
-| **Lid close** | Immediate suspend-then-hibernate ([`hosts/baremetal/configuration.nix:38`](hosts/baremetal/configuration.nix)) |
-| **Power button** | Immediate suspend-then-hibernate ([`hosts/baremetal/configuration.nix:37`](hosts/baremetal/configuration.nix)) |
-| **During suspend, every 1 min** | systemd wakes to check battery drain, hibernates early if needed ([`hosts/baremetal/configuration.nix:47-50`](hosts/baremetal/configuration.nix)) |
-| **During suspend, after 2h** | Hibernate regardless ([`hosts/baremetal/configuration.nix:48`](hosts/baremetal/configuration.nix)) |
-| **Awake, battery 15%** | Warning notification via batsignal/dunst ([`home/i3/i3.nix`](home/i3/i3.nix)) |
-| **Awake, battery 5%** | Critical notification via batsignal/dunst ([`home/i3/i3.nix`](home/i3/i3.nix)) |
-| **Awake, battery 4%** | Danger notification via batsignal/dunst ([`home/i3/i3.nix`](home/i3/i3.nix)) |
-| **Awake, battery 3%** | UPower triggers hibernate ([`hosts/baremetal/configuration.nix:43-44`](hosts/baremetal/configuration.nix)) |
+| **Lid close, on AC** | Nothing -- `HandleLidSwitchExternalPower = "ignore"`. This is the one that matters; on AC it takes precedence over `HandleLidSwitch`. Note systemd ignores this setting entirely unless given an explicit value |
+| **Lid close, on battery** | Suspends -- `HandleLidSwitch = "suspend"`. Set explicitly (it matches systemd's default) so all three lid cases read as deliberate. It only applies off AC, where suspending in a bag is what you want |
+| **Lid close, docked or 2+ displays** | Nothing -- `HandleLidSwitchDocked = "ignore"`, which outranks both of the above |
+| **Idle, any duration** | Nothing -- logind `IdleAction = "ignore"` |
+| **Idle at the GDM greeter** | Nothing -- `services.displayManager.gdm.autoSuspend = false`. GDM runs its own idle timer that ignores logind, so this is required separately |
+| **Idle 5 min (i3 session)** | Screen still locks via xss-lock/i3lock ([`home/i3/i3.config`](home/i3/i3.config)) -- lock and DPMS-off are kept, they don't suspend |
+| **Power button, short press** | Suspends (`HandlePowerKey = "suspend"`). Deliberately kept: the button is the fingerprint reader on the keyboard deck, unreachable with the lid shut, so it can't be hit by accident in the always-on case -- and it's the behavior you want when the lid is open. If it *is* pressed, the host stays down until someone opens the lid |
+| **Power button, ~5s hold** | Clean poweroff (`HandlePowerKeyLongPress`). systemd defaults this to `ignore`, which would leave only the firmware's unclean force-cut |
+| **Kernel panic / oops** | Reboots after 30s (`boot.kernel.sysctl."kernel.panic"`) |
+| **PID 1 wedged >60s** | Hardware watchdog resets the box (`systemd.settings.Manager.RuntimeWatchdogSec`, device `/dev/watchdog0`). 60s not 30s because heavy nix builds under swap pressure can delay PID 1, and a spurious reset mid-build is worse than slower recovery |
+| **Reboot itself hangs >10min** | Watchdog forces the reset (`RebootWatchdogSec`) |
+| **Boot and after resume** | Battery charge capped at 80% via `framework_tool --charge-limit` (systemd unit `framework-charge-limit`). The EC forgets this across a full power loss, hence re-applying |
+| **Awake, battery 15% / 5% / 4%** | Warning / critical / danger notification via batsignal/dunst ([`home/i3/i3.nix`](home/i3/i3.nix)) |
+| **Awake, battery 3%** | UPower hibernates. On AC the battery is effectively a UPS -- this is the graceful landing for a long power cut, not a normal path |
+
+### Manual steps not expressible in Nix
+
+- **Power On AC Attach** must be enabled in BIOS setup (F2 at boot). Without it the machine
+  stays off after a power cut drains the battery, and Nix cannot set it.
+- **Ethernet**: the Framework 13 has no built-in NIC. WiFi works (powersave is disabled in
+  `networking.networkmanager.wifi.powersave`), but the ethernet expansion card is more
+  reliable for a server.
+- **Thermals**: lid closed, intake is the underside and exhaust is the hinge. Keep it on a
+  hard surface with clearance. Check with `sensors` over SSH.
 
 ### Key files
 
-- **System power config**: [`hosts/baremetal/configuration.nix`](hosts/baremetal/configuration.nix) -- logind (lid/power/idle actions), upower (critical battery action), systemd sleep (hibernate delay, suspend estimation)
+- **System power config**: [`hosts/baremetal/configuration.nix`](hosts/baremetal/configuration.nix) -- logind (lid/power/idle actions), gdm autoSuspend, upower (critical battery action), charge limit unit, panic sysctls
 - **Screen lock/DPMS**: [`home/i3/i3.config`](home/i3/i3.config) -- xset timeouts (use `exec` not `exec_always` so toggle state survives i3 reload)
 - **Screensaver toggle**: [`home/i3/scripts/monitor/toggle-screensaver.sh`](home/i3/scripts/monitor/toggle-screensaver.sh) -- toggle DPMS/screensaver on/off (keep xset values in sync with i3.config)
 - **Battery notifications**: [`home/i3/i3.nix`](home/i3/i3.nix) -- batsignal systemd user service, sends notifications via dunst
 - **Swap/hibernation**: [`hosts/baremetal/hardware-configuration.nix`](hosts/baremetal/hardware-configuration.nix) -- 32GB swapfile, resume auto-detected by systemd initrd
+
+### Remote access
+
+SSH is key-only (`PasswordAuthentication = false`), matching bau. `matt` has lingering
+enabled so systemd **user** units start at boot without an interactive login -- this is
+what makes a reboot bring services back with the lid still shut.
+
+**baremetal is reachable on the LAN only.** The `baremetal` SSH match block in
+[`home/shared/ssh.nix`](home/shared/ssh.nix) resolves it over NordVPN Meshnet (nickname
+`baremetal`, mesh IP `100.125.97.192` as `baremetal-mesh-ip`). Renaming the Meshnet
+nickname breaks `ssh baremetal` until this file is updated and re-applied.
+
+There are deliberately no `baremetal/*` Makefile targets. Rebuilds are done by SSHing in
+(`ssh baremetal`) and running `make switch` there. The Mac is aarch64-darwin and cannot
+build an x86_64-linux closure without a remote builder anyway, so a push-based deploy
+target would have to build on baremetal regardless.
 
 ## Karabiner-Elements (macOS)
 
