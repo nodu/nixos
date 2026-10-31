@@ -11,9 +11,9 @@
 # document embeddings to Studio in Open WebUI's admin settings.
 #
 # Usage:
-#   docker compose -f docker/ollama.yml up -d    # start
-#   docker compose -f docker/ollama.yml down      # stop
-#   docker compose -f docker/ollama.yml pull      # update image
+#   docker compose -f docker/open-webui.yml up -d    # start
+#   docker compose -f docker/open-webui.yml down      # stop
+#   docker compose -f docker/open-webui.yml pull      # update image
 #
 # Open http://localhost:8080 in your browser.
 
