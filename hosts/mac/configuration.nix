@@ -275,11 +275,13 @@ in
       "fathom"
       "t3-code"
       "unsloth"
+      "android-platform-tools"
       "stablyai/orca/orca"
     ];
 
     brews = [
       "anomalyco/tap/opencode"
+      "scrcpy"
     ];
   };
 }

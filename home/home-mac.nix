@@ -199,6 +199,94 @@ in
     "$LSREGISTER" -f "$CLAUDE_PERSONAL"
   '';
 
+  #----- scrcpy launcher app -----
+  # Mirrors the Android phone over wireless debugging without a terminal.
+  # Connects via mDNS first because the connect port changes whenever wireless
+  # debugging restarts. Uses the Homebrew scrcpy/adb (hosts/mac brews) by full
+  # path since GUI launches don't get the shell PATH. Pairing is a one-time
+  # manual step (`adb pair`) and is not handled here.
+  home.activation.scrcpyApp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+    SCRCPY_APP="$HOME/Applications/Scrcpy.app"
+    rm -rf "$SCRCPY_APP"
+    mkdir -p "$SCRCPY_APP/Contents/MacOS"
+
+    cat > "$SCRCPY_APP/Contents/Info.plist" << 'PLIST'
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>CFBundleExecutable</key>
+      <string>scrcpy-launcher</string>
+      <key>CFBundleIdentifier</key>
+      <string>com.custom.scrcpy</string>
+      <key>CFBundleName</key>
+      <string>Scrcpy</string>
+      <key>CFBundleVersion</key>
+      <string>1.0</string>
+    </dict>
+    </plist>
+    PLIST
+
+    cat > "$SCRCPY_APP/Contents/MacOS/scrcpy-launcher" << 'SCRIPT'
+    #!/bin/bash
+    # scrcpy runs adb itself and finds it via $ADB or PATH, so both must be exported
+    export ADB=/opt/homebrew/bin/adb
+    export PATH="/opt/homebrew/bin:$PATH"
+    SCRCPY=/opt/homebrew/bin/scrcpy
+    LOG="$HOME/.local/state/scrcpy-app.log"
+    mkdir -p "$HOME/.local/state"
+    exec >"$LOG" 2>&1
+
+    notify() {
+        osascript -e "display notification \"$1\" with title \"Scrcpy\""
+    }
+
+    # Already mirroring: bring the window forward instead of opening a second one
+    PID=$(pgrep -x scrcpy | head -1)
+    if [ -n "$PID" ]; then
+        osascript -e "tell application \"System Events\" to set frontmost of (first process whose unix id is $PID) to true"
+        exit 0
+    fi
+
+    network_device() {
+        "$ADB" devices | awk 'NR > 1 && $2 == "device" && ($1 ~ /:/ || $1 ~ /_adb-tls-connect/) { print $1; exit }'
+    }
+
+    "$ADB" start-server
+
+    # mDNS discovery takes a few seconds after the adb server starts
+    for _ in 1 2 3 4 5 6 7 8; do
+        [ -n "$(network_device)" ] && break
+        ADDR=$("$ADB" mdns services | awk '$2 == "_adb-tls-connect._tcp" { print $3; exit }')
+        [ -n "$ADDR" ] && "$ADB" connect "$ADDR"
+        sleep 1
+    done
+
+    if [ -z "$(network_device)" ]; then
+        notify "Phone not found. Is Wireless debugging on and the phone on the same network?"
+        exit 1
+    fi
+
+    # Tuned for typing latency over Wi-Fi on the Pixel 11 Pro Fold:
+    # - repeat-previous-frame-after keeps the encoder fed at ~60fps; otherwise
+    #   it holds a keystroke's frame until the next change (or a 100ms timer)
+    # - uhid acts as a physical keyboard, so the on-screen keyboard (and its
+    #   per-key redraws) stays hidden
+    # - h264 at 1600 felt most usable; --max-fps=60 felt the same or better than
+    #   uncapped and saves encoding work against the 120Hz panel
+    "$SCRCPY" -e \
+        --max-size=1600 \
+        --max-fps=60 \
+        --keyboard=uhid \
+        --video-codec=h264 \
+        --video-codec-options=repeat-previous-frame-after:long=16666,priority:int=0,latency:int=0 \
+        || notify "scrcpy exited with an error, see ~/.local/state/scrcpy-app.log"
+    SCRIPT
+    chmod +x "$SCRCPY_APP/Contents/MacOS/scrcpy-launcher"
+    "$LSREGISTER" -f "$SCRCPY_APP"
+  '';
+
   #----- macOS-specific packages -----
   home.packages = [
     # pkgs.bun
