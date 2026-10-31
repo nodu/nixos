@@ -109,6 +109,15 @@
           KUBE_PS1_CTX_COLOR=cyan          # readable on dark terminal
           KUBE_PS1_NS_COLOR=yellow
 
+          # Reset terminal input modes at every prompt. A remote TUI killed mid-session
+          # (ssh "Broken pipe") never sends its teardown, leaving mouse reporting on, so
+          # moving the mouse over the tmux pane types "35;x;yM" garbage into the shell.
+          # zsh itself never wants these modes: 1000/1002/1003 mouse tracking, 1006 SGR
+          # mouse encoding, 1004 focus events, 2031 color-scheme reports ("997;1n").
+          _reset_term_modes() { print -n '\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?1004l\e[?2031l' }
+          autoload -Uz add-zsh-hook
+          add-zsh-hook precmd _reset_term_modes
+
           source $HOME/.config/nixos-functions.sh
           source $HOME/.config/apps.sh
           source $HOME/.config/aliases
