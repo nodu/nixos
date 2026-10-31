@@ -102,7 +102,7 @@ There is no unit test suite, linter, or CI pipeline. The primary validation meth
 So a pane restored after a crash (tmux resurrect keeps cwd but not the session
 id) can be relaunched, both agent TUIs show the copy-pasteable resume command:
 
-- **Claude Code**: bottom statusline appends `claude -r <session-uuid>` (plus the
+- **Claude Code**: bottom statusline appends `claude -r <session-uuid>` (`claude-personal -r` in the personal profile, plus the
   session name when set). Source: [`home/shared/claude/statusline.sh`](home/shared/claude/statusline.sh).
 - **opencode**: a TUI slot plugin renders `opencode -s <session-id>` on the
   prompt row. Source: [`home/shared/opencode/plugins/session-id/index.tsx`](home/shared/opencode/plugins/session-id/index.tsx),

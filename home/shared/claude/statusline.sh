@@ -46,8 +46,8 @@ SEP="${DIM} · ${RESET}"
 # scrubbed, but is absent very early in a session. Either one naming the
 # personal dir is enough.
 case "${CLAUDE_CONFIG_DIR:-}${tpath}" in
-  *.claude-personal*) profile_seg="${BOLD}${MAGENTA}personal${RESET}" ;;
-  *)                  profile_seg="${DIM}work${RESET}" ;;
+  *.claude-personal*) profile_seg="${BOLD}${MAGENTA}personal${RESET}"; claude_bin=claude-personal ;;
+  *)                  profile_seg="${DIM}work${RESET}"; claude_bin=claude ;;
 esac
 
 # --- context segment ---
@@ -86,5 +86,5 @@ if [ -n "$sid" ]; then
   if [ -n "$sname" ]; then
     name_str="${DIM}(${sname})${RESET} "
   fi
-  printf "%b${DIM}claude -r %s${RESET}\n" "$name_str" "$sid"
+  printf "%b${DIM}%s -r %s${RESET}\n" "$name_str" "$claude_bin" "$sid"
 fi
