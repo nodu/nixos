@@ -2,8 +2,8 @@
 { config, lib, pkgs, ... }:
 
 let
-  # Use the same key name across hosts; secrets/restore puts the key in place
-  identityFile = if pkgs.stdenv.isDarwin then "~/.ssh/mac" else "~/.ssh/baremetal";
+  # One key pair, same name on every host; secrets/restore puts it in place
+  identityFile = "~/.ssh/matt";
 
   # Meshnet addresses live in one place so the ssh blocks below and the mac's
   # /etc/hosts block cannot drift apart.
@@ -95,6 +95,15 @@ in
           host.address = "localhost";
           host.port = 3389;
         }];
+      };
+
+      # Wired LAN address it had under Ubuntu; reserve it in the router.
+      # TODO: switch to the Meshnet name once base is registered, like baremetal.
+      "base" = {
+        User = "matt";
+        HostName = "192.168.0.3";
+        HostKeyAlias = "base";
+        IdentityFile = identityFile;
       };
 
       "rpi3" = {
