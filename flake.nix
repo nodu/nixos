@@ -10,6 +10,10 @@
     # We use the unstable nixpkgs repo for some packages.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
+    # Build recipe for T3 Code only, so scripts/update-t3code.sh can move it
+    # without updating everything else on unstable.
+    nixpkgs-t3code.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+
     # Pinned nixpkgs 25.05 for packages that need older versions (e.g. terraform 1.12.x)
     nixpkgs-2505.url = "github:nixos/nixpkgs/nixos-25.05";
 
@@ -167,18 +171,7 @@
       # handy is x86_64-only
       handy = inputs.handy.packages."x86_64-linux".default;
 
-      # TODO: drop once upstream adds ../script to the fileset in nix/node_modules.nix.
-      # packages/cli/script/build.ts imports script/native-arch.ts, which the src filter leaves out.
-      opencodePackages = system:
-        let upstream = inputs.opencode.packages.${system};
-        in upstream // {
-          opencode = upstream.opencode.overrideAttrs (old: {
-            postPatch = (old.postPatch or "") + ''
-              mkdir -p script
-              cp ${inputs.opencode}/script/native-arch.ts script/
-            '';
-          });
-        };
+      opencodePackages = system: inputs.opencode.packages.${system};
 
       overlays = [
         #(import ./overlays/sddm.nix)

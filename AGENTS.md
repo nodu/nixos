@@ -117,16 +117,18 @@ save/restore path; the on-screen IDs complement it for single-pane recovery.
 
 `~/.config/opencode/opencode.json` is **generated** — do not edit it, and do not
 add a home-manager `xdg.configFile` entry for that path. It is written by
-`nx-opencode-models-sync` (`home/scripts/opencode-models.py`) from two
+`nx-opencode-models-sync` (`home/scripts/opencode-models.py`) from three
 sources:
 
 - [`home/shared/opencode/opencode.base.json`](home/shared/opencode/opencode.base.json) —
   shared, hand-written settings (`mcp`, `default_agent`, `agent`, `skills`),
   symlinked out-of-store to `~/.config/opencode/opencode.base.json`. **Edit this one.**
+- [`home/shared/mcp/servers.json`](home/shared/mcp/servers.json) — MCP servers
+  shared with every harness (see below).
 - the local model servers — host-specific, since the installed models and their
-  safe context caps differ per host: Unsloth Studio on the Mac
-  (`127.0.0.1:8888`, MLX), ollama on baremetal (`127.0.0.1:11434`, gguf). Each
-  server that answers gets its own provider block.
+  safe context caps differ per host: Unsloth Studio (`127.0.0.1:8888`) and
+  ollama (`127.0.0.1:11434`). Each server that answers gets its own provider
+  block; Studio's last list is kept while the app is closed.
 
 The merge is done by the script rather than by opencode's own config layering
 (`global -> OPENCODE_CONFIG -> project`), because that layering needs
@@ -139,6 +141,27 @@ The sync runs on every home-manager activation, so base edits and a `git pull`
 propagate on rebuild. **Rerun it by hand after downloading or removing a model** —
 a rebuild does not notice a changed model set. If no model server is reachable
 the base settings are still written, minus the provider blocks.
+
+## MCP Servers (all harnesses)
+
+Declared once in [`home/shared/mcp/servers.json`](home/shared/mcp/servers.json)
+(`mcpServers` shape; `authFile` instead of inline headers). Edit that file, then
+run `nx-mcp-sync` and `nx-opencode-models-sync` (a switch runs both):
+
+- **Claude Code**: `nx-mcp-sync` writes user-scope entries into both profiles'
+  `.claude.json`, tracking what it owns so servers added with `claude mcp add` survive.
+- **opencode**: `nx-opencode-models-sync` merges the servers into the generated
+  `opencode.json`. Servers in `opencode.base.json` (linear, notion) stay opencode-only.
+
+Tokens live in `~/.secrets/mcp/<name>` as the full Authorization header value
+(`Bearer …` / `Basic …`), never in the repo or the generated configs. Claude reads
+them through a `headersHelper` (`nx-mcp-auth-header`), opencode through `{file:…}`.
+Details in [`home/shared/mcp.nix`](home/shared/mcp.nix).
+
+Global agent instructions (when to use these servers, where memories go) live in
+[`home/shared/agents/AGENTS.md`](home/shared/agents/AGENTS.md), linked by
+[`home/shared/agents.nix`](home/shared/agents.nix) into both Claude profiles'
+`CLAUDE.md`, `~/.config/opencode/AGENTS.md` and `~/.codex/AGENTS.md`.
 
 ## Desktop & Development Environment
 

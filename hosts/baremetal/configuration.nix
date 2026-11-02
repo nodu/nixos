@@ -418,13 +418,13 @@
       ];
 
     };
-  # T3 Code (home-manager user service) listens on 0.0.0.0:3773. Reachable over
-  # Meshnet, and from the home LAN via the wired USB NIC only (never wifi).
-  # 8787 homebase receiver, 2586 homebase ntfy: Meshnet only.
+  # Wired LAN only (USB NIC, never wifi): 3773 T3 Code, 3389 xrdp, 2586 homebase ntfy.
+  # 3773 and 2586 are also reachable over Meshnet; 8787 homebase receiver is Meshnet only.
   networking.firewall.interfaces.nordlynx.allowedTCPPorts = [ 3773 8787 2586 ];
   networking.firewall.extraCommands = ''
     iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 3773 -s 192.168.0.0/24 -j nixos-fw-accept
     iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 3389 -s 192.168.0.0/24 -j nixos-fw-accept
+    iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 2586 -s 192.168.0.0/24 -j nixos-fw-accept
   '';
 
   networking.firewall.checkReversePath = "loose"; #nordvpn + tailscale

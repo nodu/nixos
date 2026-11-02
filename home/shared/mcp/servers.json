@@ -1,0 +1,15 @@
+{
+  "//": "MCP servers for every agent harness. nx-mcp-sync writes them into Claude Code (user scope, both profiles); nx-opencode-models-sync merges them into opencode.json. authFile holds the whole Authorization header value (\"Bearer ...\" / \"Basic ...\") and lives in ~/.secrets, never here. See home/shared/mcp.nix.",
+  "mcpServers": {
+    "silverbullet": {
+      "type": "http",
+      "url": "http://bau:9998/mcp",
+      "authFile": "~/.secrets/mcp/silverbullet"
+    },
+    "basic-memory": {
+      "type": "http",
+      "url": "http://bau/basic-memory/mcp",
+      "authFile": "~/.secrets/mcp/basic-memory"
+    }
+  }
+}

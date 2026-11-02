@@ -54,6 +54,8 @@ in
     ./shared/agent-sessions.nix
     ./shared/claude.nix
     ./shared/opencode.nix
+    ./shared/mcp.nix
+    ./shared/agents.nix
     ./darwin/darwin.nix
   ];
 
