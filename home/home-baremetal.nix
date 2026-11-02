@@ -177,6 +177,8 @@ in
     ./shared/ssh.nix
     ./shared/claude.nix
     ./shared/opencode.nix
+    ./shared/mcp.nix
+    ./shared/agents.nix
     ./sway/sway.nix
     ./i3/i3.nix
     # ./hyprland/hyprland.nix
