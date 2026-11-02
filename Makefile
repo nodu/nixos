@@ -42,6 +42,7 @@ help:
 	@echo "Updates:"
 	@echo "  make update-flakes       - Update all flake inputs"
 	@echo "  make update-nordvpn      - Update pinned NordVPN version"
+	@echo "  make update-t3code       - Pin T3 Code to its latest stable release"
 	@echo ""
 	@echo "macOS (nix-darwin):"
 	@echo "  make mac/bootstrap       - First-time setup (run on a fresh Mac)"
@@ -130,6 +131,9 @@ update-flakes:
 
 update-nordvpn:
 	$(MAKEFILE_DIR)/scripts/update-nordvpn.sh
+
+update-t3code:
+	$(MAKEFILE_DIR)/scripts/update-t3code.sh
 
 # bootstrap a brand new VM. The VM should have NixOS ISO on the CD drive
 # and just set the password of the root user to "root". This will install

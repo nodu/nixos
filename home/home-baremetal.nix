@@ -19,33 +19,9 @@ let
     exec ${unstable.opencode-desktop}/bin/OpenCode --disable-gpu --use-gl=angle --use-angle=swiftshader "$@"
   '';
 
-  # TODO: drop the version bump once nixpkgs-unstable ships t3code >= 0.1.0
-  t3codeUnwrapped = unstable.t3code.unwrapped.overrideAttrs (finalAttrs: old: {
-    version = "0.1.0";
-    src = old.src.override {
-      tag = "v${finalAttrs.version}";
-      hash = "sha256-P82DqoY1E9wtROwu5Nr7MB/I1PdmZHWXXR4nRa4GWXM=";
-    };
-    pnpmDeps = old.pnpmDeps.overrideAttrs {
-      inherit (finalAttrs) version src;
-      outputHash = "sha256-oX4tOu20tYO3ci7VvSEL8eFgxAYWp5HlQFSfAWJGJmg=";
-    };
-    # Pairing-issued sessions expire after a fixed 30 days with no refresh, so
-    # every client must re-pair monthly. Drop once upstream ships a fix:
-    # https://github.com/pingdotgg/t3code/issues/13055
-    # https://github.com/pingdotgg/t3code/issues/9884
-    postPatch = (old.postPatch or "") + ''
-      substituteInPlace apps/server/src/auth/SessionStore.ts \
-        --replace-fail "DEFAULT_SESSION_TTL = Duration.days(30)" "DEFAULT_SESSION_TTL = Duration.days(365)"
-    '';
-  });
-  t3code = unstable.t3code.override {
-    t3code-unwrapped = t3codeUnwrapped;
-    # Cargo.lock is unchanged in 0.1.0, so the vendored deps carry over.
-    t3code-resource-monitor = unstable.t3code.resourceMonitor.overrideAttrs {
-      inherit (t3codeUnwrapped) version src;
-    };
-  };
+  t3code = (import inputs.nixpkgs-t3code {
+    inherit (pkgs.stdenv.hostPlatform) system;
+  }).callPackage ../modules/t3code.nix { };
 
   freerdpLauncherGPC =
     pkgs.writeShellApplication
