@@ -294,6 +294,8 @@ in
     unstable.claude-code
     t3code
     unstable.codex
+    # Local LLMs. Its bundled llama.cpp (own ROCm) runs on the 780M; opencode
+    # reaches it through nx-opencode-models-sync (see home/shared/opencode.nix).
     unstable.unsloth-desktop
     pkgs.magnitude
     opencode-packages.opencode
@@ -449,86 +451,6 @@ in
 
   # Override pinentry to GTK for desktop environment
   services.gpg-agent.pinentry.package = lib.mkForce pkgs.pinentry-gtk2;
-
-  # models live in ~/.ollama/models
-
-  # CPU inference, deliberately. The Radeon 780M iGPU was tried (ollama-rocm +
-  # HSA_OVERRIDE_GFX_VERSION=11.0.0 + OLLAMA_IGPU_ENABLE=1 + HSA_ENABLE_SDMA=0)
-  # and rejected. Re-verified 2026-09-08 against ROCm 7.2.3: one of the two
-  # original reasons is now stale, the other is not, and a third has appeared.
-  #
-  # 1. STALE -- 'gfx110x ROCm hard-hangs ("HW Exception ... GPU Hang")'. ROCm
-  #    has since made gfx1103 a native build target: nixpkgs-unstable builds
-  #    both rocblas and ollama-rocm with gfx1103 in the target list, and the
-  #    kernel reports the arch honestly --
-  #      /sys/class/kfd/kfd/topology/nodes/1/properties -> gfx_target_version
-  #      = 110003
-  #    So do NOT restore HSA_OVERRIDE_GFX_VERSION=11.0.0 on a retry. Forcing
-  #    the gfx1100 code path onto gfx1103 silicon is the likely cause of those
-  #    hangs, and re-setting it would reproduce them and look like proof that
-  #    nothing improved. OLLAMA_IGPU_ENABLE=1 is still needed (ollama skips
-  #    iGPUs by default); HSA_ENABLE_SDMA=0 was a hang workaround, so retry
-  #    without it first.
-  #
-  # 2. STILL TRUE -- the 780M has no dedicated memory. It reads weights over
-  #    the same LPDDR5 bus as the CPU (~100 GB/s on a 7840U) and token
-  #    generation is memory-bandwidth bound, so decode cannot beat CPU however
-  #    good the driver gets. ROCm support does not add bandwidth. Prefill is
-  #    compute-bound and would genuinely speed up -- that, and only that, is
-  #    the argument for retrying.
-  #
-  # 3. NEW BLOCKER -- ROCm sees a single 15.33 GiB heap on this box. KFD
-  #    reports the GTT pool as HEAP_TYPE_FB_PUBLIC; the 512M VRAM carveout is
-  #    display-side and adds no compute-addressable room, so the two do not
-  #    sum. qwen3.8:27b is 15.66 GiB of weights + 0.87 GiB projector before any
-  #    KV cache, so it cannot fully offload. Its KV cache is also fat: 65
-  #    layers x 4 KV heads x (256+256) x 2 B = 260 KiB/token, i.e. 8.12 GiB at
-  #    our 32k context. Full offload would need amdgpu.gttsize (megabytes,
-  #    default -1 = auto = half of RAM):
-  #      32k / f16 KV  -> 25.1 GiB  gttsize=26624
-  #      32k / q8_0 KV -> 21.1 GiB  gttsize=22528
-  #      4k  / q8_0 KV -> 17.5 GiB  gttsize=18432   (absolute floor, and 4k is
-  #                                                  the truncation trap below)
-  #    gttsize is a ceiling on pinnable system RAM rather than a boot-time
-  #    carve-out, but once the model loads those pages really are pinned, and
-  #    surrendering 22-26 GiB of 30 GiB to win prefill on a bandwidth-bound
-  #    decode is a bad trade. Leave it at auto.
-  #
-  # To retry meaningfully: pull an 8-14B model that fits under 15.33 GiB with
-  # its KV cache, set package = unstable.ollama-rocm, leave gttsize alone, and
-  # measure time-to-first-token rather than tok/s -- decode is not the win.
-  #
-  # Context window: pin it explicitly, because the default has been wrong in
-  # both directions and neither failure is loud.
-  #
-  # Ollama <= 0.32 defaulted to OLLAMA_CONTEXT_LENGTH=4096 and silently
-  # truncated anything larger (opencode's system prompt + MCP tool schemas + a
-  # pasted doc blow past it in one message, and the model ends up blind to its
-  # own instructions).
-  #
-  # Ollama >= 0.33 inverted it: the default is now sized from reported VRAM and
-  # will happily take a model's full advertised window -- 262144 tokens on the
-  # current qwen3.x builds -- whose KV cache alone can exceed free RAM. On the
-  # Mac that OOMs the Metal backend into a state where every model returns an
-  # empty response (see hosts/mac/configuration.nix); here it just means
-  # allocating far more than a 30 GB box has.
-  #
-  # 32k is also what nx-opencode-models-sync emits for gguf models, which is
-  # every model here -- this box runs ggml on CPU, and ggml pre-allocates the
-  # whole window at load, so the cap is a real reservation rather than a
-  # ceiling. (The sync script raises it for MLX models, which allocate lazily,
-  # but those are Apple-Silicon-only and will never appear on this host.) KV
-  # cache grows with this, so pin one loaded model at a time to stay inside the
-  # 30 GB of RAM alongside a 20-27B model.
-  services.ollama = {
-    enable = true;
-    package = unstable.ollama;
-    environmentVariables = {
-      OLLAMA_CONTEXT_LENGTH = "32768";
-      OLLAMA_MAX_LOADED_MODELS = "1";
-      OLLAMA_KEEP_ALIVE = "30m";
-    };
-  };
 
   # T3 Code: GUI/control plane over the agent CLIs (claude, codex, opencode),
   # reachable from the Pixel and maemac over NordVPN Meshnet. Meshnet has no
