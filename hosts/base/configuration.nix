@@ -53,6 +53,11 @@ in
 
   networking.hostName = "base";
 
+  # The KVM's USB NIC (RTL8153, stuck at USB 2.0 speed) disappears whenever the
+  # KVM is switched away, and while present it took the default route from the
+  # onboard Intel NIC (.3). Matched by MAC since its name follows the USB port.
+  networking.networkmanager.unmanaged = [ "mac:34:1b:22:85:43:c4" ];
+
   # No swap partition; 32 GB of RAM rarely needs disk swap.
   zramSwap.enable = true;
 

@@ -306,10 +306,26 @@ in
   ];
 
   fonts.fontconfig.enable = true;
+
   #---------------------------------------------------------------------
   # Env vars and dotfiles
   #---------------------------------------------------------------------
   #home.file.".inputrc".source = ./inputrc;
+
+  # https://github.com/netbrain/zwift
+  # docker run -v zwift-$USER:/data --name zwift-copy-op busybox true
+  # docker cp .zwift-credentials zwift-copy-op:/data
+  # docker rm zwift-copy-op
+  home.file = {
+    "zwift.sh" = {
+      source = pkgs.fetchurl {
+        url = "https://raw.githubusercontent.com/netbrain/zwift/7e5b697ba3e6bd624a843485d0d5612be18278b2/zwift.sh";
+        hash = "sha256-joipzHtLvy+l4H+NOLTSpVf8bzVGUF4JVDcyfQIt5II=";
+      };
+      target = ".local/bin/zwift";
+      executable = true;
+    };
+  };
 
   xdg.configFile = {
     "rofi" = {
