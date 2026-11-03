@@ -456,6 +456,7 @@ secrets/backup:
 		--exclude='.gnupg/S.*' \
 		--exclude='.gnupg/*.conf' \
 		--exclude='.ssh/environment' \
+		--exclude='.ssh/config' \
 		.ssh/ \
 		.gnupg \
 		.secrets/
@@ -468,7 +469,8 @@ secrets/restore:
 	fi
 	echo "Restoring SSH keys and GPG keyring from backup..."
 	mkdir -p $(HOME)/.ssh $(HOME)/.gnupg $(HOME)/.secrets
-	tar -xzvf $(MAKEFILE_DIR)/backup.tar.gz -C $(HOME)
+	# Home Manager creates this symlink for the destination machine.
+	tar -xzvf $(MAKEFILE_DIR)/backup.tar.gz -C $(HOME) --exclude='.ssh/config'
 	chmod 700 $(HOME)/.ssh $(HOME)/.gnupg $(HOME)/.secrets
 	chmod 600 $(HOME)/.ssh/* || true
 	chmod 700 $(HOME)/.gnupg/* || true

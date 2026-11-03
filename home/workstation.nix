@@ -158,6 +158,7 @@ in
     ./shared/agents.nix
     ./sway/sway.nix
     ./i3/i3.nix
+    # ./zwift.nix
     # ./hyprland/hyprland.nix
   ];
 
@@ -310,21 +311,6 @@ in
   #---------------------------------------------------------------------
   #home.file.".inputrc".source = ./inputrc;
 
-  # https://github.com/netbrain/zwift
-  # docker run -v zwift-$USER:/data --name zwift-copy-op busybox true
-  # docker cp .zwift-credentials zwift-copy-op:/data
-  # docker rm zwift-copy-op
-  home.file = {
-    "zwift.sh" = {
-      source = pkgs.fetchurl {
-        url = "https://raw.githubusercontent.com/netbrain/zwift/master/zwift.sh";
-        hash = "sha256-joipzHtLvy+l4H+NOLTSpVf8bzVGUF4JVDcyfQIt5II=";
-      };
-      target = ".local/bin/zwift";
-      executable = true;
-    };
-  };
-
   xdg.configFile = {
     "rofi" = {
       source = ./rofi;
@@ -361,12 +347,6 @@ in
         name = "Settings";
         exec = "env XDG_CURRENT_DESKTOP=Gnome gnome-control-center";
         categories = [ "Application" "Settings" ];
-      };
-      zwift = {
-        type = "Application";
-        name = "Zwift";
-        exec = "/home/matt/.local/bin/zwift";
-        categories = [ "Application" "Game" ];
       };
       freeRDPGPC = {
         type = "Application";

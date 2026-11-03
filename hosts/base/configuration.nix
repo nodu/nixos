@@ -72,6 +72,11 @@ in
     nvidiaPersistenced = false;
   };
 
+  # GDM's Wayland greeter fails to hand the NVIDIA display over to Xorg/i3.
+  # GNOME 50 no longer supports an X11 GDM greeter; use LightDM on this host.
+  services.displayManager.gdm.enable = lib.mkForce false;
+  services.xserver.displayManager.lightdm.enable = true;
+
   # Keep the desktop off the 3090 so it can be detached for the VM. Xorg is
   # pinned to the 1080 (05:00.0, behind the chipset), and ProbeAllGpus stops
   # the nvidia X driver opening the other card anyway. The GDM greeter runs

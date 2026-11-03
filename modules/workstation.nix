@@ -319,6 +319,9 @@
   # self-tests, and temperature. Warnings go to the desktop through dunst
   # (systembus-notify) and to every terminal (wall); smartd also logs to the
   # journal (`journalctl -u smartd`). No mail: there is no MTA here.
+  # TODO: push smartd warnings to the phone via the homebase ntfy server
+  # (baremetal :2586); these hosts are usually unattended, so a popup is easy
+  # to miss. Needs a custom -M exec script, since the module allows only one.
   services.smartd = {
     enable = true;
     notifications = {
