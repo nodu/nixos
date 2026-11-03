@@ -15,16 +15,15 @@ sources cannot live in one file:
   the local model servers the installed model set, which is host-specific and
                           changes whenever you download or remove a model.
 
-Two servers are read, each into its own provider block, and whichever answers
-is written -- so one script serves every host without per-host settings:
+The models come from Unsloth Studio, the local model server on every host, so
+one script serves every host without per-host settings:
 
-  Unsloth Studio  http://127.0.0.1:8888, on the mac and baremetal. Needs
-                  Settings > API > "Keyless API access" = full (loopback-only,
-                  and the only keyless scope that may switch models) and "Model
-                  auto-switch" on, so a request naming a downloaded model loads
-                  it. Studio only runs while its desktop app is open, so when it
-                  is down the previous run's model list is kept.
-  Ollama          http://127.0.0.1:11434, if one is running.
+  Unsloth Studio  http://127.0.0.1:8888. Needs Settings > API > "Keyless API
+                  access" = full (loopback-only, and the only keyless scope that
+                  may switch models) and "Model auto-switch" on, so a request
+                  naming a downloaded model loads it. Studio only runs while its
+                  desktop app is open, so when it is down the previous run's
+                  model list is kept.
 
 Merging them here rather than layering them through opencode's own config chain
 (global -> OPENCODE_CONFIG -> project) is deliberate: that chain needs
@@ -39,9 +38,9 @@ removing a model:
     nx-opencode-models-sync --print    # dump to stdout instead
     nx-opencode-models-sync --max-ctx-mlx 65536
 
-A server that is unreachable is skipped, and with neither up the base settings
-are still written without a provider block, so a host with no model server
-running keeps working mcp and skills config. A missing or malformed base is a
+If Studio is unreachable and no earlier run left a model list, the base
+settings are still written without a provider block, so a host with no model
+server keeps working mcp and skills config. A missing or malformed base is a
 hard error instead -- writing a config without it would silently drop those
 settings.
 
@@ -49,8 +48,8 @@ Context is capped per engine, because the two allocate KV cache differently:
 
   ggml (gguf)      pre-allocates the whole window at load. A 27B at the
                    advertised 262144 reserves ~17 GB of KV cache before the
-                   first token, which OOMed Ollama's Metal backend on the mac
-                   until the context was pinned. Capped hard.
+                   first token, enough to OOM a 64 GB mac before the context
+                   was pinned. Capped hard.
 
   MLX (safetensors) allocates lazily as the sequence grows, so the window is a
                    ceiling rather than a reservation. Measured on a 64 GB M5
@@ -95,7 +94,6 @@ import urllib.parse
 import urllib.request
 
 DEFAULT_UNSLOTH_HOST = os.environ.get("UNSLOTH_HOST", "http://127.0.0.1:8888")
-DEFAULT_OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
 CONFIG_DIR = os.path.join(
     os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
     "opencode",
@@ -117,7 +115,7 @@ GENERATED_NOTE = (
     "in home/shared/opencode/opencode.base.json (symlinked to "
     "~/.config/opencode/opencode.base.json) and home/shared/mcp/servers.json "
     "(MCP servers for every harness); the provider blocks below are read "
-    "from the local Unsloth Studio and Ollama servers. Rerun after editing the "
+    "from the local Unsloth Studio server. Rerun after editing the "
     "base or after downloading or removing a model."
 )
 
@@ -191,8 +189,8 @@ def unsloth_provider(
         label = entry.get("display_name") or model_id.split("/")[-1]
         quant = entry.get("quant")
 
-        # Studio does not report tool or thinking support per model the way
-        # ollama's /api/show does; every chat model served here has both.
+        # Studio does not report tool or thinking support per model; every
+        # chat model served here has both.
         models[model_id] = model_entry(
             f"{label}{f' {quant}' if quant else ''} ({engine})",
             ctx,
@@ -209,80 +207,6 @@ def unsloth_provider(
         "name": "Unsloth Studio (local)",
         "npm": "@ai-sdk/openai-compatible",
         "options": {"baseURL": f"{host.rstrip('/')}/v1"},
-        "models": models,
-    }
-
-
-#----- Ollama -----
-
-def ollama_context_length(model_info: dict) -> int | None:
-    """Pull `<arch>.context_length` without needing to know the architecture."""
-    for key, value in model_info.items():
-        if key.endswith(".context_length") and isinstance(value, int):
-            return value
-    return None
-
-
-def ollama_engine(info: dict) -> str:
-    """safetensors is how ollama ships the MLX-native quants; gguf runs ggml."""
-    details = info.get("details") or {}
-    return "MLX" if details.get("format") == "safetensors" else "ggml"
-
-
-def ollama_describe(tag: str, info: dict, engine: str) -> str:
-    details = info.get("details") or {}
-    size = details.get("parameter_size") or "?"
-    quant = details.get("quantization_level") or "?"
-    return f"{tag} — {size} {quant} ({engine})"
-
-
-def ollama_provider(
-    host: str, max_ctx_ggml: int, max_ctx_mlx: int, max_output: int
-) -> dict | None:
-    """Ollama's provider block, or None if it has nothing to offer right now."""
-    try:
-        tags = api(host, "/api/tags").get("models") or []
-    except urllib.error.URLError as exc:
-        print(f"note: no ollama at {host} ({exc}); skipped", file=sys.stderr)
-        return None
-
-    models: dict[str, dict] = {}
-
-    for entry in sorted(tags, key=lambda m: m.get("name", "")):
-        tag = entry.get("name")
-        if not tag:
-            continue
-        try:
-            info = api(host, "/api/show", {"model": tag})
-        except urllib.error.URLError as exc:
-            print(f"warning: skipping {tag}: {exc}", file=sys.stderr)
-            continue
-
-        caps = info.get("capabilities") or []
-        if "completion" not in caps:
-            continue  # embedding-only models are not chat providers
-
-        engine = ollama_engine(info)
-        cap = max_ctx_mlx if engine == "MLX" else max_ctx_ggml
-        ctx = capped(ollama_context_length(info.get("model_info") or {}), cap)
-
-        models[tag] = model_entry(
-            ollama_describe(tag, info, engine),
-            ctx,
-            max_output,
-            tools="tools" in caps,
-            reasoning="thinking" in caps,
-            attachment="vision" in caps,
-            options={"num_ctx": ctx},
-        )
-
-    if not models:
-        return None
-
-    return {
-        "name": "Ollama (local)",
-        "npm": "ollama-ai-provider-v2",
-        "options": {"baseURL": f"{host.rstrip('/')}/api"},
         "models": models,
     }
 
@@ -371,7 +295,6 @@ def main() -> int:
     parser.add_argument(
         "--unsloth-host", default=DEFAULT_UNSLOTH_HOST, help="Unsloth Studio base URL"
     )
-    parser.add_argument("--ollama-host", default=DEFAULT_OLLAMA_HOST, help="ollama base URL")
     parser.add_argument("--base", default=DEFAULT_BASE, help="shared settings path")
     parser.add_argument("--out", default=DEFAULT_OUT, help="output path")
     parser.add_argument("--mcp", default=DEFAULT_MCP, help="shared MCP server list")
@@ -397,7 +320,6 @@ def main() -> int:
     found = {
         "unsloth": unsloth_provider(args.unsloth_host, *limits)
         or previous_provider(args.out, "unsloth"),
-        "ollama": ollama_provider(args.ollama_host, *limits),
     }
     providers = {key: block for key, block in found.items() if block}
 

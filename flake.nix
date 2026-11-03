@@ -176,15 +176,10 @@
       overlays = [
         #(import ./overlays/sddm.nix)
       ];
-    in
-    {
-      nixosConfigurations.baremetal = mkSystem {
-        system = "x86_64-linux";
-        config = ./hosts/baremetal/configuration.nix;
-        homeConfig = ./home/home-baremetal.nix;
-        hardwareModules = [
-          nixos-hardware.nixosModules.framework-13-7040-amd
-        ];
+
+      # Shared by the x86_64 workstations (baremetal, base); pairs with
+      # modules/workstation.nix and home/workstation.nix
+      workstation = {
         extraSpecialArgs = {
           inherit handy;
           opencode-packages = opencodePackages "x86_64-linux";
@@ -199,6 +194,30 @@
             };
           }
         ];
+      };
+    in
+    {
+      nixosConfigurations.baremetal = mkSystem {
+        system = "x86_64-linux";
+        config = ./hosts/baremetal/configuration.nix;
+        homeConfig = ./home/home-baremetal.nix;
+        hardwareModules = [
+          nixos-hardware.nixosModules.framework-13-7040-amd
+        ];
+        inherit (workstation) extraSpecialArgs extraModules;
+      };
+
+      # Desktop workstation + server: i7-6700K, GTX 1080 display, RTX 3090 for CUDA and a Windows VM
+      nixosConfigurations.base = mkSystem {
+        system = "x86_64-linux";
+        config = ./hosts/base/configuration.nix;
+        homeConfig = ./home/home-base.nix;
+        hardwareModules = [
+          nixos-hardware.nixosModules.common-cpu-intel-cpu-only
+          nixos-hardware.nixosModules.common-pc
+          nixos-hardware.nixosModules.common-pc-ssd
+        ];
+        inherit (workstation) extraSpecialArgs extraModules;
       };
 
       nixosConfigurations.rpi3 = mkSystem {

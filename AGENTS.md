@@ -4,7 +4,7 @@ Instructions for AI coding agents working in this NixOS configuration repository
 
 ## Repository Overview
 
-Personal NixOS configuration using Nix flakes, home-manager, GNOME + i3 (X11 primary), and Sway (Wayland secondary). Three host types: `baremetal` (Framework 13 AMD, x86_64), `rpi3` (Raspberry Pi 3, aarch64 headless server), and `mac` (macOS via nix-darwin, aarch64-darwin).
+Personal NixOS configuration using Nix flakes, home-manager, GNOME + i3 (X11 primary), and Sway (Wayland secondary). Host types: `baremetal` (Framework 13 AMD, x86_64), `base` (desktop workstation, x86_64, GTX 1080 for display, RTX 3090 for CUDA and lent to a Windows VM), `rpi3` (Raspberry Pi 3, aarch64 headless server), `bau` (Raspberry Pi 4, aarch64), and `mac` (macOS via nix-darwin, aarch64-darwin). `baremetal` and `base` share most of their config through `modules/workstation.nix` and `home/workstation.nix`.
 
 ## Build / Test / Apply Commands
 
@@ -73,23 +73,29 @@ There is no unit test suite, linter, or CI pipeline. The primary validation meth
 | `flake.nix` | Flake definition: inputs, outputs, nixpkgs/unstable channels, overlays |
 | `hosts/baremetal/configuration.nix` | System-level config for Framework 13: boot, networking, services, system packages |
 | `hosts/baremetal/hardware-configuration.nix` | Auto-generated hardware config (**do not edit**) |
+| `hosts/base/configuration.nix` | System-level config for the desktop: NVIDIA, VFIO/libvirt, LAN firewall rules |
+| `hosts/base/hardware-configuration.nix` | Hardware config; mounts by label (`nixos`, `NIXBOOT`) |
+| `hosts/base/INSTALL.md` | Partitioning and install runbook for base |
 | `hosts/rpi3/configuration.nix` | System-level config for Raspberry Pi 3 (headless, SSH-only) |
 | `hosts/rpi3/hardware-configuration.nix` | Auto-generated hardware config (**do not edit**) |
 | `hosts/mac/configuration.nix` | System-level config for macOS: nix settings, system.defaults, homebrew, fonts |
-| `home/home-baremetal.nix` | User-level config for baremetal: GUI apps, dev tools, dotfiles |
+| `home/workstation.nix` | User-level config shared by baremetal and base: GUI apps, dev tools, dotfiles, T3 Code |
+| `home/home-baremetal.nix` | User-level config for baremetal: AMD GPU tools |
+| `home/home-base.nix` | User-level config for base: NVIDIA tools, rofi dpi |
 | `home/home-rpi3.nix` | User-level config for rpi3: minimal, imports shared modules |
 | `home/home-mac.nix` | User-level config for macOS: alacritty, dev tools, imports shared + darwin modules |
 | `home/shared/` | Shared home-manager modules: `shell.nix`, `git.nix`, `cli.nix`, `gpg.nix`, `ssh.nix`, `neovim.nix` |
 | `home/i3/`, `home/sway/` | Window manager configs (nix modules + external config files) |
 | `home/darwin/` | macOS WM config: aerospace, sketchybar, karabiner (nix module + config files) |
-| `modules/` | Custom NixOS modules (`vpns.nix`, `fhs-compat.nix`) and package derivations (`vpn.nix`) |
+| `modules/` | Custom NixOS modules (`workstation.nix`, `vpns.nix`, `fhs-compat.nix`) and package derivations (`vpn.nix`) |
 | `Makefile` | Build/deploy commands |
 
 ### Where to Add Things
 
-- **System packages (baremetal)**: `hosts/baremetal/configuration.nix` in `environment.systemPackages`
+- **System config shared by baremetal and base**: `modules/workstation.nix`
+- **System config for one workstation only**: `hosts/baremetal/configuration.nix` or `hosts/base/configuration.nix`
 - **System packages (rpi3)**: `hosts/rpi3/configuration.nix` in `environment.systemPackages`
-- **User packages (baremetal)**: `home/home-baremetal.nix` in `home.packages`
+- **User packages (baremetal and base)**: `home/workstation.nix` in `home.packages`; host-only ones in `home/home-baremetal.nix` / `home/home-base.nix`
 - **User packages (mac)**: `home/home-mac.nix` in `home.packages`
 - **Shared user config**: `home/shared/` modules (imported by all hosts)
 - **NixOS services/modules**: `modules/` directory, imported in the host's `configuration.nix`
@@ -126,9 +132,8 @@ sources:
 - [`home/shared/mcp/servers.json`](home/shared/mcp/servers.json) — MCP servers
   shared with every harness (see below).
 - the local model servers — host-specific, since the installed models and their
-  safe context caps differ per host: Unsloth Studio (`127.0.0.1:8888`) and
-  ollama (`127.0.0.1:11434`). Each server that answers gets its own provider
-  block; Studio's last list is kept while the app is closed.
+  safe context caps differ per host: Unsloth Studio (`127.0.0.1:8888`) on every
+  host. Studio's last list is kept while the app is closed.
 
 The merge is done by the script rather than by opencode's own config layering
 (`global -> OPENCODE_CONFIG -> project`), because that layering needs
@@ -235,6 +240,36 @@ There are deliberately no `baremetal/*` Makefile targets. Rebuilds are done by S
 (`ssh baremetal`) and running `make switch` there. The Mac is aarch64-darwin and cannot
 build an x86_64-linux closure without a remote builder anyway, so a push-based deploy
 target would have to build on baremetal regardless.
+
+## base (desktop workstation)
+
+Always-on desktop workstation and server, configured like baremetal through
+`modules/workstation.nix` (no automatic suspend, watchdog, linger, key-only
+SSH). i7-6700K, 32 GB RAM, onboard I219-V ethernet (`enp0s31f6`). NixOS owns the
+whole NVMe; Windows runs as a libvirt VM.
+
+- **GPUs**: GTX 1080 (`05:00.0`, chipset x4 slot) drives the host display. The
+  RTX 3090 (`01:00.0`, CPU x16 slot, alone in its IOMMU group) does host
+  CUDA (Unsloth Studio) and is lent to the `win11` VM while it runs. libvirt moves it
+  between nvidia and vfio-pci itself, because the VM lists it as a
+  `managed='yes'` hostdev. The libvirt qemu hook `rtx3090-passthrough`
+  refuses to start the VM if anything still has the card open (quit Unsloth
+  Studio or unload its model first). An
+  unbind with open handles blocks instead of failing, so the check is what
+  stands between a busy card and a hung VM start. Keeping the desktop off the
+  3090 is what makes the handoff possible: Xorg `BusID` + `ProbeAllGpus false`,
+  the `mutter-device-ignore` udev tag for the GDM greeter, and
+  nvidia-persistenced off.
+- **vfio-boot entry**: a specialisation that binds the 3090 to vfio-pci at boot.
+  It's a fallback for when the runtime handoff misbehaves; in it the host has no
+  CUDA on the 3090.
+- **The 3090 is the boot VGA card**: firmware screens and the VM's display come
+  out of it; the host desktop comes out of the 1080.
+- **NVIDIA driver**: pinned to `nvidiaPackages.legacy_580`. The 1080 is Pascal: it
+  has no open kernel module, and 590+ (`production` is 595) dropped it. Don't
+  switch to `open = true` or the default package while the 1080 is installed.
+
+Install steps: [`hosts/base/INSTALL.md`](hosts/base/INSTALL.md).
 
 ## Karabiner-Elements (macOS)
 
@@ -392,7 +427,7 @@ in
 - Framework 13 hardware optimizations are applied via nixos-hardware
 - RPi3 uses binfmt cross-compilation from the x86_64 host for builds
 - Auto garbage collection runs every 30 days, store optimization enabled
-- The `NIXNAME` variable in the Makefile controls which host config is built (default: `baremetal`)
+- The `NIXNAME` variable in the Makefile controls which host config is built (default: the machine's short hostname, which matches its flake attribute)
 
 ## Key Workflows
 

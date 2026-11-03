@@ -78,9 +78,9 @@ UNAME := $(shell uname)
 # Get the path to this Makefile and directory
 MAKEFILE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-# The name of the nixosConfiguration in the flake
-# MRNOTE not vm-intel, fully arm
-NIXNAME ?= baremetal
+# The name of the nixosConfiguration in the flake. Defaults to this machine's
+# hostname, which matches its flake attribute (baremetal, base, bau, rpi3).
+NIXNAME ?= $(shell hostname -s)
 
 # SSH options that are used. These aren't meant to be overridden but are
 # reused a lot so we just store them up here.

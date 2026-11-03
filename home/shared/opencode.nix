@@ -5,8 +5,8 @@
 #   opencode.base.json      shared, hand-written settings (mcp, default_agent,
 #                           skills). Symlinked out-of-store below so it can be
 #                           edited without a nix rebuild.
-#   the local model servers the installed model set (Unsloth Studio on the mac,
-#                           ollama on baremetal), which differs per host and
+#   the local model servers the installed model set (Unsloth Studio), which
+#                           differs per host and
 #                           changes on every download/removal, so it is derived
 #                           rather than hand-maintained in a file shared across
 #                           hosts.

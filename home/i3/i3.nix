@@ -115,6 +115,8 @@
       Description = "Battery level notification daemon";
       After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
+      # Skip on desktops (base) rather than crash-loop looking for a battery
+      ConditionPathExists = "/sys/class/power_supply/BAT1";
     };
     Service = {
       ExecStart = "${pkgs.batsignal}/bin/batsignal -n BAT1 -w 15 -c 7 -d 4 -e";
