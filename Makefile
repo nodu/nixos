@@ -43,6 +43,8 @@ help:
 	@echo "  make update-flakes       - Update all flake inputs"
 	@echo "  make update-nordvpn      - Update pinned NordVPN version"
 	@echo "  make update-t3code       - Pin T3 Code to its latest stable release"
+	@echo "  make update-unsloth-llama - Pin base's llama.cpp to Unsloth's latest release"
+	@echo "  make check-unsloth-llama  - Show how far base's llama.cpp pin is behind"
 	@echo ""
 	@echo "macOS (nix-darwin):"
 	@echo "  make mac/bootstrap       - First-time setup (run on a fresh Mac)"
@@ -134,6 +136,12 @@ update-nordvpn:
 
 update-t3code:
 	$(MAKEFILE_DIR)/scripts/update-t3code.sh
+
+update-unsloth-llama:
+	$(MAKEFILE_DIR)/scripts/update-unsloth-llama.sh
+
+check-unsloth-llama:
+	$(MAKEFILE_DIR)/scripts/update-unsloth-llama.sh --check
 
 # bootstrap a brand new VM. The VM should have NixOS ISO on the CD drive
 # and just set the password of the root user to "root". This will install
@@ -471,7 +479,6 @@ secrets/restore:
 	mkdir -p $(HOME)/.ssh $(HOME)/.gnupg $(HOME)/.secrets
 	# Home Manager creates this symlink for the destination machine.
 	tar -xzvf $(MAKEFILE_DIR)/backup.tar.gz -C $(HOME) --exclude='.ssh/config'
-	chmod 700 $(HOME)/.ssh $(HOME)/.gnupg $(HOME)/.secrets
-	chmod 600 $(HOME)/.ssh/* || true
-	chmod 700 $(HOME)/.gnupg/* || true
-	chmod 600 $(HOME)/.secrets/* || true
+	# Directories need +x to be traversable; only regular files get 600.
+	find $(HOME)/.ssh $(HOME)/.gnupg $(HOME)/.secrets -type d -exec chmod 700 {} +
+	find $(HOME)/.ssh $(HOME)/.gnupg $(HOME)/.secrets -type f -exec chmod 600 {} +

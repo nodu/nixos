@@ -37,6 +37,12 @@
     enable = true;
     memoryPercent = 50;
   };
+  # Swap is zram only: prefer it over dropping page cache, and don't read
+  # ahead since there is no seek cost to amortize
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 180;
+    "vm.page-cluster" = 0;
+  };
 
   # Only include RPi WiFi/BT firmware instead of the full 736 MiB linux-firmware blob.
   # The not-detected.nix import sets enableRedistributableFirmware = true by default;
