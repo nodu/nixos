@@ -60,6 +60,12 @@ in
 
   # No swap partition; 32 GB of RAM rarely needs disk swap.
   zramSwap.enable = true;
+  # Swapping to zram is far cheaper than dropping page cache, so prefer it,
+  # and don't read ahead: there is no seek cost to amortize.
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 180;
+    "vm.page-cluster" = 0;
+  };
 
   #----- NVIDIA (host display on the 1080) -----
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -89,6 +95,11 @@ in
   services.xserver.deviceSection = ''
     BusID "PCI:5:0:0"
     Option "ProbeAllGpus" "false"
+  '';
+  # Without this the ultrawide comes up at 60 Hz; it does 120 over DP. Set at
+  # the X server so LightDM and i3 both get it.
+  services.xserver.screenSection = ''
+    Option "metamodes" "HDMI-0: 3840x2400_60 +0+0, DP-0: 3440x1440_120 +3840+0"
   '';
   services.udev.extraRules = ''
     SUBSYSTEM=="drm", KERNELS=="${rtx3090}", TAG+="mutter-device-ignore"
@@ -137,11 +148,32 @@ in
     ];
   };
 
+  #----- Remote desktop (Sunshine) -----
+  # Streams the live i3 session on :0 to Moonlight. Pair through the web UI:
+  # `ssh -L 47990:localhost:47990 base`, then https://localhost:47990.
+  # X11 capture rather than KMS, so Sunshine never opens the 3090's DRM nodes
+  # (which would block lending it to the VM); NVENC is pinned to the 1080.
+  services.sunshine = {
+    enable = true;
+    package = pkgs.sunshine.override { cudaSupport = true; };
+    settings = {
+      capture = "x11";
+      encoder = "nvenc";
+      # The ultrawide (DP-0) only; the default streams every monitor at once
+      output_name = 2;
+    };
+  };
+  systemd.user.services.sunshine.environment.CUDA_VISIBLE_DEVICES =
+    "GPU-1e68a55a-03e0-d1eb-f9f9-69c560b1b2ef";
+
   #----- Network -----
-  # LAN access to T3 Code and xrdp over the onboard I219-V
+  # LAN access to T3 Code, xrdp, Unsloth Studio and Sunshine over the onboard I219-V
   networking.firewall.extraCommands = ''
     iptables -A nixos-fw -i enp0s31f6 -p tcp --dport 3773 -s 192.168.0.0/24 -j nixos-fw-accept
     iptables -A nixos-fw -i enp0s31f6 -p tcp --dport 3389 -s 192.168.0.0/24 -j nixos-fw-accept
+    iptables -A nixos-fw -i enp0s31f6 -p tcp --dport 8888 -s 192.168.0.0/24 -j nixos-fw-accept
+    iptables -A nixos-fw -i enp0s31f6 -p tcp -m multiport --dports 47984,47989,48010 -s 192.168.0.0/24 -j nixos-fw-accept
+    iptables -A nixos-fw -i enp0s31f6 -p udp -m multiport --dports 47998:48000,48002,48010 -s 192.168.0.0/24 -j nixos-fw-accept
   '';
 
   # This value determines the NixOS release from which the default

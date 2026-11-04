@@ -20,22 +20,6 @@ let
     exec ${unstable.opencode-desktop}/bin/OpenCode --disable-gpu --use-gl=angle --use-angle=swiftshader "$@"
   '';
 
-  # Unsloth Studio's installer builds its venv with `uv venv --python 3.13`. With
-  # no uv-managed CPython downloaded yet, uv falls back to the first python3 on
-  # PATH: a nixpkgs build whose loader ignores the FHS sandbox's /usr/lib64. The
-  # pip wheels then can't find libstdc++, PyTorch fails to import, and Studio
-  # reports "GPUs are present but PyTorch cannot use them" (chat-only). That is
-  # what happened on a fresh base; baremetal already had a managed CPython, so it
-  # worked by luck. Make uv always use its own standalone CPython, which links
-  # against the FHS loader like any other distro would.
-  unslothDesktop = unstable.unsloth-desktop.override {
-    buildFHSEnv = args: unstable.buildFHSEnv (args // {
-      profile = args.profile + ''
-        export UV_PYTHON_PREFERENCE=only-managed
-      '';
-    });
-  };
-
   t3code = (import inputs.nixpkgs-t3code {
     inherit (pkgs.stdenv.hostPlatform) system;
   }).callPackage ../modules/t3code.nix { };
@@ -164,6 +148,7 @@ in
     ./shared/cli.nix
     ./shared/devops.nix
     ./shared/gpg.nix
+    ./unsloth.nix
     ./shared/alacritty.nix
     ./shared/ghostty.nix
     ./shared/tmux.nix
@@ -281,10 +266,6 @@ in
     unstable.claude-code
     t3code
     unstable.codex
-    # Local LLMs. On baremetal its bundled llama.cpp (own ROCm) runs on the
-    # 780M; opencode reaches it through nx-opencode-models-sync (see
-    # home/shared/opencode.nix).
-    unslothDesktop
     pkgs.magnitude
     opencode-packages.opencode
     openCodeDesktop

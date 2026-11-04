@@ -125,6 +125,20 @@
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
+  #----- Tray: proxy StatusNotifierItem (AppIndicator) icons into i3bar's XEmbed tray -----
+  systemd.user.services.snixembed = {
+    Unit = {
+      Description = "StatusNotifierItem to XEmbed tray proxy";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.snixembed}/bin/snixembed";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   services.picom = {
     enable = true;
     shadow = true;

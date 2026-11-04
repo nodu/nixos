@@ -47,7 +47,10 @@
 
   # Tune VM for SD card storage -- reduce random I/O pressure
   boot.kernel.sysctl = {
-    "vm.swappiness" = 10; # strongly prefer RAM over swap-to-SD
+    # Swap is zram only, never the SD card: prefer it over dropping page
+    # cache, and don't read ahead since there is no seek cost to amortize
+    "vm.swappiness" = 180;
+    "vm.page-cluster" = 0;
     "vm.vfs_cache_pressure" = 50; # retain inode/dentry caches longer
     "vm.dirty_ratio" = 10; # flush dirty pages sooner
     "vm.dirty_background_ratio" = 5; # start background writeback earlier
