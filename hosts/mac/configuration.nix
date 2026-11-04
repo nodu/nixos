@@ -272,6 +272,7 @@ in
       "shottr"
       "google-drive"
       "windows-app"
+      "moonlight"
       "thaw"
       "libreoffice"
       "fathom"

@@ -29,6 +29,7 @@
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
@@ -59,6 +60,7 @@
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
@@ -76,6 +78,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -163,6 +166,7 @@
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
@@ -180,6 +184,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -250,6 +255,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -320,6 +326,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -856,6 +863,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$",
                       "^io\\.alacritty$",
@@ -897,6 +905,7 @@
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -966,6 +975,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1034,6 +1044,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1102,6 +1113,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1183,6 +1195,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1259,6 +1272,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1340,6 +1354,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1417,6 +1432,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1491,6 +1507,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1564,6 +1581,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1637,6 +1655,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1705,6 +1724,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1778,6 +1798,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1851,6 +1872,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -1914,6 +1936,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
@@ -1948,6 +1971,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
@@ -1988,6 +2012,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
@@ -2030,6 +2055,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
@@ -2064,6 +2090,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
@@ -2104,6 +2131,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
@@ -2146,6 +2174,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$",
                       "^io\\.alacritty$",
@@ -2191,6 +2220,7 @@
                       "^co\\.zeit\\.hyper$",
                       "^org\\.virtualbox\\.app\\.VirtualBoxVM$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^tv\\.parsec\\.www$"
                     ],
@@ -2331,6 +2361,7 @@
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
@@ -2364,6 +2395,7 @@
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
@@ -2401,6 +2433,7 @@
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
@@ -2418,6 +2451,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -2483,6 +2517,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -2585,6 +2620,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -2647,6 +2683,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -2715,6 +2752,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -2802,6 +2840,7 @@
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
@@ -2819,6 +2858,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -2877,6 +2917,7 @@
                       "^com\\.microsoft\\.rdc$",
                       "^com\\.microsoft\\.rdc\\.mac$",
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$",
                       "^com\\.microsoft\\.rdc\\.osx\\.beta$",
                       "^net\\.sf\\.cord$",
@@ -3116,6 +3157,7 @@
                     "type": "frontmost_application_unless",
                     "bundle_identifiers": [
                       "^com\\.microsoft\\.rdc\\.macos$",
+                      "^com\\.moonlight-stream\\.Moonlight$",
                       "^com\\.google\\.Chrome\\.app\\.cmkncekebbebpfilplodngbpllndjkfo$"
                     ]
                   }
