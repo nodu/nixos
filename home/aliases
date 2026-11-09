@@ -303,3 +303,6 @@ alias vpn-ts='vpn-switch tailscale'
 alias vpn-nord='vpn-switch nordvpn'
 alias vpn-off='vpn-switch off'
 alias vpn-status='vpn-switch status'
+
+# Android wireless debugging: show a pairing QR code, then adb pair once the phone scans it
+alias adb-pair-qr='nix shell nixpkgs#android-tools nixpkgs#qrencode --command bash -c '\''name=adb-qr-$RANDOM; pass=$(LC_ALL=C tr -dc 0-9 </dev/urandom | head -c 8); qrencode -t ansiutf8 "WIFI:T:ADB;S:$name;P:$pass;;"; echo "Phone: Developer options > Wireless debugging > Pair device with QR code"; until addr=$(adb mdns services | grep "^$name[[:space:]]*_adb-tls-pairing" | grep -oE "[^[:space:]]+$"); do sleep 1; done; adb pair "$addr" "$pass"'\'''
