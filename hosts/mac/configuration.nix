@@ -12,9 +12,11 @@ let
   # means a re-registered peer self-heals there instead of silently serving a
   # stale address from a file.
   meshHostsBlock = lib.concatStringsSep "\n"
-    (lib.mapAttrsToList (name: addr: "${addr}\t${name}") meshPeers);
+    (lib.mapAttrsToList (name: { mesh, ... }: "${mesh}\t${name}") meshPeers);
 in
 {
+  imports = [ ./meshnet-watchdog.nix ];
+
   #----- Nix Settings -----
   nix = {
     package = pkgs.nix;

@@ -231,10 +231,11 @@ SSH is key-only (`PasswordAuthentication = false`), matching bau. `matt` has lin
 enabled so systemd **user** units start at boot without an interactive login -- this is
 what makes a reboot bring services back with the lid still shut.
 
-**baremetal is reachable on the LAN only.** The `baremetal` SSH match block in
-[`home/shared/ssh.nix`](home/shared/ssh.nix) resolves it over NordVPN Meshnet (nickname
-`baremetal`, mesh IP `100.125.97.192` as `baremetal-mesh-ip`). Renaming the Meshnet
-nickname breaks `ssh baremetal` until this file is updated and re-applied.
+**SSH to baremetal** goes over NordVPN Meshnet through the `baremetal` block in
+[`home/shared/ssh.nix`](home/shared/ssh.nix) (nickname `baremetal`, also reachable as
+`baremetal-mesh-ip`), and prefers the LAN when it answers there. Peer addresses
+live in [`modules/mesh-peers.nix`](modules/mesh-peers.nix). If you rename the Meshnet
+nickname, update `ssh.nix` to match and re-apply, or `ssh baremetal` will break.
 
 There are deliberately no `baremetal/*` Makefile targets. Rebuilds are done by SSHing in
 (`ssh baremetal`) and running `make switch` there. The Mac is aarch64-darwin and cannot

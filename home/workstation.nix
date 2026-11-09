@@ -5,6 +5,8 @@
 # https://mipmip.github.io/home-manager-option-search
 
 let
+  meshPeers = import ../modules/mesh-peers.nix;
+
   # Note: Nix Search for package, click on platform to find binary build status
   # Get specific versions of packages here:
   #   https://lazamar.co.uk/nix-versions/
@@ -32,7 +34,7 @@ let
         text = ''
           pw=$(gpg --decrypt "$HOME"/.secrets/gpc-rdp-secret.gpg)
           # pw=$(zenity --entry --title="Domain Password" --text="Enter your _password:" --hide-text)
-          xfreerdp /v:192.168.0.3 +clipboard /dynamic-resolution /sound:sys:alsa /u:GPC /d: /p:"$pw"
+          xfreerdp /v:${meshPeers.base.lan} +clipboard /dynamic-resolution /sound:sys:alsa /u:GPC /d: /p:"$pw"
         '';
       };
 

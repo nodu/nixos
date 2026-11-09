@@ -5,21 +5,40 @@ let
   # One key pair, same name on every host; secrets/restore puts it in place
   identityFile = "~/.ssh/matt";
 
-  # Meshnet addresses live in one place so the ssh blocks below and the mac's
+  # Peer addresses live in one place so the ssh blocks below and the mac's
   # /etc/hosts block cannot drift apart.
   meshPeers = import ../../modules/mesh-peers.nix;
+
+  # ssh names that reach a peer besides its bare hostname.
+  peerAliases = { baremetal = [ "baremetal-tunnel" ]; };
+
+  # Fixed system paths because a Match line is an attribute name, which can't
+  # refer to a store path.
+  # Apple's nc: `-G` is its connect timeout (the nix nc on PATH ignores it).
+  lanCheck = addr:
+    if pkgs.stdenv.isDarwin
+    then "/usr/bin/nc -z -G 1 ${addr} 22"
+    else "/run/current-system/sw/bin/timeout 1 /run/current-system/sw/bin/bash -c '</dev/tcp/${addr}/22'";
+
+  # Use the LAN whenever a peer answers there, otherwise fall through to the
+  # Meshnet name in its Host block. Meshnet's links can go dead after the mac
+  # sleeps.
+  # Must precede the Host blocks: ssh keeps the first HostName it sees.
+  lanMatches = lib.mapAttrs'
+    (name: { lan, ... }:
+      let hosts = [ name ] ++ peerAliases.${name} or [ ]; in
+      lib.nameValuePair
+        "Match originalhost ${lib.concatStringsSep "," hosts} exec \"${lanCheck lan} >/dev/null 2>&1\""
+        (lib.hm.dag.entryBefore hosts { HostName = lan; }))
+    meshPeers;
 
   # "<name>-mesh-ip" escape hatches: address a peer by its Meshnet IP directly,
   # bypassing name resolution entirely. Useful when DNS is the thing that's
   # broken -- which is exactly the failure the /etc/hosts block guards against.
-  # baremetal's wired LAN address at home. Meshnet's link to it goes dead after
-  # the mac sleeps, so prefer the LAN whenever baremetal answers there.
-  baremetalLan = "192.168.0.20";
-
   meshSettings = lib.mapAttrs'
-    (name: addr: lib.nameValuePair "${name}-mesh-ip" {
+    (name: { mesh, ... }: lib.nameValuePair "${name}-mesh-ip" {
       User = "matt";
-      HostName = addr;
+      HostName = mesh;
       IdentityFile = identityFile;
     })
     meshPeers;
@@ -56,12 +75,7 @@ in
       "bau" = {
         User = "matt";
         HostName = "bau";
-        IdentityFile = identityFile;
-      };
-
-      "bau-kai" = {
-        User = "matt";
-        HostName = "192.168.0.6";
+        HostKeyAlias = "bau";
         IdentityFile = identityFile;
       };
 
@@ -79,12 +93,6 @@ in
         HostKeyAlias = "baremetal";
         IdentityFile = identityFile;
       };
-      "baremetal-local" = {
-        User = "matt";
-        HostName = "baremetal.local";
-        IdentityFile = identityFile;
-      };
-
       "baremetal-tunnel" = {
         User = "matt";
         HostName = "baremetal";
@@ -97,11 +105,9 @@ in
         }];
       };
 
-      # Wired LAN address it had under Ubuntu; reserve it in the router.
-      # TODO: switch to the Meshnet name once base is registered, like baremetal.
       "base" = {
         User = "matt";
-        HostName = "192.168.0.3";
+        HostName = "base";
         HostKeyAlias = "base";
         IdentityFile = identityFile;
       };
@@ -125,14 +131,7 @@ in
       "*" = {
         IdentitiesOnly = "yes";
       };
-    } // meshSettings // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      # Must precede the Host blocks: ssh keeps the first HostName it sees.
-      # Apple's nc: `-G` is its connect timeout (the nix nc on PATH ignores it).
-      "Match originalhost baremetal,baremetal-tunnel exec \"/usr/bin/nc -z -G 1 ${baremetalLan} 22 >/dev/null 2>&1\"" =
-        lib.hm.dag.entryBefore [ "baremetal" "baremetal-tunnel" ] {
-          HostName = baremetalLan;
-        };
-    };
+    } // meshSettings // lanMatches;
   };
 }
 

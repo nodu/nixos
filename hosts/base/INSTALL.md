@@ -15,7 +15,7 @@ Cable the monitor to both cards and switch inputs.
 - Copy anything wanted off Ubuntu (`/home/matt` is 18G: `Code`, `notes`,
   `dotenv`, `Documents`, ...) and off the Windows partition:
   `rsync -aHAX --info=progress2 /home/matt/ /mnt/usb/ubuntu-home/`
-- Reserve `192.168.0.3` for the desktop in the router (`ssh base` points at it).
+- Reserve `192.168.0.3` for the desktop in the router.
 
 ## 2. Make the installer USB (on the Mac)
 
@@ -116,9 +116,9 @@ for d in /sys/kernel/iommu_groups/*/devices/*; do
 done | sort -V
 ```
 
-- `nordvpn login`, enable Meshnet, set the nickname to `base`, then add its IP
-  to `modules/mesh-peers.nix` and point the `base` block in
-  `home/shared/ssh.nix` at the Meshnet name.
+- `nordvpn login`, enable Meshnet, set the nickname to `base`, then update its
+  IP in `modules/mesh-peers.nix` if registering gave it a new one (`ssh base`
+  uses the Meshnet name).
 - Enable "Restore AC Power Loss: Power On" in the BIOS so the box comes back
   after a power cut.
 
