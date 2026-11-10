@@ -152,6 +152,9 @@
     iptables -A nixos-fw -i enp0s31f6 -p tcp --dport 8888 -s 192.168.0.0/24 -j nixos-fw-accept
     iptables -A nixos-fw -i enp0s31f6 -p tcp -m multiport --dports 47984,47989,48010 -s 192.168.0.0/24 -j nixos-fw-accept
     iptables -A nixos-fw -i enp0s31f6 -p udp -m multiport --dports 47998:48000,48002,48010 -s 192.168.0.0/24 -j nixos-fw-accept
+    # xrdp and Unsloth Studio from Meshnet peers (off-LAN)
+    iptables -A nixos-fw -i nordlynx -p tcp --dport 3389 -s 100.64.0.0/10 -j nixos-fw-accept
+    iptables -A nixos-fw -i nordlynx -p tcp --dport 8888 -s 100.64.0.0/10 -j nixos-fw-accept
   '';
 
   # This value determines the NixOS release from which the default
