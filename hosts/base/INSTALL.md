@@ -4,11 +4,13 @@ NixOS takes the whole NVMe (1G ESP + one root partition), replacing both
 Ubuntu and the bare-metal Windows install. Windows 11 comes back as a fresh
 libvirt VM that borrows the RTX 3090 while it runs.
 
-GPUs: the GTX 1080 (`05:00.0`, chipset slot) drives the host desktop. The RTX
-3090 (`01:00.0`, CPU x16 slot) does host CUDA (Unsloth Studio) and goes to the VM while
-the VM is up. The 3090 is the boot VGA card, so firmware screens (BIOS, the
-systemd-boot menu, the installer) come out of it. The VM's display does too.
-Cable the monitor to both cards and switch inputs.
+GPUs: the CPU's HD 530 (`00:02.0`, the board's DP and HDMI ports) drives the
+host desktop and the firmware screens. In the BIOS, Advanced > System Agent >
+Graphics Configuration: Primary Display = IGFX, iGPU Multi-Monitor = Enabled.
+The GTX 1080 (`05:00.0`, chipset slot) and RTX 3090 (`01:00.0`, CPU x16 slot)
+are compute-only: host CUDA (Unsloth Studio), and the 3090 goes to the VM
+while the VM is up. The VM's display comes out of the 3090, so cable a monitor
+to it too and switch inputs.
 
 ## 1. Before wiping
 
@@ -39,8 +41,8 @@ whatever disk it is given.
 
 ## 3. Wipe the NVMe and install (NixOS 26.05 ISO)
 
-Plug the stick and ethernet into the desktop, cable the monitor to the 3090,
-and press F8 at power-on. Pick the `UEFI: <stick>` entry, not the plain one
+Plug the stick and ethernet into the desktop, cable the monitor to the
+board's DP port, and press F8 at power-on. Pick the `UEFI: <stick>` entry, not the plain one
 (that's legacy BIOS mode, and systemd-boot needs UEFI). Secure Boot is already
 off. The ISO auto-logs in as `nixos` and gets an address by DHCP.
 
@@ -81,8 +83,7 @@ reboot
 
 ## 4. First boot
 
-The systemd-boot menu shows on the 3090's output; the desktop appears on the
-**1080's**.
+The systemd-boot menu and the desktop both show on the board's outputs.
 
 `ssh base` from the Mac works straight away: base authorizes the same key the
 Mac and baremetal use. `backup.tar.gz` is gitignored, so the fresh clone on
@@ -108,7 +109,7 @@ make switch                 # NIXNAME defaults to the hostname. Also re-links
                             # baremetal's (dangling) home-manager symlink
 rm backup.tar.gz            # private keys; don't leave a copy lying around
 
-nvidia-smi                  # both GPUs, driver 580.x; no process on the 3090
+nvidia-smi                  # both GPUs, driver 580.x; no processes on either
 
 # The 3090's IOMMU group should hold just 01:00.0, 01:00.1 and root port 00:01.0
 for d in /sys/kernel/iommu_groups/*/devices/*; do

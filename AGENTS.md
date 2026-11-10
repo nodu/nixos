@@ -4,7 +4,7 @@ Instructions for AI coding agents working in this NixOS configuration repository
 
 ## Repository Overview
 
-Personal NixOS configuration using Nix flakes, home-manager, GNOME + i3 (X11 primary), and Sway (Wayland secondary). Host types: `baremetal` (Framework 13 AMD, x86_64), `base` (desktop workstation, x86_64, GTX 1080 for display, RTX 3090 for CUDA and lent to a Windows VM), `rpi3` (Raspberry Pi 3, aarch64 headless server), `bau` (Raspberry Pi 4, aarch64), and `mac` (macOS via nix-darwin, aarch64-darwin). `baremetal` and `base` share most of their config through `modules/workstation.nix` and `home/workstation.nix`.
+Personal NixOS configuration using Nix flakes, home-manager, GNOME + i3 (X11 primary), and Sway (Wayland secondary). Host types: `baremetal` (Framework 13 AMD, x86_64), `base` (desktop workstation, x86_64, iGPU display, 2x RTX 3090 for CUDA), `rpi3` (Raspberry Pi 3, aarch64 headless server), `bau` (Raspberry Pi 4, aarch64), and `mac` (macOS via nix-darwin, aarch64-darwin). `baremetal` and `base` share most of their config through `modules/workstation.nix` and `home/workstation.nix`.
 
 ## Build / Test / Apply Commands
 
@@ -73,7 +73,7 @@ There is no unit test suite, linter, or CI pipeline. The primary validation meth
 | `flake.nix` | Flake definition: inputs, outputs, nixpkgs/unstable channels, overlays |
 | `hosts/baremetal/configuration.nix` | System-level config for Framework 13: boot, networking, services, system packages |
 | `hosts/baremetal/hardware-configuration.nix` | Auto-generated hardware config (**do not edit**) |
-| `hosts/base/configuration.nix` | System-level config for the desktop: NVIDIA, VFIO/libvirt, LAN firewall rules |
+| `hosts/base/configuration.nix` | System-level config for the desktop: NVIDIA, libvirt, LAN firewall rules |
 | `hosts/base/hardware-configuration.nix` | Hardware config; mounts by label (`nixos`, `NIXBOOT`) |
 | `hosts/base/INSTALL.md` | Partitioning and install runbook for base |
 | `hosts/rpi3/configuration.nix` | System-level config for Raspberry Pi 3 (headless, SSH-only) |
@@ -249,26 +249,19 @@ Always-on desktop workstation and server, configured like baremetal through
 SSH). i7-6700K, 32 GB RAM, onboard I219-V ethernet (`enp0s31f6`). NixOS owns the
 whole NVMe; Windows runs as a libvirt VM.
 
-- **GPUs**: GTX 1080 (`05:00.0`, chipset x4 slot) drives the host display. The
-  RTX 3090 (`01:00.0`, CPU x16 slot, alone in its IOMMU group) does host
-  CUDA (Unsloth Studio) and is lent to the `win11` VM while it runs. libvirt moves it
-  between nvidia and vfio-pci itself, because the VM lists it as a
-  `managed='yes'` hostdev. The libvirt qemu hook `rtx3090-passthrough`
-  refuses to start the VM if anything still has the card open (quit Unsloth
-  Studio or unload its model first). An
-  unbind with open handles blocks instead of failing, so the check is what
-  stands between a busy card and a hung VM start. Keeping the desktop off the
-  3090 is what makes the handoff possible: Xorg `BusID` + `ProbeAllGpus false`,
-  the `mutter-device-ignore` udev tag for the GDM greeter, and
-  nvidia-persistenced off.
-- **vfio-boot entry**: a specialisation that binds the 3090 to vfio-pci at boot.
-  It's a fallback for when the runtime handoff misbehaves; in it the host has no
-  CUDA on the 3090.
-- **The 3090 is the boot VGA card**: firmware screens and the VM's display come
-  out of it; the host desktop comes out of the 1080.
-- **NVIDIA driver**: pinned to `nvidiaPackages.legacy_580`. The 1080 is Pascal: it
-  has no open kernel module, and 590+ (`production` is 595) dropped it. Don't
-  switch to `open = true` or the default package while the 1080 is installed.
+- **GPUs**: the iGPU (HD 530, `00:02.0`) drives the host display and firmware
+  screens (BIOS: Primary Display = IGFX). Two ROG Strix RTX 3090s on risers
+  (`01:00.0` PCIEX16_1, `02:00.0` PCIEX8_2, Gen3 x8 each) are compute-only.
+  Xorg is pinned to the iGPU (`BusID`, `AutoAddGPU false`). The Windows VM
+  has no GPU passthrough.
+- **NVIDIA driver**: `production` with the open kernel module, as `mkDefault`s.
+  nvidia-persistenced is on. GPU-f3039727 is capped at 270 W
+  (`rtx3090-power-limit`) because it runs hot and falls off the bus at full power.
+- **GTX 1080 (optional)**: uncomment `./gtx1080.nix` in the host config and
+  `home/base-gtx1080.nix` in `home/home-base.nix`. Together they switch to
+  `legacy_580` closed (Pascal has no open module and 590+ dropped it) and
+  build Unsloth's llama.cpp for sm_61 + sm_86. `make update-unsloth-llama`
+  only applies in that setup; otherwise Studio uses its own prebuilt.
 
 Install steps: [`hosts/base/INSTALL.md`](hosts/base/INSTALL.md).
 

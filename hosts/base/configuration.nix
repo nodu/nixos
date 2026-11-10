@@ -1,56 +1,19 @@
 # Desktop workstation + always-on server: i7-6700K on an ASUS Maximus VIII
-# Hero. GTX 1080 drives the host display. RTX 3090 serves host CUDA (Unsloth
-# Studio) and is lent to the Windows VM while it runs. Shared desktop/server
+# Hero. The CPU's HD 530 drives the host display, firmware screens included,
+# so the two RTX 3090s are compute-only (CUDA for Unsloth Studio). ./gtx1080.nix
+# adds the GTX 1080 back as a third compute card. Shared desktop/server
 # config lives in ../../modules/workstation.nix. Install steps are in
 # ./INSTALL.md.
 
 { config, pkgs, lib, ... }:
 
-let
-  # lspci -nn: 01:00.0 [10de:2204] RTX 3090, 01:00.1 [10de:1aef] its HDMI audio.
-  # The 1080 (10de:1b80, 10de:10f0) has different IDs, so binding by ID is safe.
-  rtx3090Ids = "10de:2204,10de:1aef";
-  rtx3090 = "0000:01:00.0";
-
-  # libvirt qemu hook, called as `<domain> <operation> <sub-operation>`. Before
-  # the win11 VM takes the 3090, checks that nothing on the host has it open.
-  #
-  # The detach is an unbind of nvidia from the card. If a process still has
-  # the card open (e.g. Unsloth Studio with a model loaded), the unbind blocks
-  # instead of failing, and the VM start hangs. So refuse to start, naming the
-  # holders, rather than risk that.
-  gpuPassthroughHook = pkgs.writeShellApplication {
-    name = "rtx3090-passthrough-hook";
-    runtimeInputs = [ pkgs.gawk pkgs.psmisc ];
-    text = ''
-      [ "$1" = win11 ] || exit 0
-      case "$2" in
-        prepare)
-          info=/proc/driver/nvidia/gpus/${rtx3090}/information
-          # Absent when the 3090 is already on vfio-pci (vfio-boot entry)
-          [ -r "$info" ] || exit 0
-          nodes="/dev/nvidia$(awk '/Device Minor/ {print $3}' "$info")"
-          for n in /dev/dri/by-path/pci-${rtx3090}-card /dev/dri/by-path/pci-${rtx3090}-render; do
-            if [ -e "$n" ]; then nodes="$nodes $n"; fi
-          done
-          # shellcheck disable=SC2086
-          if fuser -s $nodes; then
-            echo "RTX 3090 is still in use, not detaching it:" >&2
-            # shellcheck disable=SC2086
-            fuser -v $nodes >&2 || true
-            exit 1
-          fi
-          ;;
-      esac
-    '';
-  };
-in
 {
   imports = [
     ./hardware-configuration.nix
     ./disko.nix # the data pool's disks and datasets; goes with zfs.nix
     ./zfs.nix
     ./restic.nix
+    # ./gtx1080.nix # with ../../home/base-gtx1080.nix in home-base.nix
     ../../modules/workstation.nix
   ];
 
@@ -70,20 +33,24 @@ in
     "vm.page-cluster" = 0;
   };
 
-  #----- NVIDIA (host display on the 1080) -----
+  #----- GPUs: iGPU display, NVIDIA compute-only -----
+  # The NixOS nvidia module only loads the kernel driver when "nvidia" is in
+  # videoDrivers, but that also gives Xorg an nvidia screen. Keep the driver
+  # and hand Xorg the iGPU alone.
   services.xserver.videoDrivers = [ "nvidia" ];
+  services.xserver.drivers = lib.mkForce [{ name = "modesetting"; display = true; }];
+  services.xserver.externallyConfiguredDrivers = [ "nvidia" ];
   hardware.nvidia = {
-    # The GTX 1080 is Pascal: it has no open kernel module, and the 590+
-    # drivers (`production` is 595 in 26.05) dropped it. 580 is NVIDIA's
-    # long-term branch for Maxwell/Pascal/Volta, supported until Aug 2028, and
-    # drives the 3090 too.
-    open = false;
-    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
-    modesetting.enable = true;
-    nvidiaSettings = true;
-    # Off: nvidia-persistenced holds every GPU open, which would block lending
-    # the 3090 to the VM.
-    nvidiaPersistenced = false;
+    # Ampere gets NVIDIA's open kernel module and current driver; ./gtx1080.nix
+    # overrides both for Pascal.
+    open = lib.mkDefault true;
+    package = lib.mkDefault config.boot.kernelPackages.nvidiaPackages.production;
+    # No KMS: nothing drives a display from these cards, so there is no
+    # nvidia framebuffer console and Xorg can't pick them up as extra GPUs.
+    modesetting.enable = false;
+    nvidiaSettings = false;
+    # Keeps idle cards initialised, so they drop to P8 and keep power limits.
+    nvidiaPersistenced = true;
   };
 
   # GDM's Wayland greeter fails to hand the NVIDIA display over to Xorg/i3.
@@ -91,25 +58,58 @@ in
   services.displayManager.gdm.enable = lib.mkForce false;
   services.xserver.displayManager.lightdm.enable = true;
 
-  # Keep the desktop off the 3090 so it can be detached for the VM. Xorg is
-  # pinned to the 1080 (05:00.0, behind the chipset), and ProbeAllGpus stops
-  # the nvidia X driver opening the other card anyway. The GDM greeter runs
-  # on mutter, which skips devices tagged mutter-device-ignore.
+  # Keep the desktop off the NVIDIA cards so their VRAM stays free. Xorg is
+  # pinned to the iGPU (00:02.0), and
+  # AutoAddGPU stops it attaching the other cards as secondary GPUs. The GDM
+  # greeter runs on mutter, which skips devices tagged mutter-device-ignore.
   services.xserver.deviceSection = ''
-    BusID "PCI:5:0:0"
-    Option "ProbeAllGpus" "false"
+    BusID "PCI:0:2:0"
   '';
-  # Without this the ultrawide comes up at 60 Hz; it does 120 over DP. Set at
-  # the X server so LightDM and i3 both get it.
-  services.xserver.screenSection = ''
-    Option "metamodes" "HDMI-0: 3840x2400_60 +0+0, DP-0: 3440x1440_120 +3840+0"
+  services.xserver.serverFlagsSection = ''
+    Option "AutoAddGPU" "false"
   '';
   services.udev.extraRules = ''
-    SUBSYSTEM=="drm", KERNELS=="${rtx3090}", TAG+="mutter-device-ignore"
+    SUBSYSTEM=="drm", ATTRS{vendor}=="0x10de", TAG+="mutter-device-ignore"
+  '';
+  # The board has one DP 1.2 and one HDMI 1.4 port, and i915 caps HDMI at
+  # 300 MHz: 3840x2400 at 30 Hz, 3440x1440 at ~50. Whichever monitor is on DP
+  # gets its full rate. So rather than fixed output names and rates, each
+  # monitor gets its preferred mode (xrandr lists it first) at the highest
+  # rate the port allows. Monitors go left to right, widest mode first; the
+  # 3440x1440 is primary. LightDM reuses its X server for the session, so i3
+  # gets this too.
+  services.xserver.displayManager.setupCommands = ''
+    xrandr=${lib.getExe pkgs.xrandr}
+    x=0
+    while read -r out mode rate; do
+      primary=""
+      if [ "$mode" = 3440x1440 ]; then primary=--primary; fi
+      $xrandr --output "$out" --mode "$mode" --rate "$rate" --pos "''${x}x0" $primary
+      x=$((x + ''${mode%x*}))
+    done < <($xrandr | ${lib.getExe pkgs.gawk} '
+      / connected/ { out = $1; next }
+      out && /^ / {
+        rate = 0
+        for (i = 2; i <= NF; i++) { r = $i; gsub(/[*+]/, "", r); if (r + 0 > rate + 0) rate = r }
+        print out, $1, rate
+        out = ""
+      }' | ${pkgs.coreutils}/bin/sort -k2,2r)
   '';
 
   # GPUs in docker: `docker run --device nvidia.com/gpu=all ...`
   hardware.nvidia-container-toolkit.enable = true;
+
+  # Strix 3090 GPU-f3039727 falls off the bus (Xid 79) after ~10 min at full
+  # power until it is repasted. Cap it.
+  systemd.services.rtx3090-power-limit = {
+    wantedBy = [ "multi-user.target" ];
+    after = [ "nvidia-persistenced.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i GPU-f3039727-ff98-e47c-5d66-906f2ea741f2 -pl 270";
+    };
+  };
 
   # Prebuilt CUDA-enabled packages; otherwise anything built with CUDA support
   # compiles locally
@@ -119,55 +119,30 @@ in
   };
 
   #----- Windows VM -----
-  # VT-d is on in firmware (ACPI DMAR present); the kernel needs intel_iommu=on.
-  # The 3090 sits alone on the CPU's x16 root port, so it gets its own IOMMU
-  # group.
-  boot.kernelParams = [ "intel_iommu=on" "iommu=pt" ];
-  boot.initrd.kernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1" ];
-
-  # Add the 3090 (01:00.0 and 01:00.1) to the VM as managed PCI host devices
-  # (virt-manager's default). libvirt then moves the card from nvidia to
-  # vfio-pci on VM start and back to nvidia on shutdown.
   virtualisation.libvirtd = {
     enable = true;
     qemu.swtpm.enable = true; # TPM 2.0 for Windows 11
-    hooks.qemu.rtx3090-passthrough = lib.getExe gpuPassthroughHook;
   };
   virtualisation.spiceUSBRedirection.enable = true;
   programs.virt-manager.enable = true;
   users.users.matt.extraGroups = [ "libvirtd" "kvm" ];
 
-  # Fallback in case the runtime handoff misbehaves: a "vfio-boot" boot entry
-  # that gives the 3090 to vfio-pci from early boot. The host loses it for
-  # CUDA in that entry, but nothing has to be detached at VM start.
-  specialisation.vfio-boot.configuration = {
-    system.nixos.tags = [ "vfio-boot" ];
-    boot.kernelParams = [
-      "vfio-pci.ids=${rtx3090Ids}"
-      # The 3090 is the boot VGA card (the firmware always initializes the
-      # x16 slot). In this entry nvidia-drm never takes it over, so stop the
-      # early framebuffer (simpledrm) from holding its memory.
-      "initcall_blacklist=sysfb_init"
-    ];
-  };
-
   #----- Remote desktop (Sunshine) -----
   # Streams the live i3 session on :0 to Moonlight. Pair through the web UI:
   # `ssh -L 47990:localhost:47990 base`, then https://localhost:47990.
-  # X11 capture rather than KMS, so Sunshine never opens the 3090's DRM nodes
-  # (which would block lending it to the VM); NVENC is pinned to the 1080.
+  # X11 capture, encoded by the iGPU's Quick Sync over VA-API, so streaming
+  # never touches the NVIDIA cards.
   services.sunshine = {
     enable = true;
-    package = pkgs.sunshine.override { cudaSupport = true; };
     settings = {
       capture = "x11";
-      encoder = "nvenc";
-      # The ultrawide (DP-0) only; the default streams every monitor at once
+      encoder = "vaapi";
+      adapter_name = "/dev/dri/by-path/pci-0000:00:02.0-render";
+      # The ultrawide only; the default streams every monitor at once. Was 2
+      # on the 1080; check the index in Sunshine's log after the move.
       output_name = 2;
     };
   };
-  systemd.user.services.sunshine.environment.CUDA_VISIBLE_DEVICES =
-    "GPU-1e68a55a-03e0-d1eb-f9f9-69c560b1b2ef";
 
   #----- Network -----
   # LAN access to T3 Code, xrdp, Unsloth Studio and Sunshine over the onboard I219-V

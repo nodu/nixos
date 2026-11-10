@@ -213,13 +213,14 @@
         inherit (workstation) extraSpecialArgs extraModules;
       };
 
-      # Desktop workstation + server: i7-6700K, GTX 1080 display, RTX 3090 for CUDA and a Windows VM
+      # Desktop workstation + server: i7-6700K, iGPU display, 2x RTX 3090 for CUDA
       nixosConfigurations.base = mkSystem {
         system = "x86_64-linux";
         config = ./hosts/base/configuration.nix;
         homeConfig = ./home/home-base.nix;
         hardwareModules = [
-          nixos-hardware.nixosModules.common-cpu-intel-cpu-only
+          # Not exported as a module; Skylake GuC/HuC and VA-API settings for the HD 530
+          "${nixos-hardware}/common/cpu/intel/skylake"
           nixos-hardware.nixosModules.common-pc
           nixos-hardware.nixosModules.common-pc-ssd
         ];

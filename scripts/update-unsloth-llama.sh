@@ -2,6 +2,8 @@
 #
 # Pin base's llama.cpp (Unsloth's fork, built for the 3090 + 1080) to its
 # latest GitHub release.
+# Only applies while home/base-gtx1080.nix is imported; otherwise Studio
+# uses its own prebuilt.
 #
 # Rewrites home/unsloth-llama-cpp.json with the release's tag, commit, source
 # hash, and the web UI's npm dependency hash (found by building that
