@@ -15,15 +15,21 @@ sources cannot live in one file:
   the local model servers the installed model set, which is host-specific and
                           changes whenever you download or remove a model.
 
-The models come from Unsloth Studio, the local model server on every host, so
-one script serves every host without per-host settings:
+The models come from Unsloth Studio: the local one on every host (provider
+`unsloth`), plus base's, which has the GPUs, on every other host (provider
+`unsloth-base`, see REMOTES). One script serves every host without per-host
+settings:
 
-  Unsloth Studio  http://127.0.0.1:8888. Needs Settings > API > "Keyless API
-                  access" = full (loopback-only, and the only keyless scope that
-                  may switch models) and "Model auto-switch" on, so a request
-                  naming a downloaded model loads it. Studio only runs while its
-                  desktop app is open, so when it is down the previous run's
-                  model list is kept.
+  Unsloth Studio  http://127.0.0.1:8888 locally, http://192.168.0.3:8888 for
+                  base. Needs Settings > API > "Model auto-switch" on, so a
+                  request naming a downloaded model loads it onto that host's
+                  GPU. Auth is an API key in ~/.secrets/unsloth/<host> (one line,
+                  mode 0600; mint one under Settings > API keys), referenced from
+                  the config with opencode's {file:...} so it never lands in
+                  opencode.json. With no key file the server must allow keyless
+                  access (Settings > API > "Keyless API access" = full,
+                  loopback-only), which only works for the local server. An
+                  unreachable server keeps the previous run's model list.
 
 Merging them here rather than layering them through opencode's own config chain
 (global -> OPENCODE_CONFIG -> project) is deliberate: that chain needs
@@ -36,7 +42,6 @@ removing a model:
 
     nx-opencode-models-sync            # write ~/.config/opencode/opencode.json
     nx-opencode-models-sync --print    # dump to stdout instead
-    nx-opencode-models-sync --max-ctx-mlx 65536
 
 If Studio is unreachable and no earlier run left a model list, the base
 settings are still written without a provider block, so a host with no model
@@ -44,43 +49,11 @@ server keeps working mcp and skills config. A missing or malformed base is a
 hard error instead -- writing a config without it would silently drop those
 settings.
 
-Context is capped per engine, because the two allocate KV cache differently:
-
-  ggml (gguf)      pre-allocates the whole window at load. A 27B at the
-                   advertised 262144 reserves ~17 GB of KV cache before the
-                   first token, enough to OOM a 64 GB mac before the context
-                   was pinned. Capped hard.
-
-  MLX (safetensors) allocates lazily as the sequence grows, so the window is a
-                   ceiling rather than a reservation. Measured on a 64 GB M5
-                   Pro: qwen3.6 35b-a3b nvfp4 completed a real 227k-token
-                   prompt with no OOM. Costs nothing to set high.
-
-The MLX cap is the models' native 262144. It was 131072, to stay off the
-throughput cliff at the top of the window (measured, qwen3.6 35b-a3b nvfp4:
-87.8 tok/s generation and 1328 tok/s prefill on a short context, versus 26.5
-and 635 at ~227k). That cliff turns out to be front-loaded -- the same model
-prefills at ~680 tok/s at 113k depth, so 131072 was paying nearly all of the
-slowdown while buying back only half the window. Compaction costs more than
-the remaining margin: opencode uses limit.context to decide when to compact,
-and dropping history mid-task is a worse failure than a slow turn. Pass
---max-ctx-mlx to trade back if a session spends more time in prefill than a
-compaction would have cost.
-
-KV cache is not what bounds this, for either MLX model here. Both are hybrid
-attention (qwen3_5's full_attention_interval = 4), so only a quarter of the
-layers hold a cache that grows with the sequence; the rest are linear
-attention with constant-size state. From each model's shipped config.json, at
-2 B/value f16 cache:
-
-  qwen3.6 35b-a3b  10 of 40 full-attn layers x 2 KV heads x 256 head_dim
-                   -> 20 KiB/token ->  5 GiB at 262144
-  qwen3.8 27b      16 of 64 full-attn layers x 4 KV heads x 256 head_dim
-                   -> 64 KiB/token -> 16 GiB at 262144
-
-Measured peak process memory on the 64 GB M5 Pro stays ~31-37 GiB across
-requests from 0 to 140k tokens of context, against 35 GB of resident weights
--- i.e. flat in context length, which is what the table above predicts.
+Every model's limit.context is 0, which opencode treats as unknown, so nothing
+here can go stale. Studio sizes llama-server's window itself at load time and
+only reports it while the model is loaded, so any number written here would
+drift from the real one. opencode only uses this value to decide when to
+compact; with 0 it compacts when Studio rejects a request as too long.
 """
 
 from __future__ import annotations
@@ -88,12 +61,17 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import socket
 import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 
 DEFAULT_UNSLOTH_HOST = os.environ.get("UNSLOTH_HOST", "http://127.0.0.1:8888")
+# Studio servers on other hosts, by hostname. A host skips its own entry, since
+# its local server already covers it.
+REMOTES = {"base": "http://192.168.0.3:8888"}
+KEY_DIR = "~/.secrets/unsloth"
 CONFIG_DIR = os.path.join(
     os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
     "opencode",
@@ -105,9 +83,7 @@ DEFAULT_MCP = os.path.join(
     "mcp",
     "servers.json",
 )
-DEFAULT_MAX_CTX_GGML = 32768
-DEFAULT_MAX_CTX_MLX = 262144
-DEFAULT_MAX_OUTPUT = 8192
+DEFAULT_MAX_OUTPUT = 32000
 
 SCHEMA_URL = "https://opencode.ai/config.json"
 GENERATED_NOTE = (
@@ -120,22 +96,16 @@ GENERATED_NOTE = (
 )
 
 
-def api(host: str, path: str, payload: dict | None = None) -> dict:
+def api(host: str, path: str, key: str | None = None) -> dict:
     url = f"{host.rstrip('/')}{path}"
-    data = json.dumps(payload).encode() if payload is not None else None
-    req = urllib.request.Request(
-        url, data=data, headers={"Content-Type": "application/json"}
-    )
+    headers = {"Authorization": f"Bearer {key}"} if key else {}
+    req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.load(resp)
 
 
-def capped(native_ctx: int | None, cap: int) -> int:
-    return min(native_ctx, cap) if native_ctx else cap
-
-
 def model_entry(
-    name: str, ctx: int, max_output: int, *, tools: bool, reasoning: bool,
+    name: str, max_output: int, *, tools: bool, reasoning: bool,
     attachment: bool, options: dict | None = None,
 ) -> dict:
     entry = {
@@ -146,19 +116,28 @@ def model_entry(
     }
     if options:
         entry["options"] = options
-    entry["limit"] = {"context": ctx, "output": max_output}
+    entry["limit"] = {"context": 0, "output": max_output}
     return entry
 
 
 #----- Unsloth Studio -----
 
+def read_key(key_file: str) -> str | None:
+    try:
+        with open(os.path.expanduser(key_file)) as handle:
+            return handle.read().strip() or None
+    except FileNotFoundError:
+        return None
+
+
 def unsloth_provider(
-    host: str, max_ctx_ggml: int, max_ctx_mlx: int, max_output: int
+    label: str, host: str, key_file: str, max_output: int,
 ) -> dict | None:
     """Studio's provider block, or None if it has nothing to offer right now."""
+    key = read_key(key_file)
     try:
-        listed = api(host, "/v1/models").get("data") or []
-        local = api(host, "/api/models/local").get("models") or []
+        listed = api(host, "/v1/models", key).get("data") or []
+        local = api(host, "/api/models/local", key).get("models") or []
     except urllib.error.URLError as exc:
         print(f"note: no Unsloth Studio at {host} ({exc}); skipped", file=sys.stderr)
         return None
@@ -166,16 +145,22 @@ def unsloth_provider(
     # /api/models/config's is_gguf / is_mlx read false even for GGUF repos;
     # the local scan's model_format is the field that is actually set.
     gguf = {m.get("id") for m in local if m.get("model_format") == "gguf"}
+    # e.g. parakeet's "speech-recognition-unsupported"; chat models read
+    # "text-generation". /api/models/config's is_audio misses these.
+    not_chat = {
+        m.get("id") for m in local
+        if any(word in (m.get("task") or "") for word in ("speech", "unsupported"))
+    }
 
     models: dict[str, dict] = {}
 
     for entry in sorted(listed, key=lambda m: m.get("id", "")):
         model_id = entry.get("id")
-        if not model_id:
+        if not model_id or model_id in not_chat:
             continue
         quoted = urllib.parse.quote(model_id, safe="")
         try:
-            info = api(host, f"/api/models/config/{quoted}")
+            info = api(host, f"/api/models/config/{quoted}", key)
         except urllib.error.URLError as exc:
             print(f"warning: skipping {model_id}: {exc}", file=sys.stderr)
             continue
@@ -184,16 +169,13 @@ def unsloth_provider(
             continue  # not chat providers
 
         engine = "ggml" if model_id in gguf else "MLX"
-        cap = max_ctx_mlx if engine == "MLX" else max_ctx_ggml
-        ctx = capped(info.get("max_position_embeddings"), cap)
-        label = entry.get("display_name") or model_id.split("/")[-1]
+        shown = entry.get("display_name") or model_id.split("/")[-1]
         quant = entry.get("quant")
 
         # Studio does not report tool or thinking support per model; every
         # chat model served here has both.
         models[model_id] = model_entry(
-            f"{label}{f' {quant}' if quant else ''} ({engine})",
-            ctx,
+            f"{shown}{f' {quant}' if quant else ''} ({engine})",
             max_output,
             tools=True,
             reasoning=True,
@@ -203,10 +185,13 @@ def unsloth_provider(
     if not models:
         return None
 
+    options = {"baseURL": f"{host.rstrip('/')}/v1"}
+    if key:
+        options["apiKey"] = f"{{file:{key_file}}}"
     return {
-        "name": "Unsloth Studio (local)",
+        "name": f"Unsloth Studio ({label})",
         "npm": "@ai-sdk/openai-compatible",
-        "options": {"baseURL": f"{host.rstrip('/')}/v1"},
+        "options": options,
         "models": models,
     }
 
@@ -298,28 +283,21 @@ def main() -> int:
     parser.add_argument("--base", default=DEFAULT_BASE, help="shared settings path")
     parser.add_argument("--out", default=DEFAULT_OUT, help="output path")
     parser.add_argument("--mcp", default=DEFAULT_MCP, help="shared MCP server list")
-    parser.add_argument(
-        "--max-ctx-ggml",
-        type=int,
-        default=DEFAULT_MAX_CTX_GGML,
-        help="context cap for gguf models (ggml pre-allocates KV cache)",
-    )
-    parser.add_argument(
-        "--max-ctx-mlx",
-        type=int,
-        default=DEFAULT_MAX_CTX_MLX,
-        help="context cap for MLX models (lazy KV allocation)",
-    )
     parser.add_argument("--max-output", type=int, default=DEFAULT_MAX_OUTPUT)
     parser.add_argument(
         "--print", dest="to_stdout", action="store_true", help="print instead of write"
     )
     args = parser.parse_args()
 
-    limits = (args.max_ctx_ggml, args.max_ctx_mlx, args.max_output)
+    me = socket.gethostname().split(".")[0].lower()
+    servers = {"unsloth": ("local", args.unsloth_host, f"{KEY_DIR}/{me}")}
+    for name, url in REMOTES.items():
+        if name != me:
+            servers[f"unsloth-{name}"] = (name, url, f"{KEY_DIR}/{name}")
     found = {
-        "unsloth": unsloth_provider(args.unsloth_host, *limits)
-        or previous_provider(args.out, "unsloth"),
+        provider: unsloth_provider(*server, args.max_output)
+        or previous_provider(args.out, provider)
+        for provider, server in servers.items()
     }
     providers = {key: block for key, block in found.items() if block}
 
