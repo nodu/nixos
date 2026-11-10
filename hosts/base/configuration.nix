@@ -48,6 +48,9 @@ in
 {
   imports = [
     ./hardware-configuration.nix
+    ./disko.nix # the data pool's disks and datasets; goes with zfs.nix
+    ./zfs.nix
+    ./restic.nix
     ../../modules/workstation.nix
   ];
 

@@ -19,6 +19,12 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    # Declarative disk layout; base's ZFS pool (hosts/base/disko.nix)
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       # We want home-manager to use the same set of nixpkgs as our system.
@@ -217,7 +223,8 @@
           nixos-hardware.nixosModules.common-pc
           nixos-hardware.nixosModules.common-pc-ssd
         ];
-        inherit (workstation) extraSpecialArgs extraModules;
+        inherit (workstation) extraSpecialArgs;
+        extraModules = workstation.extraModules ++ [ inputs.disko.nixosModules.disko ];
       };
 
       nixosConfigurations.rpi3 = mkSystem {

@@ -158,3 +158,43 @@ and the 3090 returns to the host: `nvidia-smi` lists it again.
 If the handoff misbehaves (the detach hangs, or the card doesn't come back
 after shutdown), boot the `vfio-boot` entry. It gives the 3090 to vfio-pci from
 early boot, so the VM always works, but the host has no CUDA on it.
+
+## Storage pool (`data`)
+
+The disks, pool and datasets are declared in `./disko.nix`; `./zfs.nix` adds
+the host ID, ARC cap, scrubs and snapshots. Both must be imported in
+`./configuration.nix`. Rebuilding never formats anything: the pool is created
+by running disko's format script, once, after both disks pass a long SMART test
+(`smartctl -t long` on each; they run in parallel. Then `smartctl -a`: test
+passed, and reallocated, pending and CRC counts all 0).
+
+```sh
+cd ~/repos/nixos
+make switch   # loads the zfs module; the /data mounts are nofail, so they
+              # just fail until the pool exists
+
+# Creates the GPT partitions, the mirror and the datasets. It skips a pool
+# that already exists and a disk that already holds anything.
+sudo "$(nix build --no-link --print-out-paths .#nixosConfigurations.base.config.system.build.zfsDiskoFormatScript)"
+
+# disko creates the pool under /mnt (its installer default). Export and
+# re-import it the way boot does, which mounts everything at /data.
+sudo zpool export data
+sudo systemctl restart zfs-import-data.service
+sudo systemctl start local-fs.target
+
+sudo chown -R matt:users /data
+zpool status data; zfs list -o name,used,avail,recordsize,mountpoint
+```
+
+To add a dataset or change a property later: edit `./disko.nix`, `make
+switch`, then run the format script again. It creates the missing datasets and
+`zfs set`s the declared properties on the existing ones (except
+creation-only ones such as `normalization`); it doesn't touch the pool or
+partitions.
+
+To replace a failed disk: put the new disk's serial in `./disko.nix` in place
+of the old one, `make switch`, and run the format script, which partitions the
+blank disk and leaves the pool alone. Then
+`sudo zpool replace data <old-disk-guid-from-zpool-status> /dev/disk/by-partlabel/disk-data1-zfs`
+(or `data2`), and `zpool status data` shows the resilver.
