@@ -161,6 +161,16 @@
     };
 
   };
+  # picom ships an XDG autostart entry, which the profile exposes and systemd
+  # starts at login. That copy runs without this config, wins the compositor
+  # slot, and leaves the service above crash-looping. On base it held X at
+  # ~65% of the GTX 1080 while idle (0–3% under the service).
+  xdg.configFile."autostart/picom.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=picom
+    Hidden=true
+  '';
 
   services.redshift = {
     enable = true;
