@@ -235,9 +235,13 @@ def _opencode_from_db(session_id=None, cwd=None):
     if conn is None:
         return None
     try:
+        # opencode 2.x moved sessions to session_v2 and leaves the 1.x table behind.
+        table = "session_v2" if conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='session_v2'"
+        ).fetchone() else "session"
         if session_id:
             cur = conn.execute(
-                "SELECT id, directory, title, time_updated FROM session WHERE id=?",
+                f"SELECT id, directory, title, time_updated FROM {table} WHERE id=?",
                 (session_id,),
             )
             row = cur.fetchone()
@@ -245,7 +249,7 @@ def _opencode_from_db(session_id=None, cwd=None):
                 return _row_to_session(row)
         if cwd:
             cur = conn.execute(
-                "SELECT id, directory, title, time_updated FROM session "
+                f"SELECT id, directory, title, time_updated FROM {table} "
                 "WHERE directory=? AND time_archived IS NULL "
                 "ORDER BY time_updated DESC LIMIT 1",
                 (cwd,),

@@ -95,8 +95,9 @@
     # against the bun in opencode's own nixpkgs pin. Pointing it at our unstable
     # gives it a different bun (1.4.x vs 1.3.x), which lays out node_modules
     # differently and fails the FOD hash check. Let it use its own pin.
+    # Pinned to upstream's last node_modules hash update; dev's hash is stale.
     opencode = {
-      url = "github:anomalyco/opencode/dev";
+      url = "github:anomalyco/opencode/56ec471ee6ecd3faa766e4e915cf216501704d0c";
     };
   };
 
