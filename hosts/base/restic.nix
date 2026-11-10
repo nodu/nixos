@@ -24,6 +24,9 @@
 
     paths = [
       "/data/inbox/tanker"
+      "/data/inbox/baremetal"
+      "/data/inbox/usb"
+      "/data/inbox/sonic"
     ];
     # Fewer, larger files in Drive than the 16 MiB default
     extraBackupArgs = [ "--pack-size=128" ];
