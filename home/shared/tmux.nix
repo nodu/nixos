@@ -104,8 +104,39 @@ let
       "⋯") tmux list-keys -N | ${pkgs.fzf}/bin/fzf --reverse --header 'all key bindings (search only)' >/dev/null || true ;;
     esac
   '';
+  tmuxBin = "${config.programs.tmux.package}/bin/tmux";
 in
 {
+  # Own the tmux server with a user service, so it never lives inside a
+  # terminal's cgroup. Otherwise the first `tmux` run starts the server inside
+  # whatever launched it. If that's a T3 Code terminal, its transient scope
+  # (KillMode=control-group) takes the server and every session down when the
+  # terminal closes or T3 restarts. tmux puts pane scopes in the server's
+  # slice, so they end up under tmux.slice too.
+  #   -D: stay in the foreground for systemd; also turns exit-empty off, so
+  #       the server stays up with zero sessions.
+  #   ExecCondition: skip (don't fail) if a server already holds the socket.
+  #       Starting with -D would unlink that socket and orphan the server.
+  #   Restart=always: a `tmux kill-server` comes back as a fresh server, so a
+  #       later `tmux` in some terminal never spawns one in its own scope.
+  # Linger is on for this user, so the server outlives logout and starts at
+  # boot, where continuum restores the last save.
+  systemd.user = lib.mkIf pkgs.stdenv.isLinux {
+    slices.tmux.Unit.Description = "tmux server and panes";
+    services.tmux-server = {
+      Unit.Description = "tmux server";
+      Service = {
+        Slice = "tmux.slice";
+        Environment = [ "TMUX_TMPDIR=%t" ];
+        ExecCondition = "${pkgs.bash}/bin/sh -c '! ${tmuxBin} ls >/dev/null 2>&1'";
+        ExecStart = "${tmuxBin} -D";
+        Restart = "always";
+        RestartSec = 1;
+      };
+      Install.WantedBy = [ "default.target" ];
+    };
+  };
+
   programs.tmux = {
     enable = true;
     prefix = "C-a";
