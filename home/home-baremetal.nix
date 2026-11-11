@@ -6,6 +6,7 @@
 {
   imports = [
     (import ./workstation.nix { inherit inputs; })
+    ./open-webui.nix
   ];
 
   # Home-manager 22.11 requires this be set. We never set it so we have

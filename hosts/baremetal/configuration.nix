@@ -94,11 +94,32 @@
 
   networking.networkmanager.wifi.powersave = false;
 
-  # Wired LAN only (USB NIC, never wifi): 3773 T3 Code, 3389 xrdp, 2586 homebase ntfy.
+  # Open WebUI: Meshnet, wired LAN, and public via bau's Traefik. Models come
+  # from cptr (home/open-webui.nix) via an OpenAI connection added in
+  # the UI. The first account becomes admin.
+  services.open-webui = {
+    enable = true;
+    host = "0.0.0.0";
+    port = 8090;
+    environment = {
+      WEBUI_URL = "https://openweb.nodu.io";
+      ENABLE_OLLAMA_API = "False";
+      ENABLE_SIGNUP = "False";
+      ANONYMIZED_TELEMETRY = "False";
+      DO_NOT_TRACK = "True";
+      SCARF_NO_ANALYTICS = "True";
+    };
+  };
+  networking.firewall.interfaces.nordlynx.allowedTCPPorts = [ 8000 8090 ];
+
+  # Wired LAN only (USB NIC, never wifi): 3773 T3 Code, 3389 xrdp, 2586 homebase ntfy,
+  # 8000 cptr, 8090 Open WebUI (bau's Traefik serves it as openweb.nodu.io).
   networking.firewall.extraCommands = ''
     iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 3773 -s 192.168.0.0/24 -j nixos-fw-accept
     iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 3389 -s 192.168.0.0/24 -j nixos-fw-accept
     iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 2586 -s 192.168.0.0/24 -j nixos-fw-accept
+    iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 8000 -s 192.168.0.0/24 -j nixos-fw-accept
+    iptables -A nixos-fw -i enp193s0f3u2 -p tcp --dport 8090 -s 192.168.0.0/24 -j nixos-fw-accept
   '';
 
   # This value determines the NixOS release from which the default
