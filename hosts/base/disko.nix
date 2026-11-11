@@ -1,15 +1,15 @@
-# Disk layout of the `data` pool: a ZFS mirror of two WD Red Plus 6TB
-# (WD60EFPX), declared for disko. Only these two disks; the NVMe root stays
-# the hand-made ext4 in ./hardware-configuration.nix.
+# Disk layout declared for disko: the `data` pool, a ZFS mirror of two WD Red
+# Plus 6TB (WD60EFPX), and `/cache` on the failing Tanker SSD. The NVMe root
+# stays the hand-made ext4 in ./hardware-configuration.nix.
 #
 # disko generates the fileSystems entries from this. It never formats on
-# `nixos-rebuild switch`: creating the pool, or a dataset added here later, is
-# an explicit run of the format script (./INSTALL.md, "Storage pool"). That
-# script skips a pool that already exists, and skips a disk that already holds
-# partitions or a filesystem. On a rerun it creates only missing datasets and
-# `zfs set`s the properties below on existing ones.
+# `nixos-rebuild switch`; the format scripts below are one-time, explicit runs.
+#
+# Don't rerun zfsDiskoFormatScript now the pool exists. It skips an existing
+# pool, but sgdisk still rewrites the partition GUIDs on the live pool disks.
+# To add a dataset, follow ./INSTALL.md, "Storage pool".
 
-{ config, ... }:
+{ config, extendModules, lib, ... }:
 
 let
   disk = serial: {
@@ -34,16 +34,48 @@ let
     inherit mountpoint;
     mountOptions = [ "nofail" ];
   } // extra;
+
+  # Samsung 870 EVO with bad flash (589 reallocated blocks, stable through a
+  # full write test on 2026-11-10). Re-downloadable data only. nofail and a
+  # short timeout, so a dead drive can't hold up boot.
+  cacheDisk = {
+    type = "disk";
+    device = "/dev/disk/by-id/ata-Samsung_SSD_870_EVO_2TB_S620NG0R308004Y";
+    content = {
+      type = "gpt";
+      partitions.cache = {
+        size = "100%";
+        content = {
+          type = "filesystem";
+          format = "ext4";
+          extraArgs = [ "-L" "cache" "-m" "0" ];
+          mountpoint = "/cache";
+          mountOptions = [ "nofail" "noatime" "errors=remount-ro" "x-systemd.device-timeout=10s" ];
+        };
+      };
+    };
+  };
 in
 {
   # Alias for disko's format script:
   # sudo "$(nix build --no-link --print-out-paths .#nixosConfigurations.base.config.system.build.zfsDiskoFormatScript)"
   system.build.zfsDiskoFormatScript = config.system.build.formatScript;
 
+  # Formats only the cache disk, so it can't touch the pool's partitions:
+  # sudo "$(nix build --no-link --print-out-paths .#nixosConfigurations.base.config.system.build.cacheDiskoFormatScript)"
+  system.build.cacheDiskoFormatScript =
+    (extendModules {
+      modules = [{
+        disko.devices.disk = lib.mkForce { cache = cacheDisk; };
+        disko.devices.zpool = lib.mkForce { };
+      }];
+    }).config.system.build.formatScript;
+
   disko.devices = {
     disk = {
       data1 = disk "WD-WX22D76D4X50";
       data2 = disk "WD-WX22D76D45L2";
+      cache = cacheDisk;
     };
 
     zpool.data = {

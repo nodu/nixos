@@ -144,7 +144,11 @@ in
         plugin = continuum;
         extraConfig = ''
           set -g @continuum-restore 'on'
-          set -g @continuum-save-interval '10'
+          # 1 min, not 10: the first autosave only fires one interval after
+          # the server starts, so a session created and lost to a reboot
+          # within that window is never saved. A resurrect save takes well
+          # under a second.
+          set -g @continuum-save-interval '1'
 
           # status-right lives here, not in the theme block: see plugin
           # ordering comment above.

@@ -188,14 +188,28 @@ sudo chown -R matt:users /data
 zpool status data; zfs list -o name,used,avail,recordsize,mountpoint
 ```
 
-To add a dataset or change a property later: edit `./disko.nix`, `make
-switch`, then run the format script again. It creates the missing datasets and
-`zfs set`s the declared properties on the existing ones (except
-creation-only ones such as `normalization`); it doesn't touch the pool or
-partitions.
+Don't rerun the format script now the pool exists: it skips the pool, but its
+`sgdisk` step still rewrites the partition GUIDs on the live disks.
+
+To add a dataset: create it first with `sudo zfs create -o mountpoint=/data/<name>
+data/<name>`, add the same dataset to `./disko.nix`, then `make switch`.
 
 To replace a failed disk: put the new disk's serial in `./disko.nix` in place
-of the old one, `make switch`, and run the format script, which partitions the
-blank disk and leaves the pool alone. Then
-`sudo zpool replace data <old-disk-guid-from-zpool-status> /dev/disk/by-partlabel/disk-data1-zfs`
-(or `data2`), and `zpool status data` shows the resilver.
+of the old one and `make switch`. Partition only the new disk, with
+`sudo sgdisk --new=1:0:-0 --change-name=1:disk-data1-zfs --typecode=1:8300 /dev/disk/by-id/<new-disk>`
+(`disk-data2-zfs` for the other slot). Then
+`sudo zpool replace data <old-disk-guid-from-zpool-status> /dev/disk/by-partlabel/disk-data1-zfs`,
+and `zpool status data` shows the resilver.
+
+## Cache disk (`/cache`)
+
+Tanker, the failing Samsung 870 EVO, holds only data that can be downloaded
+again. Format it once, before the `make switch` that adds its mount, using the
+script that only touches this disk:
+
+```sh
+cd ~/repos/nixos
+sudo "$(nix build --no-link --print-out-paths .#nixosConfigurations.base.config.system.build.cacheDiskoFormatScript)"
+make switch
+sudo chown matt:users /cache
+```

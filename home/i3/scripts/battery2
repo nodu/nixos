@@ -5,7 +5,7 @@
 #
 # A battery indicator blocklet script for i3blocks
 
-from subprocess import check_output, Popen
+from subprocess import DEVNULL, check_output, Popen
 import os
 import re
 
@@ -16,17 +16,11 @@ if os.environ.get("BLOCK_BUTTON") == "1":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     Popen([os.path.join(script_dir, "power-profiles")])
 
-status = check_output(["acpi"], universal_newlines=True)
+status = check_output(["acpi"], stderr=DEVNULL, universal_newlines=True)
 
 if not status:
-    # stands for no battery found
-    color = config.get("color_10", "red")
-    fulltext = (
-        "<span color='{}'><span font='FontAwesome'>\uf00d \uf240</span></span>".format(
-            color
-        )
-    )
-    percentleft = 100
+    # No battery (desktop): print nothing so i3blocks hides the block.
+    exit(0)
 else:
     # if there is more than one battery in one laptop, the percentage left is
     # available for each battery separately, although state and remaining

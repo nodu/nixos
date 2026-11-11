@@ -4,12 +4,16 @@
 # The password is in ~/.secrets/restic-password and in the password manager.
 # Without it this repository can never be read.
 #
-# Initial upload, in stages: add the next path to `paths`, switch, then
+# `paths` stays the whole pool. restic picks the previous snapshot with the
+# same `paths` as the parent and skips unchanged files; a different list means
+# rereading everything. So hold data back with `exclude`, not by narrowing
+# `paths`. Files moved out of the inbox are read again but not re-uploaded.
+#
+# Run by hand:
 #   sudo systemctl start --no-block restic-backups-base
 #   journalctl -fu restic-backups-base
-# restic stores data by content, so files that move out of the inbox later
-# aren't uploaded again. Once every stage is done, set timerConfig for the
-# nightly run and add pruneOpts.
+# Once the initial upload is done, set timerConfig for the nightly run and add
+# pruneOpts.
 
 { ... }:
 
@@ -22,11 +26,10 @@
     user = "matt";
     initialize = true;
 
-    paths = [
-      "/data/inbox/tanker"
-      "/data/inbox/baremetal"
-      "/data/inbox/usb"
-      "/data/inbox/sonic"
+    paths = [ "/data" ];
+    exclude = [
+      # Films/TV: replaceable, uploaded last (stage 5)
+      "/data/inbox/nas-right/Media"
     ];
     # Fewer, larger files in Drive than the 16 MiB default
     extraBackupArgs = [ "--pack-size=128" ];
