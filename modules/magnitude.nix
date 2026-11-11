@@ -10,12 +10,12 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "magnitude";
-  version = "0.2.10";
-  revision = "60";
+  version = "0.2.17";
+  revision = "67";
 
   src = fetchurl {
     url = "https://github.com/magnitudedev/magnitude/releases/download/%40magnitudedev%2Fcli%40${version}/magnitude-desktop_${version}-${revision}_amd64.deb";
-    hash = "sha256-8nix6+GjOyPbEllCGCZYhWKBHRAHdkP18M/SDBLc2H0=";
+    hash = "sha256-UCKnnsQD2WxRX4FclKhvhAZ1bdD71WWK/B93OWmvxTc=";
   };
 
   nativeBuildInputs = [ dpkg ];

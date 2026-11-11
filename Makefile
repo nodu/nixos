@@ -40,9 +40,14 @@ help:
 	@echo "  make vm/secrets          - Copy secrets to VM"
 	@echo ""
 	@echo "Updates:"
+	@echo "  make update-all          - Run update-flakes, -nordvpn, -magnitude, -t3code, -opencode"
 	@echo "  make update-flakes       - Update all flake inputs"
 	@echo "  make update-nordvpn      - Update pinned NordVPN version"
 	@echo "  make update-t3code       - Pin T3 Code to its latest stable release"
+	@echo "  make update-opencode     - Pin opencode to its latest release"
+	@echo "  make check-opencode      - Show the pinned and latest opencode releases"
+	@echo "  make update-magnitude    - Pin Magnitude to its latest release"
+	@echo "  make check-magnitude     - Show the pinned and latest Magnitude releases"
 	@echo "  make update-unsloth-llama - Pin base's llama.cpp to Unsloth's latest release"
 	@echo "  make check-unsloth-llama  - Show how far base's llama.cpp pin is behind"
 	@echo ""
@@ -128,6 +133,14 @@ clean-boot-partition:
 set-current:
 	sudo nix-env -p /nix/var/nix/profiles/system --switch-generation $(gen)
 
+# Sequential, not prerequisites: each step edits flake.lock or a pin file.
+update-all:
+	$(MAKE) update-flakes
+	$(MAKE) update-nordvpn
+	$(MAKE) update-magnitude
+	$(MAKE) update-t3code
+	$(MAKE) update-opencode
+
 update-flakes:
 	nix flake update
 
@@ -136,6 +149,18 @@ update-nordvpn:
 
 update-t3code:
 	$(MAKEFILE_DIR)/scripts/update-t3code.sh
+
+update-opencode:
+	$(MAKEFILE_DIR)/scripts/update-opencode.sh
+
+check-opencode:
+	$(MAKEFILE_DIR)/scripts/update-opencode.sh --check
+
+update-magnitude:
+	$(MAKEFILE_DIR)/scripts/update-magnitude.sh
+
+check-magnitude:
+	$(MAKEFILE_DIR)/scripts/update-magnitude.sh --check
 
 update-unsloth-llama:
 	$(MAKEFILE_DIR)/scripts/update-unsloth-llama.sh

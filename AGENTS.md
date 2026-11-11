@@ -449,6 +449,11 @@ in
 - Use `nx-update-flakes()` to update all inputs
 - Use `nx-update-input <input>` for targeted updates
 - Check nixpkgs versions in flake.nix - system uses 26.05, some packages from unstable
+- `make update-flakes` doesn't move opencode: it's pinned to a release tag,
+  with our own node_modules hashes in `modules/opencode.json` (upstream's go
+  stale). `make update-opencode` bumps both; run it on baremetal, which can
+  build bau's aarch64-linux hash. `make update-magnitude` bumps
+  `modules/magnitude.nix`. `check-opencode` / `check-magnitude` only report.
 
 ### Package Discovery
 

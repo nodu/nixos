@@ -95,9 +95,10 @@
     # against the bun in opencode's own nixpkgs pin. Pointing it at our unstable
     # gives it a different bun (1.4.x vs 1.3.x), which lays out node_modules
     # differently and fails the FOD hash check. Let it use its own pin.
-    # Pinned to upstream's last node_modules hash update; dev's hash is stale.
+    # Pinned to a release tag by scripts/update-opencode.sh, which also writes
+    # modules/opencode.json: release tags ship a stale node_modules hash.
     opencode = {
-      url = "github:anomalyco/opencode/56ec471ee6ecd3faa766e4e915cf216501704d0c";
+      url = "github:anomalyco/opencode/v2.2.7";
     };
   };
 
@@ -178,7 +179,19 @@
       # handy is x86_64-only
       handy = inputs.handy.packages."x86_64-linux".default;
 
-      opencodePackages = system: inputs.opencode.packages.${system};
+      # Upstream's opencode with our node_modules hash from modules/opencode.json.
+      opencodePackages = system:
+        let
+          upstream = inputs.opencode.packages.${system};
+          pin = nixpkgs.lib.importJSON ./modules/opencode.json;
+          hash = pin.nodeModules.${system} or (throw
+            "modules/opencode.json has no node_modules hash for ${system}; run scripts/update-opencode.sh --force on a host that can build ${system} (baremetal emulates aarch64-linux)");
+        in
+        upstream // {
+          opencode = upstream.opencode.override {
+            node_modules = upstream.node_modules_updater.override { inherit hash; };
+          };
+        };
 
       overlays = [
         #(import ./overlays/sddm.nix)
@@ -273,5 +286,9 @@
         system = "aarch64-darwin";
         homeConfig = ./home/home-mac.nix;
       };
+
+      # Built by scripts/update-opencode.sh to check a new pin.
+      packages = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ]
+        (system: { opencode = (opencodePackages system).opencode; });
     };
 }
