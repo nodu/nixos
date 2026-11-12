@@ -97,8 +97,11 @@
     # differently and fails the FOD hash check. Let it use its own pin.
     # Pinned to a release tag by scripts/update-opencode.sh, which also writes
     # modules/opencode.json: release tags ship a stale node_modules hash.
+    # Held at 56ec471 (2.2.5) because the Nix build of v2.2.7 dies at startup
+    # with "Export named 'extension' not found in module 'ws'"; the upstream
+    # release binary of 2.2.7 runs fine. Retry on the next release.
     opencode = {
-      url = "github:anomalyco/opencode/v2.2.7";
+      url = "github:anomalyco/opencode/56ec471ee6ecd3faa766e4e915cf216501704d0c";
     };
   };
 

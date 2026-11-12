@@ -1,6 +1,7 @@
 {
-  "version": "2.2.7",
+  "version": "2.2.5",
   "nodeModules": {
-    "x86_64-linux": "sha256-1mAAHaGwJ1sqxRe0YUsPEXJpXzEsZVX0VOmxRbY75n4="
+    "x86_64-linux": "sha256-UOVs48Z4yO4TJv859cg89lsul54KB9StTSl/VSQJXmc=",
+    "aarch64-linux": "sha256-INQvojH68t0J1Hc61N1dJvTJzl89afkQNrUcahxOs9g="
   }
 }

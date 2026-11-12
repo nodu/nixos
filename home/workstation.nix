@@ -24,7 +24,8 @@ let
 
   t3code = (import inputs.nixpkgs-t3code {
     inherit (pkgs.stdenv.hostPlatform) system;
-  }).callPackage ../modules/t3code.nix { };
+  }).callPackage ../modules/t3code.nix
+    { };
 
   freerdpLauncherGPC =
     pkgs.writeShellApplication
@@ -190,7 +191,7 @@ in
 
     # GUI Apps
     pkgs.google-chrome
-    pkgs.firefox
+    # pkgs.firefox
     #unstable.ladybird
     pkgs.obs-studio
     pkgs.vlc
