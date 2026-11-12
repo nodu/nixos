@@ -337,6 +337,16 @@
     # self-test Sundays at 04:00. -W 4,50,60: log a 4°C jump, log at 50°C,
     # warn at 60°C.
     defaults.monitored = "-a -o on -S on -n standby,q -s (S/../.././02|L/../../7/04) -W 4,50,60";
+    # NVMe drives run much hotter than spinning disks and don't throttle until
+    # ~84-90°C (9100 PRO, SN850X), so 60°C fires on every big build. Listing
+    # the drive here keeps the defaults above but overrides -W, and DEVICESCAN
+    # then skips it. -d removable: don't fail on a host without an NVMe drive.
+    devices = [
+      {
+        device = "/dev/nvme0";
+        options = "-d nvme -d removable -W 4,75,85";
+      }
+    ];
   };
 
   # Open ports in the firewall.

@@ -27,10 +27,7 @@
     initialize = true;
 
     paths = [ "/data" ];
-    exclude = [
-      # Films/TV: replaceable, uploaded last (stage 5)
-      "/data/inbox/nas-right/Media"
-    ];
+    exclude = [ ];
     # Fewer, larger files in Drive than the 16 MiB default
     extraBackupArgs = [ "--pack-size=128" ];
 
