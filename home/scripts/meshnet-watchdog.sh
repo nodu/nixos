@@ -17,6 +17,7 @@ INTERNET=1.1.1.1:443
 INTERVAL=15        # seconds between checks
 FAILS_NEEDED=3     # consecutive failures before toggling
 COOLDOWN=180       # seconds to wait after a toggle before judging again
+MAX_TOGGLES=2      # per outage; after that only log, until recovery or a network change
 LOG=${MESHNET_LOG:-$HOME/Library/Logs/meshnet-watchdog.log}
 
 read -r -a peers <<< "$MESHNET_PEERS"
@@ -34,6 +35,8 @@ mesh_ok() {
 
 primary_if() { /sbin/route -n get default 2>/dev/null | awk '/interface:/{print $2}'; }
 
+notify() { /usr/bin/osascript -e "display notification \"$1\" with title \"Meshnet watchdog\"" >/dev/null 2>&1 || true; }
+
 toggle() {
   if [[ -z ${MESHNET_TOGGLE:-} ]]; then
     log "would toggle meshnet, but no toggle script is configured"
@@ -50,6 +53,7 @@ case ${1:-} in
 esac
 
 fails=0
+toggles=0
 last_if=$(primary_if)
 log "started, primary=$last_if peers=${peers[*]}"
 while true; do
@@ -58,20 +62,29 @@ while true; do
     log "primary interface $last_if -> $cur_if"
     last_if=$cur_if
     fails=0
+    toggles=0
     sleep 10  # let NordLynx settle before judging
   fi
 
   if mesh_ok; then
-    (( fails > 0 )) && log "meshnet recovered after $fails failed checks"
+    (( fails > 0 || toggles > 0 )) && log "meshnet recovered after $fails failed checks, $toggles toggles"
     fails=0
+    toggles=0
   elif tcp_ok "$INTERNET"; then
     (( ++fails ))
-    log "meshnet peers unreachable ($fails/$FAILS_NEEDED)"
-    if (( fails >= FAILS_NEEDED )); then
-      toggle
-      fails=0
-      sleep "$COOLDOWN"
-      continue
+    if (( toggles < MAX_TOGGLES )); then
+      log "meshnet peers unreachable ($fails/$FAILS_NEEDED)"
+      if (( fails >= FAILS_NEEDED )); then
+        toggle
+        (( ++toggles ))
+        fails=0
+        sleep "$COOLDOWN"
+        continue
+      fi
+    elif (( fails == 1 )); then
+      # Toggling here did not help, so the fault is likely on the peer's side.
+      log "still unreachable after $toggles toggles; giving up until recovery or a network change"
+      notify "Still unreachable after $toggles toggles. Not toggling again until it recovers or the network changes."
     fi
   fi
   sleep "$INTERVAL"
