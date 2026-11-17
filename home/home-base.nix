@@ -20,7 +20,7 @@
   unsloth.server = {
     enable = true;
     model = "unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF";
-    ggufVariant = "Q4_K_M";
+    ggufVariant = "UD-Q8_K_XL";
   };
 
   # 34" 3440x1440 ultrawide is ~110 dpi; workstation.nix defaults to the
