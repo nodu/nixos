@@ -6,7 +6,9 @@ help:
 	@echo "Baremetal (Framework 13):"
 	@echo "  make switch              - Apply configuration"
 	@echo "  make switch-logs         - Apply with detailed build logs"
-	@echo "  make test                - Test configuration without switching (works on macOS too)"
+	@echo "  make build               - Build the system without activating it (no sudo)"
+	@echo "  make check               - Build, plus nix-darwin's checks on macOS (no sudo)"
+	@echo "  make try                 - Activate live until reboot, not the boot default (NixOS only)"
 	@echo "  make list                - List system generations"
 	@echo "  make clean               - Run garbage collection"
 	@echo "  make clean-generations   - Delete generations older than 10 days"
@@ -107,9 +109,31 @@ else
 	sudo NIXPKGS_ALLOW_UNFREE=1 NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nixos-rebuild switch --flake ".#${NIXNAME}" --print-build-logs
 endif
 
-test:
-ifeq ($(shell uname), Darwin)
-	nix build ".#darwinConfigurations.mac.system"
+# Builds this host's full system without activating it, so no sudo. Fails on
+# any evaluation or build error. The flake only sees files git tracks:
+# `git add` new files first.
+build:
+ifeq ($(UNAME), Darwin)
+	nix build --no-link --print-out-paths ".#darwinConfigurations.mac.system"
+else
+	nix build --no-link --print-out-paths ".#nixosConfigurations.$(NIXNAME).config.system.build.toplevel"
+endif
+
+# On macOS, builds and runs nix-darwin's checks (nix daemon, build users,
+# nix.conf) without activating. On NixOS there is no equivalent, so it builds.
+check:
+ifeq ($(UNAME), Darwin)
+	darwin-rebuild check --flake ".#mac"
+else
+	$(MAKE) build
+endif
+
+# Activates the new system now but leaves the boot default alone, so a reboot
+# returns to the last `make switch`. nix-darwin can't activate temporarily.
+try:
+ifeq ($(UNAME), Darwin)
+	@echo "make try is NixOS only: nix-darwin has no temporary activation. Use make check, then make switch." >&2
+	@exit 1
 else
 	sudo NIXPKGS_ALLOW_UNFREE=1 NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nixos-rebuild test --flake ".#$(NIXNAME)"
 endif

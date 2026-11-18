@@ -10,7 +10,9 @@ Personal NixOS configuration using Nix flakes, home-manager, GNOME + i3 (X11 pri
 
 ```bash
 make help             # Show all available targets (default)
-make test             # Test configuration without switching (catches eval errors)
+make build            # Build the system without activating it (no sudo; catches eval and build errors)
+make check            # make build, plus nix-darwin's checks on macOS (no sudo)
+make try              # Activate live until reboot, not the boot default (NixOS only, requires sudo)
 make switch           # Apply configuration changes (requires sudo)
 make switch-logs      # Apply with detailed build logs
 make list             # List system generations (for rollback)
@@ -64,7 +66,7 @@ make mac/clean       # Run garbage collection
 
 The macOS config uses `darwinConfigurations.mac` in `flake.nix` via a `mkDarwin` helper (analogous to `mkSystem` for NixOS). It includes nix-homebrew for declarative Homebrew cask management and mac-app-util for Spotlight/Dock integration.
 
-There is no unit test suite, linter, or CI pipeline. The primary validation method is `make test`, which evaluates the full NixOS configuration and reports any Nix evaluation errors. **Always run `make test` after making changes.**
+There is no unit test suite, linter, or CI pipeline. The primary validation method is `make build`, which evaluates and builds this host's full system without activating it, and needs no sudo. **Always run `make build` after making changes.** The flake only sees files git tracks, so `git add` new files first. `make try` and `make switch` activate the config, so leave them to the user.
 
 ## File Organization
 
@@ -428,8 +430,8 @@ in
 ### Making Configuration Changes
 
 1. Edit relevant `.nix` files
-2. Test with `make test` to catch errors
-3. Apply with `make switch`
+2. Build with `make build` to catch errors
+3. Hand off to the user, who activates it: `make try` to run it live until the next reboot (NixOS), or `make switch` to apply it. Both need sudo and change the running system, so agents don't run them.
 4. Use `make list` to see generations for rollback if needed
 
 ### RPi3 Deployment
