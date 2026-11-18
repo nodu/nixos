@@ -13,6 +13,7 @@
     ./disko.nix # the data pool's disks and datasets; goes with zfs.nix
     ./zfs.nix
     ./restic.nix
+    ./gpu-unlock.nix
     # ./gtx1080.nix # with ../../home/base-gtx1080.nix in home-base.nix
     ../../modules/workstation.nix
   ];
@@ -95,6 +96,22 @@
         out = ""
       }' | ${pkgs.coreutils}/bin/sort -k2,2r)
   '';
+
+  # Lifts the GeForce tensor-core throttle (FP16/BF16 with FP32 accumulate) at
+  # boot: about +60% on tensor math at the same power (~/gpu-bench results).
+  # The 3090 at 02:00.0 keeps its 270 W cap below; the unlock changes work per
+  # watt, not watts. A reboot keeps a card unlocked, so rolling back means a
+  # full power-off, then the `stock` boot entry.
+  services.gpu-unlock = {
+    enable = true;
+    targets = [ "0000:01:00.0" "0000:02:00.0" ];
+  };
+
+  # NVML reports GDDR6X junction temperature as N/A on GeForce; reading it
+  # means mapping the card's registers, which the nvidia driver has claimed.
+  # CONFIG_IO_STRICT_DEVMEM blocks that even for root unless relaxed.
+  # Used by ~/gpu-bench/vramtemp.py.
+  boot.kernelParams = [ "iomem=relaxed" ];
 
   # GPUs in docker: `docker run --device nvidia.com/gpu=all ...`
   hardware.nvidia-container-toolkit.enable = true;
