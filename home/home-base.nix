@@ -19,8 +19,8 @@
   # Traefik serves the web UI as unsloth.nodu.io.
   unsloth.server = {
     enable = true;
-    model = "unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF";
-    ggufVariant = "UD-Q8_K_XL";
+    model = "unsloth/Qwen3.8-27B-GGUF";
+    ggufVariant = "UD-Q6_K_XL";
   };
 
   # 34" 3440x1440 ultrawide is ~110 dpi; workstation.nix defaults to the
